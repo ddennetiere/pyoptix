@@ -1,3 +1,4 @@
+# coding: utf-8
 Bibliothèque de simulation optique X pour le synchrotron SOLEIL
 ===============================================================
 
@@ -5,11 +6,12 @@ Install
 -------
 
 1. Installer miniconda
-2. Créer un environnement dédié python 3.8.10
+2. Créer un environnement dédié python 3.8.10 et y installer les paquets nécessaires
 
 ```bash
-conda create PyOptiX python=3.8.10`
+conda create PyOptiX python=3.8.10
 conda activate PyOptiX
+conda install lxml
 ```
 3. Installer orange 
 
