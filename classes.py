@@ -1,6 +1,21 @@
 # coding: utf-8
 import numpy as np
+from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER
 
+
+class Bounds(Structure):
+    _fields_ = [("min", c_double),
+                ("max", c_double)]
+
+
+class Parameter(Structure):
+    _fields_ = [("value", c_double),
+                ("bounds", Bounds),
+                ("multiplier", c_double),
+                ("type", c_int32),
+                ("group", c_int32),
+                ("flags", c_uint32),
+                ]
 
 class Beamline(object):
     def __init__(self):

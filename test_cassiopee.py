@@ -6,7 +6,7 @@ from ctypes import *
 from ctypes import WINFUNCTYPE, Structure, pointer, byref, POINTER,  c_char_p, c_void_p, c_double, c_float, \
                    create_string_buffer
 import numpy as np
-from classes import Beamline, OpticalElement
+from classes import Beamline, OpticalElement, Parameter
 from lxml import etree
 
 global optix
@@ -70,7 +70,29 @@ if __name__ == "__main__":
     load_solemio_file(create_string_buffer(b"D:\\Dennetiere\\Programmes Python\\optix\\solemio\\CASSIOPEE"))
     hsys, hparam, elemID = c_int64(0), c_int64(0), c_int64(0)
     elname = create_string_buffer(32, c_char)
+    # elemname2 = create_string_buffer(32)
+    param_name = create_string_buffer(48)
+    param = Parameter()
+    print("#"*80)
     optix.EnumerateElements(byref(hsys), byref(elemID), elname, 32)
+    while hsys:
+        print(hsys)
+        optix.EnumerateElements(byref(hsys), byref(elemID), elname, 32)
+        # optix.GetElementName(elemID, elemname2, 32)
+        print("-"*20)
+        print(elname.value)
+        if not optix.EnumerateParameters(elemID, byref(hparam), param_name, 48, param):
+            buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
+            optix.GetOptiXLastError(buf, 256)
+            print("error", buf.value)
+        while hparam:
+            if not optix.EnumerateParameters(elemID, byref(hparam), param_name, 48, param):
+                buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
+                optix.GetOptiXLastError(buf, 256)
+                print("error", buf.value)
+            else:
+                print(param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
+                      param.group, param.flags)
 
 # system = optix.LoadSolemioFile("D:\\Dennetiere\\Programmes Python\\optix\\solemio\\CASSIOPEE")
 # # system_xml = optix.LoadSystemFromXml(r"D:\Dennetiere\optix\bin\test\system.xml")
