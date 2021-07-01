@@ -11,6 +11,18 @@ from lxml import etree
 
 global optix
 
+def call_catch(function, *args, **kwargs):
+    confirm = True
+    if "confirm" in kwargs.keys():
+        confirm = kwargs["confirm"]
+    if not function(* args):
+        buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
+        optix.GetOptiXLastError(buf, 256)
+        print(function.__name__, "error", buf.value)
+    else:
+        if confirm:
+            print(function.__name__, "ok")
+
 
 def load_optix():
     global optix
@@ -35,11 +47,12 @@ def version():
 
 
 def load_solemio_file(name):
-    if optix.LoadSolemioFile(name) == 0:
-        buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
-        optix.GetOptiXLastError(buf, 256)
-        print("error loading Solemio file :")
-        print(buf.value)
+    call_catch(optix.LoadSolemioFile, name)
+    # if optix.LoadSolemioFile(name) == 0:
+    #     buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
+    #     optix.GetOptiXLastError(buf, 256)
+    #     print("error loading Solemio file :")
+    #     print(buf.value)
 
 
 def parse_xml(filename):
@@ -68,6 +81,7 @@ if __name__ == "__main__":
     # parse_xml(r"D:\Dennetiere\optix\bin\test\system.xml")
     # optix.LoadSolemioFile.argtypes = [c_char_p]
     load_solemio_file(create_string_buffer(b"D:\\Dennetiere\\Programmes Python\\optix\\solemio\\CASSIOPEE"))
+    optix.Align()
     hsys, hparam, elemID = c_int64(0), c_int64(0), c_int64(0)
     elname = create_string_buffer(32, c_char)
     # elemname2 = create_string_buffer(32)
@@ -75,24 +89,27 @@ if __name__ == "__main__":
     param = Parameter()
     print("#"*80)
     optix.EnumerateElements(byref(hsys), byref(elemID), elname, 32)
+    sourceID=None
     while hsys:
-        print(hsys)
+        # print(hsys)
         optix.EnumerateElements(byref(hsys), byref(elemID), elname, 32)
         # optix.GetElementName(elemID, elemname2, 32)
-        print("-"*20)
+        # print("-"*20)
         print(elname.value)
-        if not optix.EnumerateParameters(elemID, byref(hparam), param_name, 48, param):
-            buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
-            optix.GetOptiXLastError(buf, 256)
-            print("error", buf.value)
+        print(elemID.value)
+        if elname.value.decode() == "S_ONDUL1":
+            sourceID = c_int64(elemID.value)
+        call_catch(optix.EnumerateParameters, elemID, byref(hparam), param_name, 48, param, confirm=False)
         while hparam:
-            if not optix.EnumerateParameters(elemID, byref(hparam), param_name, 48, param):
-                buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
-                optix.GetOptiXLastError(buf, 256)
-                print("error", buf.value)
-            else:
-                print(param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
-                      param.group, param.flags)
+            call_catch(optix.EnumerateParameters, elemID, byref(hparam), param_name, 48, param, confirm=False)
+            # print(param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
+            #       param.group, param.flags)
+    print("Source ID", sourceID)
+    lamda_align = c_double(2.5e-8)
+    call_catch(optix.Align, sourceID, lamda_align)
+    # TODO : Align devrait retourner 1 si pas d'erreur pour homogéneiser
+    call_catch(optix.Generate, sourceID, lamda_align)
+    call_catch(optix.Radiate, sourceID)
 
 # system = optix.LoadSolemioFile("D:\\Dennetiere\\Programmes Python\\optix\\solemio\\CASSIOPEE")
 # # system_xml = optix.LoadSystemFromXml(r"D:\Dennetiere\optix\bin\test\system.xml")
