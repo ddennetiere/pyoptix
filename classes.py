@@ -86,3 +86,17 @@ class OpticalElement(object):
         description += f"\n\t at {self.distance_from_previous} m from {self.previous}"
         description += f"\n\t pointing to {self.next}"
         return description
+
+
+class Source(OpticalElement):
+    def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0, x=0, y=0, z=0,
+                 d_x=0, d_y=0, d_z=0, next=None, previous=None, distance_from_previous=0, sigma_x=0,
+                 sigma_y=0, sigma_x_div=0, sigma_y_div=0, nrays=0):
+        super().__init__(name=name, phi=phi, psi=psi, theta=theta, d_phi=d_phi, d_psi=d_psi, d_theta=d_theta,
+                         x=x, y=y, z=z, d_x=d_x, d_y=d_y, d_z=d_z, next=next, previous=previous,
+                         distance_from_previous=distance_from_previous)
+        self.sigma_x = sigma_x
+        self.sigma_y = sigma_y
+        self.sigma_x_div = sigma_x_div
+        self.sigma_x_div = sigma_y_div
+        self.nrays = nrays
