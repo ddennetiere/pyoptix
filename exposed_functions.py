@@ -85,12 +85,12 @@ def enumerate_parameters(element_id, handle_param, parameter_name, parameter, co
 
 @catch_c_error
 def get_parameter(element_id, parameter_name, parameter):
-    optix.GetParameter(element_id, parameter_name, ctypes.byref(parameter))
+    optix.GetParameter(element_id, parameter_name.encode(), ctypes.byref(parameter))
 
 
 @catch_c_error
 def set_parameter(element_id, parameter_name, parameter):
-    optix.SetParameter(element_id, parameter_name, ctypes.byref(parameter))
+    optix.SetParameter(element_id, parameter_name.encode(), parameter)
 
 
 @catch_c_error
