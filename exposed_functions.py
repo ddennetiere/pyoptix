@@ -23,13 +23,16 @@ def catch_c_error(function):
         confirm = True
         if "confirm" in kwargs.keys():
             confirm = kwargs["confirm"]
-        if function(*args):
+        ret = function(*args)
+        print(function.__name__, "returned", ret)
+        if not ret:
             buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
             optix.GetOptiXLastError(buf, 256)
             print(function.__name__, "error", buf.value)
         else:
             if confirm:
                 print(function.__name__, "ok")
+        return ret
 
     return wrapper
 
@@ -55,42 +58,82 @@ def release_optix():
 
 @catch_c_error
 def load_solemio_file(name):
-    optix.LoadSolemioFile(name)
+    optix.GetParameter.restypes = ctypes.c_int32
+    ret = optix.LoadSolemioFile(name)
+    return ret
 
 
 @catch_c_error
-def align(sourceID, lamda_align):
-    optix.Align(sourceID, lamda_align)
+def align(source_id, lamda_align):
+    optix.GetParameter.restypes = ctypes.c_int32
+    ret = optix.Align(source_id, lamda_align)
+    return ret
 
 
 @catch_c_error
-def generate(sourceID, lamda):
-    optix.Align(sourceID, lamda)
+def generate(source_id, lamda):
+    optix.GetParameter.restypes = ctypes.c_int32
+    ret = optix.Generate(source_id, lamda)
+    return ret
 
 
 @catch_c_error
-def radiate(sourceID):
-    optix.Align(sourceID)
+def radiate(source_id):
+    optix.GetParameter.restypes = ctypes.c_int32
+    ret = optix.Radiate(source_id)
+    return ret
 
 
 @catch_c_error
 def enumerate_elements(hsys, element_id, element_name):
-    optix.EnumerateElements(ctypes.byref(hsys), ctypes.byref(element_id), element_name, 32)
+    optix.GetParameter.restypes = ctypes.c_int32
+    ret = optix.EnumerateElements(ctypes.byref(hsys), ctypes.byref(element_id), element_name, 32)
+    return ret
 
 
 @catch_c_error
 def enumerate_parameters(element_id, handle_param, parameter_name, parameter, confirm=False):
-    optix.EnumerateParameters(element_id, ctypes.byref(handle_param), parameter_name, 48, ctypes.byref(parameter))
+    optix.GetParameter.restypes = ctypes.c_int32
+    ret = optix.EnumerateParameters(element_id, ctypes.byref(handle_param), parameter_name, 48, ctypes.byref(parameter))
+    return ret
 
 
 @catch_c_error
 def get_parameter(element_id, parameter_name, parameter):
-    optix.GetParameter(element_id, parameter_name.encode(), ctypes.byref(parameter))
-
+    optix.GetParameter.restypes = ctypes.c_int32
+    ret = optix.GetParameter(element_id, parameter_name.encode(), ctypes.byref(parameter))
+    return ret
 
 @catch_c_error
 def set_parameter(element_id, parameter_name, parameter):
-    optix.SetParameter(element_id, parameter_name.encode(), parameter)
+    optix.GetParameter.restypes = ctypes.c_int32
+    ret = optix.SetParameter(element_id, parameter_name.encode(), parameter)
+    return ret
+
+
+@catch_c_error
+def create_element(class_name, name):
+    optix.CreateElement.restypes = ctypes.c_uint64
+    elem_id = optix.CreateElement(class_name.encode(), name.encode())
+    return ctypes.c_uint64(elem_id)
+
+
+@catch_c_error
+def get_element_name(element_id, element_name):
+    ret = optix.GetElementName(element_id, ctypes.byref(element_name), 32)
+    return ret
+
+
+@catch_c_error
+def set_recording(element_id, recording_mode):
+    ret = optix.SetRecording(element_id, recording_mode)
+    return ret
+
+
+@catch_c_error
+def clear_impacts(element_id):
+    ret = optix.ClearImpacts(element_id)
+    return ret
 
 
 @catch_c_error
