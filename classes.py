@@ -1,6 +1,6 @@
 # coding: utf-8
 import numpy as np
-from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER
+from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_int64
 
 
 class Bounds(Structure):
@@ -16,6 +16,41 @@ class Parameter(Structure):
                 ("group", c_int32),
                 ("flags", c_uint32),
                 ]
+
+
+class RecordingMode(object):
+    recording_output = c_int32(2)
+    recording_input = c_int32(1)
+    recording_none = c_int32(0)
+
+
+class Diagram(Structure):
+    _fields_ = [("dim", c_int),
+                ("reserved", c_int),
+                ("count", c_int),
+                ("lost", c_int),
+                ("min", POINTER(c_double)),
+                ("max", POINTER(c_double)),
+                ("mean", POINTER(c_double)),
+                ("sigma", POINTER(c_double)),
+                ("spots", POINTER(c_double)),
+                ]
+
+    def __init__(self, nreserved=0, ndim=5):
+        super().__init__()
+        self.dim = ndim
+        self.reserved = nreserved
+        p_min = (c_double * ndim)()
+        self.min = cast(p_min, POINTER(c_double))
+        p_max = (c_double * ndim)()
+        self.max = cast(p_max, POINTER(c_double))
+        p_mean = (c_double * ndim)()
+        self.mean = cast(p_mean, POINTER(c_double))
+        p_sigma = (c_double * ndim)()
+        self.sigma = cast(p_sigma, POINTER(c_double))
+        p_spots = (c_double * ndim * nreserved)()
+        self.spots = cast(p_spots, POINTER(c_double))
+
 
 class Beamline(object):
     def __init__(self):
@@ -46,9 +81,9 @@ class Beamline(object):
         for chain in self.chains:
             previous = 1
             while previous is not None:
-                    previous = get_previous(chain[0])
-                    if previous:
-                        chain.insert(0, previous)
+                previous = get_previous(chain[0])
+                if previous:
+                    chain.insert(0, previous)
 
     def add_element(self, new_element):
         if new_element not in self.elements:
