@@ -13,6 +13,14 @@ from exposed_functions import *
 global optix
 
 if __name__ == "__main__":
+    test_enumerate = False
+    test_parameter = False
+    test_radiate = True
+    test_add_element = False
+    test_ID = True
+    test_edit_parameter = False
+    test_linkage = True
+    test_spot_diagram = False
     # initialisation auto
     try:
         test = optix
@@ -28,56 +36,80 @@ if __name__ == "__main__":
     param_name = create_string_buffer(48)
     param = Parameter()
     print("#"*80)
-    # enumerate_elements(hsys, elemID, elname)
+    enumerate_elements(hsys, elemID, elname)
     sourceID = None
     elements_ID = {}
-    elements_ID["screen"] = create_element("PlaneFilm", "screen")
+    if test_add_element:
+        elements_ID["screen"] = create_element("PlaneFilm", "screen")
     start = 1
     while hsys or start:
         start = 0
         print("-"*20)
         print("hsys", hsys)
         enumerate_elements(hsys, elemID, elname)
-        print(f"element {elname.value.decode()}, ID {elemID.value}")
-        elements_ID[elname.value.decode()] = c_int64(elemID.value)
+        if test_enumerate:
+            print(f"element {elname.value.decode()}, ID {elemID.value}")
+        elements_ID[elname.value.decode()] = c_uint64(elemID.value)
         enumerate_parameters(elemID, hparam, param_name, param, confirm=False)
         while hparam:
-            # print("\t", param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
-            #       param.group, param.flags)
+            if test_parameter:
+                print("\t", param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
+                      param.group, param.flags)
             enumerate_parameters(elemID, hparam, param_name, param, confirm=False)
 
-    print(elements_ID)
-    print(elements_ID.keys())
-    print("SourceID", elements_ID["S_ONDUL1"])
+    if test_ID:
+        print(elements_ID)
+        print(elements_ID.keys())
+        print("SourceID", elements_ID["S_ONDUL1"])
+        print("pupille ID:", get_element_id("pupille"))
+        an_ID = ctypes.c_uint64(0)
+        find_element_id("pupille", an_ID)
+        print("find pupille ID:", an_ID)
     sourceID = elements_ID["S_ONDUL1"]
     lamda_align = c_double(2.5e-8)
-    nrays = Parameter()
-    enumerate_parameters(sourceID, hparam, param_name, param, confirm=False)
-    while hparam:
-        # print("\t", param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
-        #       param.group, param.flags)
+    if test_edit_parameter:
+        nrays = Parameter()
         enumerate_parameters(sourceID, hparam, param_name, param, confirm=False)
-    get_parameter(sourceID, "nRays", nrays)
-    print(nrays.value)
-    nrays.value = 10000
-    set_parameter(sourceID, "nRays", nrays)
-    nrays2 = Parameter()
-    get_parameter(sourceID, "nRays", nrays2)
-    print(nrays2.value)
+        while hparam:
+            print("\t", param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
+                  param.group, param.flags)
+            enumerate_parameters(sourceID, hparam, param_name, param, confirm=False)
 
-    # elements_ID["screen"] = create_element("PlaneFilm", "screen")
-    print("screen_id", elements_ID["screen"])
-    print("pupille_id", elements_ID["pupille"])
-    get_element_name(elements_ID["screen"], elname)
-    # optix.GetElementName(elements_ID["screen"], ctypes.byref(elname), c_int32(32))
-    print("screen name", elname.value.decode())
-    set_recording(elements_ID["screen"], RecordingMode.recording_output)
-    # optix.SetRecording(elements_ID["screen"], RecordingMode.recording_output)
-    diagram = Diagram(ndim=5, nreserved=int(nrays2.value))
+        get_parameter(sourceID, "nRays", nrays)
+        print("Imported nrays", nrays.value)
+        nrays.value = 10000
+        set_parameter(sourceID, "nRays", nrays)
+        nrays2 = Parameter()
+        get_parameter(sourceID, "nRays", nrays2)
+        print("New nrays", nrays2.value)
+    if test_linkage:
+        linked_beamline = []
+        get_element_name(sourceID, elname)
+        print("source name:", elname.value.decode())
+        next_ID = sourceID
+        this_ID = ctypes.c_uint64(sourceID.value)
+        while next_ID:
+            get_element_name(this_ID, elname, show_return=True)
+            linked_beamline.append(elname.value.decode())
+            find_next_element(this_ID, next_ID, show_return=True)
+            this_ID = next_ID
+        print("Chained beamline :", linked_beamline)
 
-    align(sourceID, lamda_align)
-    clear_impacts(sourceID)
-    generate(sourceID, lamda_align)
-    radiate(sourceID)
-    optix.GetSpotDiagram(elements_ID["screen"],  ctypes.byref(diagram), c_double(0))
-    print(diagram.min.value)
+    if test_add_element:
+        # elements_ID["screen"] = create_element("PlaneFilm", "screen")
+        print("screen_id", elements_ID["screen"])
+        get_element_name(elements_ID["screen"], elname)
+        print("screen name", elname.value.decode())
+        # set_recording(elements_ID["screen"], RecordingMode.recording_output)
+
+
+    if test_radiate:
+        align(sourceID, lamda_align)
+        clear_impacts(sourceID)
+        generated_rays = generate(sourceID, lamda_align, show_return=True)
+        radiate(sourceID)
+
+    if test_spot_diagram:
+        diagram = Diagram(ndim=5, nreserved=int(nrays2.value))
+        optix.GetSpotDiagram(elements_ID["screen"],  ctypes.byref(diagram), c_double(0))
+        print(diagram.min.value)
