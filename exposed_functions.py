@@ -141,6 +141,30 @@ def clear_impacts(element_id):
 
 
 @catch_c_error
+def get_next_element(element_id):
+    ret = optix.GetNextElement(element_id)
+    return ret
+
+
+@catch_c_error
+def get_previous_element(element_id):
+    ret = optix.GetPreviousElement(element_id)
+    return ret
+
+
+@catch_c_error
+def chain_element_by_name(previous_name, next_name):
+    ret = optix.ChainElement_byName(previous_name.encode(), next_name.encode())
+    return ret
+
+
+@catch_c_error
+def chain_element_by_id(previous_id, next_id):
+    ret = optix.ChainElement_byID(previous_id, next_id)
+    return ret
+
+
+@catch_c_error
 def version():
     optix.Version()
 
