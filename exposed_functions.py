@@ -96,7 +96,7 @@ def enumerate_elements(hsys, element_id, element_name):
 
 
 @catch_c_error
-def enumerate_parameters(element_id, handle_param, parameter_name, parameter, confirm=False):
+def enumerate_parameters(element_id, handle_param, parameter_name, parameter):
     optix.GetParameter.restypes = ctypes.c_int32
     ret = optix.EnumerateParameters(element_id, ctypes.byref(handle_param), parameter_name, 48, ctypes.byref(parameter))
     return ret
@@ -107,6 +107,7 @@ def get_parameter(element_id, parameter_name, parameter):
     optix.GetParameter.restypes = ctypes.c_int32
     ret = optix.GetParameter(element_id, parameter_name.encode(), ctypes.byref(parameter))
     return ret
+
 
 @catch_c_error
 def set_parameter(element_id, parameter_name, parameter):
