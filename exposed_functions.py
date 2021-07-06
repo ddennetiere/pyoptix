@@ -21,10 +21,14 @@ def catch_c_error(function):
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         confirm = True
+        show_return = False
         if "confirm" in kwargs.keys():
             confirm = kwargs["confirm"]
+        if "show_return" in kwargs.keys():
+            show_return = kwargs["show_return"]
         ret = function(*args)
-        print(function.__name__, "returned", ret)
+        if show_return:
+            print(function.__name__, "returned", ret)
         if not ret:
             buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
             optix.GetOptiXLastError(buf, 256)
