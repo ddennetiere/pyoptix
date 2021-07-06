@@ -62,63 +62,63 @@ def release_optix():
 
 @catch_c_error
 def load_solemio_file(name):
-    optix.GetParameter.restypes = ctypes.c_int32
+    optix.GetParameter.restype = ctypes.c_int32
     ret = optix.LoadSolemioFile(name)
     return ret
 
 
 @catch_c_error
 def align(source_id, lamda_align):
-    optix.GetParameter.restypes = ctypes.c_int32
+    optix.GetParameter.restype = ctypes.c_int32
     ret = optix.Align(source_id, lamda_align)
     return ret
 
 
 @catch_c_error
 def generate(source_id, lamda):
-    optix.GetParameter.restypes = ctypes.c_int32
+    optix.GetParameter.restype = ctypes.c_int32
     ret = optix.Generate(source_id, lamda)
     return ret
 
 
 @catch_c_error
 def radiate(source_id):
-    optix.GetParameter.restypes = ctypes.c_int32
+    optix.GetParameter.restype = ctypes.c_int32
     ret = optix.Radiate(source_id)
     return ret
 
 
 @catch_c_error
 def enumerate_elements(hsys, element_id, element_name):
-    optix.GetParameter.restypes = ctypes.c_int32
+    optix.GetParameter.restype = ctypes.c_int32
     ret = optix.EnumerateElements(ctypes.byref(hsys), ctypes.byref(element_id), element_name, 32)
     return ret
 
 
 @catch_c_error
 def enumerate_parameters(element_id, handle_param, parameter_name, parameter):
-    optix.GetParameter.restypes = ctypes.c_int32
+    optix.GetParameter.restype = ctypes.c_int32
     ret = optix.EnumerateParameters(element_id, ctypes.byref(handle_param), parameter_name, 48, ctypes.byref(parameter))
     return ret
 
 
 @catch_c_error
 def get_parameter(element_id, parameter_name, parameter):
-    optix.GetParameter.restypes = ctypes.c_int32
+    optix.GetParameter.restype = ctypes.c_int32
     ret = optix.GetParameter(element_id, parameter_name.encode(), ctypes.byref(parameter))
     return ret
 
 
 @catch_c_error
 def set_parameter(element_id, parameter_name, parameter):
-    optix.GetParameter.restypes = ctypes.c_int32
+    optix.GetParameter.restype = ctypes.c_int32
     ret = optix.SetParameter(element_id, parameter_name.encode(), parameter)
     return ret
 
 
 @catch_c_error
 def create_element(class_name, name):
-    optix.CreateElement.restypes = ctypes.c_uint64
+    optix.CreateElement.restype = ctypes.c_uint64
     elem_id = optix.CreateElement(class_name.encode(), name.encode())
     return ctypes.c_uint64(elem_id)
 
@@ -143,12 +143,15 @@ def clear_impacts(element_id):
 
 @catch_c_error
 def get_next_element(element_id):
+    optix.GetNextElement.argtypes = (ctypes.c_uint64)
+    optix.GetNextElement.restype = ctypes.c_void_p
     ret = optix.GetNextElement(element_id)
-    return ret
+    return ctypes.c_uint64(ret)
 
 
 @catch_c_error
 def get_previous_element(element_id):
+    optix.GetPreviousElement.restype = ctypes.c_uint64
     ret = optix.GetPreviousElement(element_id)
     return ret
 
@@ -163,6 +166,25 @@ def chain_element_by_name(previous_name, next_name):
 def chain_element_by_id(previous_id, next_id):
     ret = optix.ChainElement_byID(previous_id, next_id)
     return ret
+
+
+@catch_c_error
+def get_element_id(element_name):
+    ret = optix.GetElementID(element_name.encode())
+    return ret
+
+
+@catch_c_error
+def find_element_id(element_name, element_id):
+    ret = optix.FindElementID(element_name.encode(), ctypes.byref(element_id))
+    return ret
+
+
+@catch_c_error
+def find_next_element(element_id, next_id):
+    ret = optix.FindNextElement(element_id, ctypes.byref(next_id))
+    return ret
+
 
 
 @catch_c_error
