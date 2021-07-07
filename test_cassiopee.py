@@ -13,13 +13,13 @@ from exposed_functions import *
 global optix
 
 if __name__ == "__main__":
+    test_ID = False
     test_enumerate = False
     test_parameter = False
-    test_radiate = True
-    test_add_element = False
-    test_ID = True
     test_edit_parameter = False
     test_linkage = True
+    test_add_element = False
+    test_radiate = True
     test_spot_diagram = False
     # initialisation auto
     try:
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # parse_xml(r"D:\Dennetiere\optix\bin\test\system.xml")
     # optix.LoadSolemioFile.argtypes = [c_char_p]
     load_solemio_file(create_string_buffer(b"D:\\Dennetiere\\Programmes Python\\optix\\solemio\\CASSIOPEE"))
-    hsys, hparam, elemID = c_int64(0), c_int64(0), c_uint64(0)
+    hsys, hparam, elemID = HANDLE(0), HANDLE(0), HANDLE(0)
     elname = create_string_buffer(32, c_char)
     param_name = create_string_buffer(48)
     param = Parameter()
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         enumerate_elements(hsys, elemID, elname)
         if test_enumerate:
             print(f"element {elname.value.decode()}, ID {elemID.value}")
-        elements_ID[elname.value.decode()] = c_uint64(elemID.value)
+        elements_ID[elname.value.decode()] = HANDLE(elemID.value)
         enumerate_parameters(elemID, hparam, param_name, param, confirm=False)
         while hparam:
             if test_parameter:
@@ -61,12 +61,15 @@ if __name__ == "__main__":
         print(elements_ID)
         print(elements_ID.keys())
         print("SourceID", elements_ID["S_ONDUL1"])
-        print("pupille ID:", get_element_id("pupille"))
-        an_ID = ctypes.c_uint64(0)
-        find_element_id("pupille", an_ID)
-        print("find pupille ID:", an_ID)
+        print("S_ONDUL1 has ID", get_element_id("S_ONDUL1"))
+        get_element_name(elements_ID['S_ONDUL1'], elname)
+        print(f"Stored ID for S_ONDUL1 {elements_ID['S_ONDUL1']} is owned by {elname.value.decode()}")
+        an_ID = HANDLE(0)
+        find_element_id("S_ONDUL1", an_ID)
+        print("find S_ONDUL1 ID:", an_ID)
     sourceID = elements_ID["S_ONDUL1"]
-    lamda_align = c_double(2.5e-8)
+    lamda_align = DOUBLE(2.5e-8)
+
     if test_edit_parameter:
         nrays = Parameter()
         enumerate_parameters(sourceID, hparam, param_name, param, confirm=False)
@@ -82,16 +85,18 @@ if __name__ == "__main__":
         nrays2 = Parameter()
         get_parameter(sourceID, "nRays", nrays2)
         print("New nrays", nrays2.value)
+
     if test_linkage:
         linked_beamline = []
         get_element_name(sourceID, elname)
         print("source name:", elname.value.decode())
         next_ID = sourceID
-        this_ID = ctypes.c_uint64(sourceID.value)
+        this_ID = HANDLE(sourceID.value)
         while next_ID:
             get_element_name(this_ID, elname, show_return=True)
             linked_beamline.append(elname.value.decode())
-            find_next_element(this_ID, next_ID, show_return=True)
+            # find_next_element(this_ID, next_ID, show_return=True)
+            next_ID = get_next_element(this_ID, show_return=True)
             this_ID = next_ID
         print("Chained beamline :", linked_beamline)
 
@@ -101,7 +106,6 @@ if __name__ == "__main__":
         get_element_name(elements_ID["screen"], elname)
         print("screen name", elname.value.decode())
         # set_recording(elements_ID["screen"], RecordingMode.recording_output)
-
 
     if test_radiate:
         align(sourceID, lamda_align)

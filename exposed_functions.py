@@ -212,7 +212,6 @@ def find_next_element(element_id, next_id):
     return ret
 
 
-
 @catch_c_error
 def version():
     optix.Version()
