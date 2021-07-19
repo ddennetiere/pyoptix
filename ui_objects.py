@@ -1,11 +1,8 @@
 from bokeh.plotting import figure, show
-from bokeh.palettes import Paired12 as palette
-from bokeh.io import output_notebook, export_png
-from bokeh.models import Span, ColumnDataSource, LabelSet, Range1d
+from bokeh.io import export_png
 import numpy as np
 from scipy.constants import *
 hc = h*c/eV/nano
-# output_notebook()
 
 from scipy.stats import gaussian_kde
 from bokeh.models import BoxSelectTool, LassoSelectTool, Spacer, Label
