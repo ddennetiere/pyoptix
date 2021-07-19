@@ -3,13 +3,12 @@ import ctypes, os
 # from ctypes import cdll, windll
 from ctypes.wintypes import *
 from ctypes import *
-from ctypes import WINFUNCTYPE, Structure, pointer, byref, POINTER,  c_char_p, c_void_p, c_double, c_float, \
-                   create_string_buffer
+from ctypes import WINFUNCTYPE, Structure, pointer, byref, POINTER, c_char_p, c_void_p, c_double, c_float, \
+    create_string_buffer
 import numpy as np
 from classes import Beamline, OpticalElement, Parameter, Diagram, RecordingMode
 from exposed_functions import *
-from ui_objects import scatter_plot_2d,  show
-
+from ui_objects import scatter_plot_2d, show
 
 global optix
 
@@ -18,7 +17,7 @@ if __name__ == "__main__":
     test_enumerate = False
     test_parameter = False
     test_edit_parameter = False
-    test_linkage = False
+    test_linkage = True
     test_add_element = True
     test_radiate = True
     test_spot_diagram = True
@@ -37,7 +36,7 @@ if __name__ == "__main__":
     if test_parameter:
         param_name = create_string_buffer(48)
         param = Parameter()
-    print("#"*80)
+    print("#" * 80)
     enumerate_elements(hsys, elemID, elname)
     sourceID = None
     elements_ID = {}
@@ -46,20 +45,20 @@ if __name__ == "__main__":
     start = 1
     while hsys or start:
         start = 0
-        print("-"*20)
+        print("-" * 20)
         print("hsys", hsys)
-        if test_enumerate:
+        if test_enumerate or test_parameter:
             print(f"element {elname.value.decode()}, ID {elemID.value}")
         elements_ID[elname.value.decode()] = HANDLE(elemID.value)
         if test_parameter:
             enumerate_parameters(elemID, hparam, param_name, param, confirm=False)
             while hparam:
-                print("\t", param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
-                      param.group, param.flags)
+                print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                            f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
                 enumerate_parameters(elemID, hparam, param_name, param, confirm=False)
-            print("\t", param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
-                  param.group, param.flags)
-        enumerate_elements(hsys, elemID, elname)
+            print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                        f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+        enumerate_elements(hsys, elemID, elname, confirm=test_enumerate)
 
     if test_ID:
         print(elements_ID)
@@ -103,6 +102,10 @@ if __name__ == "__main__":
             next_ID = get_next_element(this_ID, show_return=True)
             this_ID = next_ID
         print("Chained beamline :", linked_beamline)
+        for oe_name in linked_beamline:
+            oe = OpticalElement()
+            oe.from_element_id(elements_ID[oe_name])
+            print(oe)
 
     if test_add_element:
         # elements_ID["screen"] = create_element("PlaneFilm", "screen")
