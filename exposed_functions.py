@@ -1,7 +1,5 @@
 import functools
 import ctypes
-from classes import Beamline, OpticalElement
-from lxml import etree
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
 
 global optix
@@ -223,17 +221,3 @@ def get_spot_diagram(element_id, diagram, distance=0):
 def version():
     optix.Version()
 
-
-def parse_xml(filename):
-    tree = etree.parse(filename)
-    beamline = Beamline()
-    for user in tree.xpath("/system/element"):
-        new_element = OpticalElement(name=user.get("name"), next=user.get("next"), previous=user.get("previous"))
-        beamline.add_element(new_element)
-    beamline.chain()
-
-    for chain in beamline.chains:
-        desc = ""
-        for element in chain:
-            desc += element.name + " -> "
-        print(desc)
