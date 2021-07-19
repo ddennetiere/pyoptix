@@ -8,6 +8,7 @@ from ctypes import WINFUNCTYPE, Structure, pointer, byref, POINTER,  c_char_p, c
 import numpy as np
 from classes import Beamline, OpticalElement, Parameter, Diagram, RecordingMode
 from exposed_functions import *
+from ui_objects import scatter_plot_2d,  show
 
 
 global optix
@@ -17,10 +18,10 @@ if __name__ == "__main__":
     test_enumerate = False
     test_parameter = False
     test_edit_parameter = False
-    test_linkage = True
-    test_add_element = False
+    test_linkage = False
+    test_add_element = True
     test_radiate = True
-    test_spot_diagram = False
+    test_spot_diagram = True
     # initialisation auto
     try:
         test = optix
@@ -33,8 +34,9 @@ if __name__ == "__main__":
     load_solemio_file(create_string_buffer(b"D:\\Dennetiere\\Programmes Python\\optix\\solemio\\CASSIOPEE"))
     hsys, hparam, elemID = HANDLE(0), HANDLE(0), HANDLE(0)
     elname = create_string_buffer(32, c_char)
-    param_name = create_string_buffer(48)
-    param = Parameter()
+    if test_parameter:
+        param_name = create_string_buffer(48)
+        param = Parameter()
     print("#"*80)
     enumerate_elements(hsys, elemID, elname)
     sourceID = None
@@ -46,16 +48,18 @@ if __name__ == "__main__":
         start = 0
         print("-"*20)
         print("hsys", hsys)
-        enumerate_elements(hsys, elemID, elname)
         if test_enumerate:
             print(f"element {elname.value.decode()}, ID {elemID.value}")
         elements_ID[elname.value.decode()] = HANDLE(elemID.value)
-        enumerate_parameters(elemID, hparam, param_name, param, confirm=False)
-        while hparam:
-            if test_parameter:
+        if test_parameter:
+            enumerate_parameters(elemID, hparam, param_name, param, confirm=False)
+            while hparam:
                 print("\t", param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
                       param.group, param.flags)
-            enumerate_parameters(elemID, hparam, param_name, param, confirm=False)
+                enumerate_parameters(elemID, hparam, param_name, param, confirm=False)
+            print("\t", param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
+                  param.group, param.flags)
+        enumerate_elements(hsys, elemID, elname)
 
     if test_ID:
         print(elements_ID)
@@ -105,15 +109,49 @@ if __name__ == "__main__":
         print("screen_id", elements_ID["screen"])
         get_element_name(elements_ID["screen"], elname)
         print("screen name", elname.value.decode())
-        # set_recording(elements_ID["screen"], RecordingMode.recording_output)
+        chain_element_by_id(elements_ID["EXP1"], elements_ID["screen"])
+    if test_spot_diagram:
+        set_recording(elements_ID["screen"], RecordingMode.recording_output)
 
     if test_radiate:
-        align(sourceID, lamda_align)
+        print(lamda_align)
+        align(sourceID, lamda_align, show_return=True)
         clear_impacts(sourceID)
         generated_rays = generate(sourceID, lamda_align, show_return=True)
         radiate(sourceID)
 
     if test_spot_diagram:
+        assert test_add_element
+        if not test_edit_parameter:
+            nrays2 = Parameter()
+            get_parameter(sourceID, "nRays", nrays2)
+            print("New nrays", nrays2.value)
         diagram = Diagram(ndim=5, nreserved=int(nrays2.value))
-        optix.GetSpotDiagram(elements_ID["screen"],  ctypes.byref(diagram), c_double(0))
-        print(diagram.min.value)
+        get_spot_diagram(elements_ID["screen"], diagram, distance=0)
+        print(np.ctypeslib.as_array(diagram.min, shape=(diagram.dim,)))
+        print(diagram.count)
+        import pandas as pd
+        spots = pd.DataFrame(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim)),
+                             columns=("X", "Y", "Z", "dX", "dY"))
+        # import matplotlib.pyplot as plt
+        # plt.scatter(spots["X"], spots["Y"])
+        # plt.show()
+        fig = scatter_plot_2d(spots["X"], spots["Y"])
+        show(fig)
+
+    if test_ID:
+        print("ran test_ID")
+    if test_enumerate:
+        print("ran test_enumerate")
+    if test_parameter:
+        print("ran test_parameter")
+    if test_edit_parameter:
+        print("ran test_edit_parameter")
+    if test_linkage:
+        print("ran test_linkage")
+    if test_add_element:
+        print("ran test_add_element")
+    if test_radiate:
+        print("ran test_radiate")
+    if test_spot_diagram:
+        print("ran test_spot_diagram")
