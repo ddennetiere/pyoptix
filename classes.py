@@ -1,7 +1,21 @@
 # coding: utf-8
 import numpy as np
-from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_int64
+from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_int64, create_string_buffer
+from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
+from exposed_functions import *
+from scipy.constants import degree
+from lxml import etree
 
+
+optix_dictionnary = {
+                     "DX": "d_x",
+                     "DY": "d_y",
+                     "DZ": "d_z",
+                     "Dphi": "d_phi",
+                     "Dpsi": "d_psi",
+                     "Dtheta": "d_theta",
+                     "distance": "distance_from_previous",
+                     }
 
 class Bounds(Structure):
     _fields_ = [("min", c_double),
@@ -117,10 +131,39 @@ class OpticalElement(object):
         self.distance_from_previous = distance_from_previous
 
     def __repr__(self):
-        description = f"Element {self.name} de classe {self.__class__}"
+        description = f"Element {self.name} of class {self.__class__}"
         description += f"\n\t at {self.distance_from_previous} m from {self.previous}"
         description += f"\n\t pointing to {self.next}"
+        description += f"\n\t oriented in pitch at {self.theta/degree} deg (deviation {180-2*self.theta/degree} deg)"
+        description += f"\n\t oriented in roll at {self.phi/degree} deg"
+        description += f"\n\t oriented in yaw at {self.psi/degree} deg"
         return description
+
+    def from_element_id(self, element_id, print_all=False):
+        hparam = HANDLE(0)
+        element_name = create_string_buffer(32)
+        get_element_name(element_id, element_name, confirm=False)
+        self.name = element_name.value.decode()
+        param = Parameter()
+        param_name = create_string_buffer(48)
+        enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
+        while hparam:
+            if print_all:
+                print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                            f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+            if param_name.value.decode() in optix_dictionnary.keys():
+                self.__dict__[optix_dictionnary[param_name.value.decode()]] = param.value
+            else:
+                self.__dict__[param_name.value.decode()] = param.value
+            enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
+        if print_all:
+            print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                        f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+        if param_name.value.decode() in optix_dictionnary.keys():
+            self.__dict__[optix_dictionnary[param_name.value.decode()]] = param.value
+        else:
+            self.__dict__[param_name.value.decode()] = param.value
+        enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
 
 
 class Source(OpticalElement):
@@ -135,3 +178,18 @@ class Source(OpticalElement):
         self.sigma_x_div = sigma_x_div
         self.sigma_x_div = sigma_y_div
         self.nrays = nrays
+
+
+def parse_xml(filename):
+    tree = etree.parse(filename)
+    beamline = Beamline()
+    for user in tree.xpath("/system/element"):
+        new_element = OpticalElement(name=user.get("name"), next=user.get("next"), previous=user.get("previous"))
+        beamline.add_element(new_element)
+    beamline.chain()
+
+    for chain in beamline.chains:
+        desc = ""
+        for element in chain:
+            desc += element.name + " -> "
+        print(desc)
