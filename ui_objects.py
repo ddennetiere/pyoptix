@@ -7,6 +7,8 @@ hc = h*c/eV/nano
 from scipy.stats import gaussian_kde
 from bokeh.models import BoxSelectTool, LassoSelectTool, Spacer, Label
 from bokeh.layouts import row, column
+from bokeh.util.hex import hexbin
+from bokeh.transform import linear_cmap
 
 
 # Definition des fonctions d'affichage
@@ -65,17 +67,28 @@ def scatter_plot_2d(x, y, **kwargs):
         y_unit = kwargs["y_unit"]
     else:
         y_unit = "m"
-    # Calculate the point density
-    xy = np.vstack([x, y])
-    z = gaussian_kde(xy)(xy)
-    z = z / z.max()
-    colors_jet = ["#%02x%02x%02x" % (to_jet(grayscale)) for grayscale in z]
+    if "show_map" in kwargs.keys():
+        show_map = kwargs["show_map"]
+    else:
+        show_map = False
+    if "light_plot" not in kwargs.keys():
+        light_plot = False
+    else:
+        light_plot = kwargs["light_plot"]
+    if not light_plot and not show_map:
+        # Calculate the point density
+        xy = np.vstack([x, y])
+        z = gaussian_kde(xy)(xy)
+        z = z / z.max()
+        colors_jet = ["#%02x%02x%02x" % (to_jet(grayscale)) for grayscale in z]
+    else:
+        colors_jet = ["blue"]*x.shape[0]
     # create the scatter plot
 
     if 'othonorm' in kwargs.keys():
         if kwargs['orthonorm']:
-            x_ptp = x.ptp()
-            y_ptp = y.ptp()
+            x_ptp = np.ptp(x)
+            y_ptp = np.ptp(y)
             x_range = (x.mean() - max(x_ptp, y_ptp) / 2, x.mean() + max(x_ptp, y_ptp) / 2)
             y_range = (y.mean() - max(x_ptp, y_ptp) / 2, y.mean() + max(x_ptp, y_ptp) / 2)
         else:
@@ -90,8 +103,8 @@ def scatter_plot_2d(x, y, **kwargs):
     else:
         # radius = min(x.ptp(), y.ptp())/1000
         # radius =  4e-6/z.mean()
-        radius = y.std() / 100
-        print(radius)
+        # radius = y.std() / 100
+        radius = 5
 
     p = figure(tools=TOOLS, plot_width=600, plot_height=600, min_border=10, min_border_left=50,
                toolbar_location="above", x_axis_location=None, y_axis_location=None,
@@ -100,7 +113,16 @@ def scatter_plot_2d(x, y, **kwargs):
     p.select(BoxSelectTool).select_every_mousemove = False
     p.select(LassoSelectTool).select_every_mousemove = False
 
-    r = p.circle(x, y, size=5, color=colors_jet, alpha=0.6)
+    if show_map:
+        bins = hexbin(x, y, min(np.ptp(x), np.ptp(y))/100)
+
+        p = figure(tools="wheel_zoom,reset", match_aspect=True, background_fill_color='#440154')
+        p.grid.visible = False
+
+        p.hex_tile(q="q", r="r", size=min(np.ptp(x), np.ptp(y))/100, line_color=None, source=bins,
+                   fill_color=linear_cmap('counts', 'Viridis256', 0, max(bins.counts)), alpha=1)
+    else:
+        r = p.circle(x, y, size=radius, color=colors_jet, alpha=0.1)
 
     # create the horizontal histogram
     hhist, hedges = np.histogram(x, bins=max(20, int(x.shape[0] / 1000)))
