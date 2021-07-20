@@ -118,7 +118,7 @@ def get_parameter(element_id, parameter_name, parameter):
 def set_parameter(element_id, parameter_name, parameter):
     optix.SetParameter.argtypes = [HANDLE, LPCSTR, HANDLE]
     optix.SetParameter.restype = INT
-    ret = optix.SetParameter(element_id, parameter_name.encode(), parameter)
+    ret = optix.SetParameter(element_id, parameter_name.encode(), ctypes.byref(parameter))
     return ret
 
 
