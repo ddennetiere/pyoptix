@@ -43,7 +43,13 @@ def to_jet(grayscale):
             int(255 * blue(grayscale)))
 
 
-TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save"
+TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save, box_zoom"
+
+
+def plot_spd(dataframe, x_key="x", y_key="y", **kwargs):
+    layout = scatter_plot_2d(dataframe[x_key], dataframe[y_key], title=f"{y_key} vs {x_key}",
+                             x_label=x_key, x_unit="m", y_label=y_key, y_unit="m", **kwargs)
+    return layout
 
 
 def scatter_plot_2d(x, y, **kwargs):
