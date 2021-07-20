@@ -74,8 +74,10 @@ def scatter_plot_2d(x, y, **kwargs):
 
     if 'othonorm' in kwargs.keys():
         if kwargs['orthonorm']:
-            x_range = (x.mean() - max(x.ptp(), y.ptp()) / 2, x.mean() + max(x.ptp(), y.ptp()) / 2)
-            y_range = (y.mean() - max(x.ptp(), y.ptp()) / 2, y.mean() + max(x.ptp(), y.ptp()) / 2)
+            x_ptp = x.ptp()
+            y_ptp = y.ptp()
+            x_range = (x.mean() - max(x_ptp, y_ptp) / 2, x.mean() + max(x_ptp, y_ptp) / 2)
+            y_range = (y.mean() - max(x_ptp, y_ptp) / 2, y.mean() + max(x_ptp, y_ptp) / 2)
         else:
             x_range = (x.min(), x.max())
             y_range = (y.min(), y.max())
