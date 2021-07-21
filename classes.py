@@ -113,37 +113,244 @@ class OpticalElement(object):
     def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0, x=0, y=0, z=0,
                  d_x=0, d_y=0, d_z=0, next=None, previous=None, distance_from_previous=0):
         super().__init__()
-        self.name = name
-        self.phi = phi
-        self.psi = psi
-        self.theta = theta
-        self.d_phi = d_phi
-        self.d_psi = d_psi
-        self.d_theta = d_theta
-        self.x = x
-        self.y = y
-        self.z = z
-        self.d_x = d_x
-        self.d_y = d_y
-        self.d_z = d_z
-        self.next = next
-        self.previous = previous
-        self.distance_from_previous = distance_from_previous
+        self._name = name
+        self._phi = phi
+        self._psi = psi
+        self._theta = theta
+        self._d_phi = d_phi
+        self._d_psi = d_psi
+        self._d_theta = d_theta
+        self._x = x
+        self._y = y
+        self._z = z
+        self._d_x = d_x
+        self._d_y = d_y
+        self._d_z = d_z
+        self._next = next
+        self._previous = previous
+        self._distance_from_previous = distance_from_previous
+        self._element_id = None
+
+    def _get_parameter(self, param_name):
+        param = Parameter()
+        get_parameter(self._element_id, param_name, param)
+        return param.value
+
+    @property
+    def name(self):
+        element_name = create_string_buffer(32)
+        get_element_name(self._element_id, element_name, confirm=False)
+        self._name = element_name.value.decode()
+        return self._name
+
+    @property
+    def phi(self):
+        self._phi = self._get_parameter("phi")
+        return self._phi
+
+    @phi.setter
+    def phi(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "phi", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "phi", param)
+        self.phi()
+
+    @property
+    def psi(self):
+        self._psi = self._get_parameter("psi")
+        return self._psi
+
+    @psi.setter
+    def psi(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "psi", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "psi", param)
+        self.psi()
+
+    @property
+    def theta(self):
+        self._theta = self._get_parameter("theta")
+        return self._theta
+
+    @theta.setter
+    def theta(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "theta", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "theta", param)
+        self.theta()
+
+    @property
+    def d_phi(self):
+        self._d_phi = self._get_parameter("Dphi")
+        return self._d_phi
+
+    @d_phi.setter
+    def d_phi(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "Dphi", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "Dphi", param)
+        self.d_phi()
+
+    @property
+    def d_psi(self):
+        self._d_psi = self._get_parameter("Dpsi")
+        return self._d_psi
+
+    @d_psi.setter
+    def d_psi(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "Dpsi", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "Dpsi", param)
+        self.d_psi()
+
+    @property
+    def d_theta(self):
+        self._d_theta = self._get_parameter("Dtheta")
+        return self._d_theta
+
+    @d_theta.setter
+    def d_theta(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "Dtheta", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "Dtheta", param)
+        self.d_theta()
+
+    @property
+    def x(self):
+        self._x = self._get_parameter("x")
+        return self._x
+
+    @x.setter
+    def x(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "x", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "x", param)
+        self.x()
+
+    @property
+    def y(self):
+        self._y = self._get_parameter("y")
+        return self._y
+
+    @y.setter
+    def y(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "y", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "y", param)
+        self.y()
+
+    @property
+    def z(self):
+        self._z = self._get_parameter("z")
+        return self._z
+
+    @z.setter
+    def z(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "z", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "z", param)
+        self.z()
+
+    @property
+    def d_x(self):
+        self._d_x = self._get_parameter("Dx")
+        return self._d_x
+
+    @d_x.setter
+    def d_x(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "Dx", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "Dx", param)
+        self.d_x()
+
+    @property
+    def d_y(self):
+        self._d_y = self._get_parameter("Dy")
+        return self._d_y
+
+    @d_y.setter
+    def d_y(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "Dy", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "Dy", param)
+        self.d_y()
+
+    @property
+    def d_z(self):
+        self._d_z = self._get_parameter("Dz")
+        return self._d_z
+
+    @d_z.setter
+    def d_z(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "Dz", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "Dz", param)
+        self.d_z()
+
+    @property
+    def distance_from_previous(self):
+        self._distance_from_previous = self._get_parameter("distance")
+        return self._distance_from_previous
+
+    @distance_from_previous.setter
+    def distance_from_previous(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "distance", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "distance", param)
+        self.distance_from_previous()
+
+    @property
+    def previous(self):
+        self._previous = self._get_parameter("previous")
+        return self._previous
+
+    @previous.setter
+    def previous(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "previous", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "previous", param)
+        self.previous()
+
+    @property
+    def next(self):
+        self._next = self._get_parameter("next")
+        return self._next
+
+    @next.setter
+    def next(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "next", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "next", param)
+        self.next()
 
     def __repr__(self):
-        description = f"Element {self.name} of class {self.__class__}"
-        description += f"\n\t at {self.distance_from_previous} m from {self.previous}"
-        description += f"\n\t pointing to {self.next}"
-        description += f"\n\t oriented in pitch at {self.theta/degree} deg (deviation {180-2*self.theta/degree} deg)"
-        description += f"\n\t oriented in roll at {self.phi/degree} deg"
-        description += f"\n\t oriented in yaw at {self.psi/degree} deg"
+        description = f"Element {self._name} of class {self.__class__}"
+        description += f"\n\t at {self._distance_from_previous} m from {self._previous}"
+        description += f"\n\t pointing to {self._next}"
+        description += f"\n\t oriented in pitch at {self._theta/degree} deg (deviation {180-2*self._theta/degree} deg)"
+        description += f"\n\t oriented in roll at {self._phi/degree} deg"
+        description += f"\n\t oriented in yaw at {self._psi/degree} deg"
         return description
 
     def from_element_id(self, element_id, print_all=False):
         hparam = HANDLE(0)
-        element_name = create_string_buffer(32)
-        get_element_name(element_id, element_name, confirm=False)
-        self.name = element_name.value.decode()
+        self._element_id = element_id
+        print("initializing ", self.name)
         param = Parameter()
         param_name = create_string_buffer(48)
         enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
@@ -152,18 +359,26 @@ class OpticalElement(object):
                 print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
                             f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
             if param_name.value.decode() in optix_dictionnary.keys():
-                self.__dict__[optix_dictionnary[param_name.value.decode()]] = param.value
+                self.__dict__["_"+optix_dictionnary[param_name.value.decode()]] = param.value
             else:
-                self.__dict__[param_name.value.decode()] = param.value
+                self.__dict__["_"+param_name.value.decode()] = param.value
             enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
         if print_all:
             print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
                         f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
         if param_name.value.decode() in optix_dictionnary.keys():
-            self.__dict__[optix_dictionnary[param_name.value.decode()]] = param.value
+            self.__dict__["_"+optix_dictionnary[param_name.value.decode()]] = param.value
         else:
-            self.__dict__[param_name.value.decode()] = param.value
+            self.__dict__["_"+param_name.value.decode()] = param.value
         enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
+        next_id = get_next_element(element_id)
+        next_name = create_string_buffer(32)
+        get_element_name(next_id, next_name)
+        self._next = next_name.value.decode()
+        previous_id = get_previous_element(element_id)
+        previous_name = create_string_buffer(32)
+        get_element_name(previous_id, previous_name)
+        self._previous = previous_name.value.decode()
 
 
 class Source(OpticalElement):
