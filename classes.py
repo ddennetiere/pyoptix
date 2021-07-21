@@ -371,14 +371,20 @@ class OpticalElement(object):
         else:
             self.__dict__["_"+param_name.value.decode()] = param.value
         enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
-        next_id = get_next_element(element_id)
-        next_name = create_string_buffer(32)
-        get_element_name(next_id, next_name)
-        self._next = next_name.value.decode()
-        previous_id = get_previous_element(element_id)
-        previous_name = create_string_buffer(32)
-        get_element_name(previous_id, previous_name)
-        self._previous = previous_name.value.decode()
+        next_id = get_next_element(element_id, confirm=False)
+        if next_id is not None:
+            next_name = create_string_buffer(32)
+            get_element_name(next_id, next_name, confirm=False)
+            self._next = next_name.value.decode()
+        else:
+            self._next = None
+        previous_id = get_previous_element(element_id, confirm=False)
+        if previous_id is not None:
+            previous_name = create_string_buffer(32)
+            get_element_name(previous_id, previous_name, confirm=False)
+            self._previous = previous_name.value.decode()
+        else:
+            self._previous = None
 
 
 class Source(OpticalElement):
