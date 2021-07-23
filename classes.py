@@ -72,7 +72,13 @@ class Beamline(object):
         self.elements = []
         self.chains = []
 
-    def align(self):
+    def align(self, from_element):
+        pass
+
+    def radiate(self, from_element):
+        pass
+
+    def generate(self, n_rays=None):
         pass
 
     def chain(self):
@@ -88,9 +94,9 @@ class Beamline(object):
                     print("new_chain")
 
         def get_previous(an_element):
-            for element in self.elements:
-                if element.next == an_element.name:
-                    return element
+            for element_i in self.elements:
+                if element_i.next == an_element.name:
+                    return element_i
 
         for chain in self.chains:
             previous = 1
@@ -111,7 +117,8 @@ class Beamline(object):
 
 class OpticalElement(object):
     def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0, x=0, y=0, z=0,
-                 d_x=0, d_y=0, d_z=0, next=None, previous=None, distance_from_previous=0):
+                 d_x=0, d_y=0, d_z=0, next=None, previous=None, distance_from_previous=0, element_id=None,
+                 element_type=""):
         super().__init__()
         self._name = name
         self._phi = phi
@@ -130,6 +137,12 @@ class OpticalElement(object):
         self._previous = previous
         self._distance_from_previous = distance_from_previous
         self._element_id = None
+        self._element_type = element_type
+        if element_id is not None:
+            self.from_element_id(element_id)
+        elif element_type != "" and name != "":
+            self._element_id = create_element(element_type, name)
+            self._name = name
 
     def _get_parameter(self, param_name):
         param = Parameter()
@@ -386,6 +399,11 @@ class OpticalElement(object):
         else:
             self._previous = None
 
+    def set_recording(self, recording_mode="output"):
+        set_recording(self._element_id,
+                      {"output": RecordingMode.recording_output,
+                       "input": RecordingMode.recording_input,
+                       "not_recording": RecordingMode.recording_none}[recording_mode])
 
 class Source(OpticalElement):
     def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0, x=0, y=0, z=0,
