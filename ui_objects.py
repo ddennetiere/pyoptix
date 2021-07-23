@@ -49,8 +49,16 @@ TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save, box_zoom"
 
 
 def plot_spd(dataframe, x_key="x", y_key="y", **kwargs):
+    if x_key[0] == "d":
+        x_unit = "rad"
+    else:
+        x_unit = "m"
+    if y_key[0] == "d":
+        y_unit = "rad"
+    else:
+        y_unit = "m"
     layout = scatter_plot_2d(dataframe[x_key], dataframe[y_key], title=f"{y_key} vs {x_key}",
-                             x_label=x_key, x_unit="m", y_label=y_key, y_unit="m", **kwargs)
+                             x_label=x_key, x_unit=x_unit, y_label=y_key, y_unit=y_unit, **kwargs)
     return layout
 
 
