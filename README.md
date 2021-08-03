@@ -13,7 +13,7 @@ conda create PyOptiX python=3.8.10
 conda activate PyOptiX
 conda install lxml
 ```
-3. Installer orange 
+3.1 Installer orange 
 
 ```bash
 conda install orange3
@@ -24,6 +24,26 @@ Vérifier que l'installation s'est bien déroulée
 ```bash
 python -m Orange.canvas
 ```
+
+3.2 Installer Jupyter (environnement de script recommandé)
+
+```bash
+conda install jupyter
+```
+
+Créer le fichier de configuration de jupyter
+
+```bash
+jupyter notebook --generate-config
+```
+Cela crée un fichier dans `C:\Users\<username>\.jupyter\jupyter_notebook_config.py`
+
+Trouver la ligne : `#c.NotebookApp.notebook_dir = ''`
+
+Remplacer par `c.NotebookApp.notebook_dir = '/the/path/to/home/folder/'`
+
+Ne pas oublier d'effacer le `#` en début de ligne
+
 4. Télécharger la bibliothèque optix avec git :
 
 ```bash
@@ -37,6 +57,12 @@ Télécharger la librairie libxml2-2 et linker libxml2.a dans le linker (sans ch
 
 ```bash
 git clone ssh://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/PyOptiX
+```
+
+6. Télécharger bokeh
+
+```bash
+conda install bokeh
 ```
 
 
