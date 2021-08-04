@@ -7,6 +7,7 @@ from scipy.constants import degree
 from lxml import etree
 
 
+# dictionnary for optix to pyoptix attribute import
 optix_dictionnary = {
                      "DX": "d_x",
                      "DY": "d_y",
@@ -15,6 +16,18 @@ optix_dictionnary = {
                      "Dpsi": "d_psi",
                      "Dtheta": "d_theta",
                      "distance": "distance_from_previous",
+                     "sigmaX": "sigma_x",
+                     "sigmaY": "sigma_y",
+                     "sigmaXdiv": "sigma_x_div",
+                     "sigmaYdiv": "sigma_y_div",
+                     "NRays": "nrays",
+                     "azimuthAngle1": "azimuth_angle1",
+                     "azimuthAngle2": "azimuth_angle2",
+                     "elevationAngle1": "elevation_angle1",
+                     "inverseDist1": "inverse_distance1",
+                     "inverseDist2": "inverse_distance2",
+                     "recordingWavelength": "recording_wavelength",
+                     "lineDensity": "line_density",
                      }
 
 class Bounds(Structure):
@@ -120,6 +133,15 @@ class OpticalElement(object):
                  d_x=0, d_y=0, d_z=0, next=None, previous=None, distance_from_previous=0, element_id=None,
                  element_type=""):
         super().__init__()
+        self._element_id = None
+        self._element_type = element_type
+        if element_id is not None:
+            self.from_element_id(element_id)
+        elif element_type != "" and name != "":
+            self._element_id = create_element(element_type, name)
+            self._name = name
+        else:
+            raise AttributeError("please provide either element_type and name or element_id")
         self._name = name
         self.phi = phi
         self.psi = psi
@@ -136,15 +158,6 @@ class OpticalElement(object):
         self.next = next
         self.previous = previous
         self.distance_from_previous = distance_from_previous
-        self._element_id = None
-        self._element_type = element_type
-        if element_id is not None:
-            self.from_element_id(element_id)
-        elif element_type != "" and name != "":
-            self._element_id = create_element(element_type, name)
-            self._name = name
-        else:
-            raise AttributeError("please provide either element_type and name or element_id")
 
     def _get_parameter(self, param_name):
         param = Parameter()
@@ -338,11 +351,14 @@ class OpticalElement(object):
 
     @previous.setter
     def previous(self, previous_oe):
-        param = Parameter()
-        get_parameter(self._element_id, "previous", param)
-        param.value = DOUBLE(previous_oe.element_id)
-        set_parameter(self._element_id, "previous", param)
-        self._previous = self._get_parameter("previous")
+        if previous_oe is not None:
+            param = Parameter()
+            get_parameter(self._element_id, "previous", param)
+            param.value = DOUBLE(previous_oe.element_id)
+            set_parameter(self._element_id, "previous", param)
+            self._previous = self._get_parameter("previous")
+        else:
+            self._previous = None
 
     @property
     def next(self):
@@ -351,7 +367,8 @@ class OpticalElement(object):
     @next.setter
     def next(self, next_oe):
         self._next = next_oe
-        chain_element_by_id(self._element_id, next_oe.element_id)
+        if next_oe is not None:
+            chain_element_by_id(self._element_id, next_oe.element_id)
 
     def __repr__(self):
         description = f"Element {self._name} of class {self.__class__}"
@@ -514,6 +531,139 @@ class ToroidalMirror(OpticalElement):
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "major_curvature", param)
         self._major_curvature = self._get_parameter("major_curvature")
+
+
+class PlaneHoloGrating(OpticalElement):
+    def __init__(self, azimuth_angle1=0, azimuth_angle2=0, elevation_angle1=0, inverse_distance1=np.inf,
+                 inverse_distance2=np.inf, order_align=1, order_use=1, recording_wavelength=351.1e-9,
+                 line_density=1e6, **kwargs):
+        super().__init__(**kwargs)
+        self.azimuth_angle1 = azimuth_angle1
+        self.azimuth_angle2 = azimuth_angle2
+        self.elevation_angle1 = elevation_angle1
+        self.inverse_distance1 = inverse_distance1
+        self.inverse_distance2 = inverse_distance2
+        self.order_align = order_align
+        self.order_use = order_use
+        self.recording_wavelength = recording_wavelength
+        self.line_density = line_density
+
+    @property
+    def azimuth_angle1(self):
+        self._azimuth_angle1 = self._get_parameter("azimuthAngle1")
+        return self._azimuth_angle1
+
+    @azimuth_angle1.setter
+    def azimuth_angle1(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "azimuthAngle1", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "azimuthAngle1", param)
+        self._azimuth_angle1 = self._get_parameter("azimuthAngle1")
+
+    @property
+    def azimuth_angle2(self):
+        self._azimuth_angle2 = self._get_parameter("azimuthAngle2")
+        return self._azimuth_angle2
+
+    @azimuth_angle2.setter
+    def azimuth_angle2(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "azimuthAngle2", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "azimuthAngle2", param)
+        self._azimuth_angle2 = self._get_parameter("azimuthAngle2")
+
+    @property
+    def elevation_angle1(self):
+        self._elevation_angle1 = self._get_parameter("elevationAngle1")
+        return self._elevation_angle1
+
+    @elevation_angle1.setter
+    def elevation_angle1(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "elevationAngle1", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "elevationAngle1", param)
+        self._elevation_angle1 = self._get_parameter("elevationAngle1")
+
+    @property
+    def inverse_distance1(self):
+        self._inverse_distance1 = self._get_parameter("inverseDist1")
+        return self._inverse_distance1
+
+    @inverse_distance1.setter
+    def inverse_distance1(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "inverseDist1", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "inverseDist1", param)
+        self._inverse_distance1 = self._get_parameter("inverseDist1")
+
+    @property
+    def inverse_distance2(self):
+        self._inverse_distance2 = self._get_parameter("inverseDist2")
+        return self._inverse_distance2
+
+    @inverse_distance2.setter
+    def inverse_distance2(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "inverseDist2", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "inverseDist2", param)
+        self._inverse_distance2 = self._get_parameter("inverseDist2")
+
+    @property
+    def order_align(self):
+        self._order_align = self._get_parameter("order_align")
+        return self._order_align
+
+    @order_align.setter
+    def order_align(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "order_align", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "order_align", param)
+        self._order_align = self._get_parameter("order_align")
+
+    @property
+    def order_use(self):
+        self._order_use = self._get_parameter("order_use")
+        return self._order_use
+
+    @order_use.setter
+    def order_use(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "order_use", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "order_use", param)
+        self._order_use = self._get_parameter("order_use")
+
+    @property
+    def recording_wavelength(self):
+        self._recording_wavelength = self._get_parameter("recordingWavelength")
+        return self._recording_wavelength
+
+    @recording_wavelength.setter
+    def recording_wavelength(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "recordingWavelength", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "recordingWavelength", param)
+        self._recording_wavelength = self._get_parameter("recordingWavelength")
+
+    @property
+    def line_density(self):
+        self._line_density = self._get_parameter("lineDensity")
+        return self._line_density
+
+    @line_density.setter
+    def line_density(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "lineDensity", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "lineDensity", param)
+        self._line_density = self._get_parameter("lineDensity")
 
 
 def parse_xml(filename):
