@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import ctypes, os
 # from ctypes import cdll, windll
+import sys
 from ctypes.wintypes import *
 from ctypes import *
 from ctypes import WINFUNCTYPE, Structure, pointer, byref, POINTER, c_char_p, c_void_p, c_double, c_float, \
@@ -13,14 +14,30 @@ from ui_objects import scatter_plot_2d, show, plot_spd
 global optix
 
 if __name__ == "__main__":
-    test_ID = False
-    test_enumerate = False
-    test_parameter = True
-    test_edit_parameter = False
-    test_linkage = True
-    test_add_element = True
-    test_radiate = True
-    test_spot_diagram = True
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--test_ID", help="shows the elements optix ID", action="store_true")
+    parser.add_argument("--test_enumerate", help="shows the elements in the beamline", action="store_true")
+    parser.add_argument("--test_parameter", help="shows the elements parameters", action="store_true")
+    parser.add_argument("--test_edit_parameter", help="changes the source Nrays", action="store_true")
+    parser.add_argument("--test_linkage",
+                        help="shows the linkage of the elements through which light will be propagated",
+                        action="store_true")
+    parser.add_argument("--test_add_element", help="adds a screen in the beamline", action="store_true")
+    parser.add_argument("--test_radiate", help="runs the raytracing", action="store_true")
+    parser.add_argument("--test_spot_diagram",
+                        help="shows the spot diagram on the added screen, requires --test_add_element",
+                        action="store_true")
+    args = parser.parse_args()
+    
+    test_ID = args.test_ID
+    test_enumerate = args.test_enumerate
+    test_parameter = args.test_parameter
+    test_edit_parameter = args.test_edit_parameter
+    test_linkage = args.test_linkage
+    test_add_element = args.test_add_element
+    test_radiate = args.test_radiate
+    test_spot_diagram = args.test_spot_diagram
     # initialisation auto
     try:
         test = optix
