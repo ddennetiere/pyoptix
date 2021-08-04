@@ -481,6 +481,39 @@ class Source(OpticalElement):
         self._sigma_y_div = self._get_parameter("sigmaYdiv")
 
 
+class ToroidalMirror(OpticalElement):
+    def __init__(self, minor_curvature=0, major_curvature=0, **kwargs):
+        super().__init__(**kwargs)
+        self._major_curvature = major_curvature
+        self._minor_curvature = minor_curvature
+
+    @property
+    def minor_curvature(self):
+        self._minor_curvature = self._get_parameter("minor_curvature")
+        return self._minor_curvature
+
+    @minor_curvature.setter
+    def minor_curvature(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "minor_curvature", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "minor_curvature", param)
+        self._minor_curvature = self._get_parameter("minor_curvature")
+
+    @property
+    def major_curvature(self):
+        self._major_curvature = self._get_parameter("major_curvature")
+        return self._major_curvature
+
+    @major_curvature.setter
+    def major_curvature(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "major_curvature", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "major_curvature", param)
+        self._major_curvature = self._get_parameter("major_curvature")
+
+
 def parse_xml(filename):
     tree = etree.parse(filename)
     beamline = Beamline()
