@@ -29,7 +29,7 @@ if __name__ == "__main__":
                         help="shows the spot diagram on the added screen, requires --test_add_element",
                         action="store_true")
     args = parser.parse_args()
-    
+
     test_ID = args.test_ID
     test_enumerate = args.test_enumerate
     test_parameter = args.test_parameter
@@ -95,20 +95,24 @@ if __name__ == "__main__":
     lamda_align = DOUBLE(2.5e-8)
 
     if test_edit_parameter:
-        nrays = Parameter()
-        enumerate_parameters(sourceID, hparam, param_name, param, confirm=True)
+        element_name = "Reseau_1600H"
+        print("Paramètres de l'élément", element_name)
+        theta = Parameter()
+        enumerate_parameters(elements_ID[element_name], hparam, param_name, param, confirm=True)
         while hparam:
-            print("\t", param_name.value, param.value, param.bounds.min, param.bounds.max, param.multiplier, param.type,
-                  param.group, param.flags)
-            enumerate_parameters(sourceID, hparam, param_name, param, confirm=False)
+            print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                        f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+            enumerate_parameters(elements_ID[element_name], hparam, param_name, param, confirm=False)
+        print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+              f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
 
-        get_parameter(sourceID, "nRays", nrays)
-        print("Imported nrays", nrays.value)
-        nrays.value = 50000
-        set_parameter(sourceID, "nRays", nrays)
-        nrays2 = Parameter()
-        get_parameter(sourceID, "nRays", nrays2)
-        print("New nrays", nrays2.value)
+        get_parameter(elements_ID["Reseau_1600H"], "theta", theta)
+        print("Imported theta", theta.value)
+        theta.value = 0.1
+        set_parameter(elements_ID["Reseau_1600H"], "theta", theta)
+        theta2 = Parameter()
+        get_parameter(elements_ID["Reseau_1600H"], "theta", theta2)
+        print("New theta", theta2.value)
 
     if test_linkage:
         linked_beamline = []
