@@ -19,9 +19,12 @@ def catch_c_error(function):
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         confirm = True
+        confirm_ok = False
         show_return = False
         if "confirm" in kwargs.keys():
             confirm = kwargs["confirm"]
+        if "confirm_ok" in kwargs.keys():
+            confirm_ok = kwargs["confirm_ok"]
         if "show_return" in kwargs.keys():
             show_return = kwargs["show_return"]
         ret = function(*args)
@@ -32,7 +35,7 @@ def catch_c_error(function):
             optix.GetOptiXLastError(buf, 256)
             print(function.__name__, "error", buf.value)
         else:
-            if confirm:
+            if confirm and confirm_ok:
                 print(function.__name__, "ok")
         return ret
 
