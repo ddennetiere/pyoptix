@@ -6,3 +6,5 @@ __pycache__/*
 .idea/*
 *.swp
 *.html
+Tests/.ipynb_checkpoints
+Tests/.ipynb_checkpoints/*
