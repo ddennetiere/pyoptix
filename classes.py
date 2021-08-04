@@ -150,6 +150,10 @@ class OpticalElement(object):
         return param.value
 
     @property
+    def element_id(self):
+        return self._element_id
+
+    @property
     def name(self):
         element_name = create_string_buffer(32)
         get_element_name(self._element_id, element_name, confirm=False)
@@ -167,7 +171,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "phi", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "phi", param)
-        self.phi()
+        self._phi = self._get_parameter("phi")
 
     @property
     def psi(self):
@@ -180,7 +184,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "psi", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "psi", param)
-        self.psi()
+        self._psi = self._get_parameter("psi")
 
     @property
     def theta(self):
@@ -193,7 +197,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "theta", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "theta", param)
-        self.theta()
+        self._theta = self._get_parameter("theta")
 
     @property
     def d_phi(self):
@@ -206,7 +210,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "Dphi", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "Dphi", param)
-        self.d_phi()
+        self._d_phi = self._get_parameter("Dphi")
 
     @property
     def d_psi(self):
@@ -219,7 +223,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "Dpsi", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "Dpsi", param)
-        self.d_psi()
+        self._d_psi = self._get_parameter("Dpsi")
 
     @property
     def d_theta(self):
@@ -232,7 +236,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "Dtheta", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "Dtheta", param)
-        self.d_theta()
+        self._d_theta = self._get_parameter("Dtheta")
 
     @property
     def x(self):
@@ -245,7 +249,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "x", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "x", param)
-        self.x()
+        self._x = self._get_parameter("x")
 
     @property
     def y(self):
@@ -258,7 +262,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "y", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "y", param)
-        self.y()
+        self._y = self._get_parameter("y")
 
     @property
     def z(self):
@@ -271,7 +275,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "z", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "z", param)
-        self.z()
+        self._z = self._get_parameter("z")
 
     @property
     def d_x(self):
@@ -284,7 +288,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "Dx", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "Dx", param)
-        self.d_x()
+        self._d_x = self._get_parameter("Dx")
 
     @property
     def d_y(self):
@@ -297,7 +301,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "Dy", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "Dy", param)
-        self.d_y()
+        self._d_y = self._get_parameter("Dy")
 
     @property
     def d_z(self):
@@ -310,7 +314,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "Dz", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "Dz", param)
-        self.d_z()
+        self._d_z = self._get_parameter("Dz")
 
     @property
     def distance_from_previous(self):
@@ -323,7 +327,7 @@ class OpticalElement(object):
         get_parameter(self._element_id, "distance", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "distance", param)
-        self.distance_from_previous()
+        self._distance_from_previous = self._get_parameter("distance")
 
     @property
     def previous(self):
@@ -336,20 +340,16 @@ class OpticalElement(object):
         get_parameter(self._element_id, "previous", param)
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "previous", param)
-        self.previous()
+        self._previous = self._get_parameter("previous")
 
     @property
     def next(self):
-        self._next = self._get_parameter("next")
         return self._next
 
     @next.setter
-    def next(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "next", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "next", param)
-        self.next()
+    def next(self, next_oe):
+        self._next = next_oe
+        chain_element_by_id(self._element_id, next_oe.element_id)
 
     def __repr__(self):
         description = f"Element {self._name} of class {self.__class__}"
@@ -405,18 +405,80 @@ class OpticalElement(object):
                        "input": RecordingMode.recording_input,
                        "not_recording": RecordingMode.recording_none}[recording_mode])
 
+
 class Source(OpticalElement):
-    def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0, x=0, y=0, z=0,
-                 d_x=0, d_y=0, d_z=0, next=None, previous=None, distance_from_previous=0, sigma_x=0,
-                 sigma_y=0, sigma_x_div=0, sigma_y_div=0, nrays=0):
-        super().__init__(name=name, phi=phi, psi=psi, theta=theta, d_phi=d_phi, d_psi=d_psi, d_theta=d_theta,
-                         x=x, y=y, z=z, d_x=d_x, d_y=d_y, d_z=d_z, next=next, previous=previous,
-                         distance_from_previous=distance_from_previous)
-        self.sigma_x = sigma_x
-        self.sigma_y = sigma_y
-        self.sigma_x_div = sigma_x_div
-        self.sigma_x_div = sigma_y_div
-        self.nrays = nrays
+    def __init__(self, sigma_x=0, sigma_y=0, sigma_x_div=0, sigma_y_div=0, nrays=0, **kwargs):
+        super().__init__(**kwargs)
+        self._sigma_x = sigma_x
+        self._sigma_y = sigma_y
+        self._sigma_x_div = sigma_x_div
+        self._sigma_y_div = sigma_y_div
+        self._nrays = nrays
+
+    @property
+    def nrays(self):
+        self._nrays = self._get_parameter("nRays")
+        return self._nrays
+
+    @nrays.setter
+    def nrays(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "nRays", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "nRays", param)
+        self._nrays = self._get_parameter("nRays")
+
+    @property
+    def sigma_x(self):
+        self._sigma_x = self._get_parameter("sigmaX")
+        return self._sigma_x
+
+    @sigma_x.setter
+    def sigma_x(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "sigmaX", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "sigmaX", param)
+        self._sigma_x = self._get_parameter("sigmaX")
+
+    @property
+    def sigma_y(self):
+        self._sigma_y = self._get_parameter("sigmaY")
+        return self._sigma_y
+
+    @sigma_y.setter
+    def sigma_y(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "sigmaY", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "sigmaY", param)
+        self._sigma_y = self._get_parameter("sigmaY")
+
+    @property
+    def sigma_x_div(self):
+        self._sigma_x_div = self._get_parameter("sigmaXdiv")
+        return self._sigma_x_div
+
+    @sigma_x_div.setter
+    def sigma_x_div(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "sigmaXdiv", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "sigmaXdiv", param)
+        self._sigma_x_div = self._get_parameter("sigmaXdiv")
+
+    @property
+    def sigma_y_div(self):
+        self._sigma_y_div = self._get_parameter("sigmaYdiv")
+        return self._sigma_y_div
+
+    @sigma_y_div.setter
+    def sigma_y_div(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "sigmaYdiv", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "sigmaYdiv", param)
+        self._sigma_y_div = self._get_parameter("sigmaYdiv")
 
 
 def parse_xml(filename):
