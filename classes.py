@@ -121,21 +121,21 @@ class OpticalElement(object):
                  element_type=""):
         super().__init__()
         self._name = name
-        self._phi = phi
-        self._psi = psi
-        self._theta = theta
-        self._d_phi = d_phi
-        self._d_psi = d_psi
-        self._d_theta = d_theta
-        self._x = x
-        self._y = y
-        self._z = z
-        self._d_x = d_x
-        self._d_y = d_y
-        self._d_z = d_z
-        self._next = next
-        self._previous = previous
-        self._distance_from_previous = distance_from_previous
+        self.phi = phi
+        self.psi = psi
+        self.theta = theta
+        self.d_phi = d_phi
+        self.d_psi = d_psi
+        self.d_theta = d_theta
+        self.x = x
+        self.y = y
+        self.z = z
+        self.d_x = d_x
+        self.d_y = d_y
+        self.d_z = d_z
+        self.next = next
+        self.previous = previous
+        self.distance_from_previous = distance_from_previous
         self._element_id = None
         self._element_type = element_type
         if element_id is not None:
@@ -143,6 +143,8 @@ class OpticalElement(object):
         elif element_type != "" and name != "":
             self._element_id = create_element(element_type, name)
             self._name = name
+        else:
+            raise AttributeError("please provide either element_type and name or element_id")
 
     def _get_parameter(self, param_name):
         param = Parameter()
@@ -335,10 +337,10 @@ class OpticalElement(object):
         return self._previous
 
     @previous.setter
-    def previous(self, value):
+    def previous(self, previous_oe):
         param = Parameter()
         get_parameter(self._element_id, "previous", param)
-        param.value = DOUBLE(value)
+        param.value = DOUBLE(previous_oe.element_id)
         set_parameter(self._element_id, "previous", param)
         self._previous = self._get_parameter("previous")
 
@@ -409,11 +411,11 @@ class OpticalElement(object):
 class Source(OpticalElement):
     def __init__(self, sigma_x=0, sigma_y=0, sigma_x_div=0, sigma_y_div=0, nrays=0, **kwargs):
         super().__init__(**kwargs)
-        self._sigma_x = sigma_x
-        self._sigma_y = sigma_y
-        self._sigma_x_div = sigma_x_div
-        self._sigma_y_div = sigma_y_div
-        self._nrays = nrays
+        self.sigma_x = sigma_x
+        self.sigma_y = sigma_y
+        self.sigma_x_div = sigma_x_div
+        self.sigma_y_div = sigma_y_div
+        self.nrays = nrays
 
     @property
     def nrays(self):
@@ -484,8 +486,8 @@ class Source(OpticalElement):
 class ToroidalMirror(OpticalElement):
     def __init__(self, minor_curvature=0, major_curvature=0, **kwargs):
         super().__init__(**kwargs)
-        self._major_curvature = major_curvature
-        self._minor_curvature = minor_curvature
+        self.major_curvature = major_curvature
+        self.minor_curvature = minor_curvature
 
     @property
     def minor_curvature(self):
