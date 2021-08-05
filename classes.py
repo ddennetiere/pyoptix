@@ -28,6 +28,8 @@ optix_dictionnary = {
                      "inverseDist2": "inverse_distance2",
                      "recordingWavelength": "recording_wavelength",
                      "lineDensity": "line_density",
+                     "invp": "inverse_p",
+                     "invq": "inverse_q",
                      }
 
 class Bounds(Structure):
@@ -498,6 +500,63 @@ class Source(OpticalElement):
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "sigmaYdiv", param)
         self._sigma_y_div = self._get_parameter("sigmaYdiv")
+
+
+class ConicCylindricalMirror(OpticalElement):
+    """
+    p is defined at coordinate (pcos(theta), -psin(theta))
+    q is defined at coordinate (qcos(theta), qsin(theta))
+    Due to this convention, the cylinder base (directrix) is
+    •an ellipse if p−1*q−1<0
+    •an hyperbola if p−1*q−1<0
+    •a parabola if either p−1=0 or q−1=0
+    •Warning : p−1=q−1 is forbidden and will result as an error at any time.
+
+    """
+    def __init__(self, inverse_p=0, inverse_q=0.1, theta0=0, **kwargs):
+        super().__init__(**kwargs)
+        self.inverse_p = inverse_p
+        self.inverse_q = inverse_q
+        self.theta0 = theta0
+
+    @property
+    def inverse_p(self):
+        self._inverse_p = self._get_parameter("invp")
+        return self._inverse_p
+
+    @inverse_p.setter
+    def inverse_p(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "invp", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "invp", param)
+        self._inverse_p = self._get_parameter("invp")
+
+    @property
+    def inverse_q(self):
+        self._inverse_q = self._get_parameter("invq")
+        return self._inverse_q
+
+    @inverse_q.setter
+    def inverse_q(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "invq", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "invq", param)
+        self._inverse_q = self._get_parameter("invq")
+
+    @property
+    def theta0(self):
+        self._theta0 = self._get_parameter("theta0")
+        return self._theta0
+
+    @theta0.setter
+    def theta0(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "theta0", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "theta0", param)
+        self._theta0 = self._get_parameter("theta0")
 
 
 class CylindricalMirror(OpticalElement):
