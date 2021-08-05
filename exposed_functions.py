@@ -33,7 +33,7 @@ def catch_c_error(function):
         if not ret:
             buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
             optix.GetOptiXLastError(buf, 256)
-            print(function.__name__, "error", buf.value)
+            print(function.__name__, args, kwargs,"error", buf.value)
         else:
             if confirm and confirm_ok:
                 print(function.__name__, "ok")
