@@ -5,6 +5,9 @@ from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
 from exposed_functions import *
 from scipy.constants import degree
 from lxml import etree
+import pandas as pd
+from ui_objects import show, plot_spd
+
 
 # dictionnary for optix to pyoptix attribute import
 optix_dictionnary = {
@@ -116,14 +119,23 @@ class Beamline(object):
         assert chain_name in self._chains.keys()
         self._active_chain = self.chains[chain_name]
 
-    def align(self, from_element):
-        pass
+    def align(self, lambda_align, from_element=None):
+        if from_element is not None:
+            return align(from_element.element_id, lambda_align)
+        else:
+            return align(self.active_chain[0].element_id, lambda_align)
 
-    def radiate(self, from_element):
-        pass
+    def clear_impacts(self):
+        return clear_impacts(self.active_chain[0].element_id)
 
-    def generate(self, n_rays=None):
-        pass
+    def radiate(self, from_element=None):
+        if from_element is not None:
+            return radiate(from_element.element_id)
+        else:
+            return radiate(self.active_chain[0].element_id)
+
+    def generate(self, lambda_radiate):
+        return generate(self.active_chain[0].element_id, lambda_radiate)
 
     def _add_element(self, new_element):
         if new_element not in self._elements:
@@ -310,6 +322,7 @@ class OpticalElement(object):
         description += f"\n\t oriented in roll at {self._phi / degree} deg"
         description += f"\n\t oriented in yaw at {self._psi / degree} deg\n"
         return description
+
 
     def from_element_id(self, element_id, print_all=False):
         hparam = HANDLE(0)
