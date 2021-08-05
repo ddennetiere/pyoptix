@@ -1,4 +1,3 @@
-# coding: utf-8
 Bibliothèque de simulation optique X pour le synchrotron SOLEIL
 ===============================================================
 
