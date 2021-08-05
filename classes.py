@@ -323,6 +323,20 @@ class OpticalElement(object):
         description += f"\n\t oriented in yaw at {self._psi / degree} deg\n"
         return description
 
+    def show_diagram(self, nrays):
+        assert self.recording_mode != RecordingMode.recording_none
+        diagram = Diagram(ndim=5, nreserved=int(nrays))
+        get_spot_diagram(self.element_id, diagram, distance=0)
+        spots = pd.DataFrame(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim)),
+                             columns=("X", "Y", "dX", "dY", "Lambda"))
+        print(spots.head())
+        figs = []
+        figs.append(plot_spd(spots, x_key="X", y_key="Y", light_plot=False, show_map=False))
+        figs.append(plot_spd(spots, x_key="X", y_key="dX", light_plot=False))
+        figs.append(plot_spd(spots, x_key="Y", y_key="dY", light_plot=True))
+
+        for fig in figs:
+            show(fig)
 
     def from_element_id(self, element_id, print_all=False):
         hparam = HANDLE(0)
