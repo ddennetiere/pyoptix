@@ -6,31 +6,31 @@ from exposed_functions import *
 from scipy.constants import degree
 from lxml import etree
 
-
 # dictionnary for optix to pyoptix attribute import
 optix_dictionnary = {
-                     "DX": "d_x",
-                     "DY": "d_y",
-                     "DZ": "d_z",
-                     "Dphi": "d_phi",
-                     "Dpsi": "d_psi",
-                     "Dtheta": "d_theta",
-                     "distance": "distance_from_previous",
-                     "sigmaX": "sigma_x",
-                     "sigmaY": "sigma_y",
-                     "sigmaXdiv": "sigma_x_div",
-                     "sigmaYdiv": "sigma_y_div",
-                     "NRays": "nrays",
-                     "azimuthAngle1": "azimuth_angle1",
-                     "azimuthAngle2": "azimuth_angle2",
-                     "elevationAngle1": "elevation_angle1",
-                     "inverseDist1": "inverse_distance1",
-                     "inverseDist2": "inverse_distance2",
-                     "recordingWavelength": "recording_wavelength",
-                     "lineDensity": "line_density",
-                     "invp": "inverse_p",
-                     "invq": "inverse_q",
-                     }
+    "DX": "d_x",
+    "DY": "d_y",
+    "DZ": "d_z",
+    "Dphi": "d_phi",
+    "Dpsi": "d_psi",
+    "Dtheta": "d_theta",
+    "distance": "distance_from_previous",
+    "sigmaX": "sigma_x",
+    "sigmaY": "sigma_y",
+    "sigmaXdiv": "sigma_x_div",
+    "sigmaYdiv": "sigma_y_div",
+    "NRays": "nrays",
+    "azimuthAngle1": "azimuth_angle1",
+    "azimuthAngle2": "azimuth_angle2",
+    "elevationAngle1": "elevation_angle1",
+    "inverseDist1": "inverse_distance1",
+    "inverseDist2": "inverse_distance2",
+    "recordingWavelength": "recording_wavelength",
+    "lineDensity": "line_density",
+    "invp": "inverse_p",
+    "invq": "inverse_q",
+}
+
 
 class Bounds(Structure):
     _fields_ = [("min", c_double),
@@ -81,11 +81,40 @@ class Diagram(Structure):
         self.spots = cast(p_spots, POINTER(c_double))
 
 
+class BeamlineChainDict(dict):
+    def __setitem__(self, key, value):
+        assert isinstance(value, list)
+        super(BeamlineChainDict, self).__setitem__(key, value)
+
+    def __repr__(self):
+        ret_str = ""
+        for key in self.keys():
+            ret_str += f"Chaîne {key}:\n\t"
+            for oe in self.__getitem__(key):
+                ret_str += f"{oe.name} -> "
+            ret_str += "\n"
+        return ret_str[:-4]
+
+
 class Beamline(object):
     def __init__(self):
         super().__init__()
-        self.elements = []
-        self.chains = []
+        self._elements = []
+        self._chains = BeamlineChainDict({})
+        self._active_chain = None
+
+    @property
+    def chains(self):
+        return self._chains
+
+    @property
+    def active_chain(self):
+        return self._active_chain
+
+    @active_chain.setter
+    def active_chain(self, chain_name):
+        assert chain_name in self._chains.keys()
+        self._active_chain = self.chains[chain_name]
 
     def align(self, from_element):
         pass
@@ -96,38 +125,9 @@ class Beamline(object):
     def generate(self, n_rays=None):
         pass
 
-    def chain(self):
-        for element in self.elements:
-            print(element)
-            if element.next is None:
-                new_chain = True
-                for chain in self.chains:
-                    if chain[0] == element:
-                        new_chain = False
-                if new_chain:
-                    self.chains.append([element])
-                    print("new_chain")
-
-        def get_previous(an_element):
-            for element_i in self.elements:
-                if element_i.next == an_element.name:
-                    return element_i
-
-        for chain in self.chains:
-            previous = 1
-            while previous is not None:
-                previous = get_previous(chain[0])
-                if previous:
-                    chain.insert(0, previous)
-
-    def add_element(self, new_element):
-        if new_element not in self.elements:
-            self.elements.append(new_element)
-        else:
-            print("Warning : element already in beamline")
-        for element in self.elements:
-            if element.name == new_element.next:
-                element.previous = new_element.name
+    def _add_element(self, new_element):
+        if new_element not in self._elements:
+            self._elements.append(new_element)
 
 
 class OpticalElement(object):
@@ -298,7 +298,7 @@ class OpticalElement(object):
     @recording_mode.setter
     def recording_mode(self, value):
         assert value in [RecordingMode.recording_output, RecordingMode.recording_input,
-                                  RecordingMode.recording_none]
+                         RecordingMode.recording_none]
         set_recording(self.element_id, value)
         self._recording_mode = value
 
@@ -306,9 +306,9 @@ class OpticalElement(object):
         description = f"Element {self._name} of class {self.__class__}"
         description += f"\n\t at {self._distance_from_previous} m from {self._previous}"
         description += f"\n\t pointing to {self._next}"
-        description += f"\n\t oriented in pitch at {self._theta/degree} deg (deviation {180-2*self._theta/degree} deg)"
-        description += f"\n\t oriented in roll at {self._phi/degree} deg"
-        description += f"\n\t oriented in yaw at {self._psi/degree} deg"
+        description += f"\n\t oriented in pitch at {self._theta / degree} deg (deviation {180 - 2 * self._theta / degree} deg)"
+        description += f"\n\t oriented in roll at {self._phi / degree} deg"
+        description += f"\n\t oriented in yaw at {self._psi / degree} deg\n"
         return description
 
     def from_element_id(self, element_id, print_all=False):
@@ -323,17 +323,17 @@ class OpticalElement(object):
                 print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
                             f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
             if param_name.value.decode() in optix_dictionnary.keys():
-                self.__dict__["_"+optix_dictionnary[param_name.value.decode()]] = param.value
+                self.__dict__["_" + optix_dictionnary[param_name.value.decode()]] = param.value
             else:
-                self.__dict__["_"+param_name.value.decode()] = param.value
+                self.__dict__["_" + param_name.value.decode()] = param.value
             enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
         if print_all:
             print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
                         f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
         if param_name.value.decode() in optix_dictionnary.keys():
-            self.__dict__["_"+optix_dictionnary[param_name.value.decode()]] = param.value
+            self.__dict__["_" + optix_dictionnary[param_name.value.decode()]] = param.value
         else:
-            self.__dict__["_"+param_name.value.decode()] = param.value
+            self.__dict__["_" + param_name.value.decode()] = param.value
         enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
         next_id = get_next_element(element_id, confirm=False)
         if next_id is not None:
@@ -443,6 +443,7 @@ class ConicCylindricalMirror(OpticalElement):
     •Warning : p−1=q−1 is forbidden and will result as an error at any time.
 
     """
+
     def __init__(self, inverse_p=0, inverse_q=0.1, theta0=0, **kwargs):
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "ConicBaseCylindricalMirror"
