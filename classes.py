@@ -151,9 +151,6 @@ class OpticalElement(object):
         self.d_phi = d_phi
         self.d_psi = d_psi
         self.d_theta = d_theta
-        self.x = x
-        self.y = y
-        self.z = z
         self.d_x = d_x
         self.d_y = d_y
         self.d_z = d_z
@@ -254,84 +251,6 @@ class OpticalElement(object):
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "Dtheta", param)
         self._d_theta = self._get_parameter("Dtheta")
-
-    @property
-    def x(self):
-        self._x = self._get_parameter("x")
-        return self._x
-
-    @x.setter
-    def x(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "x", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "x", param)
-        self._x = self._get_parameter("x")
-
-    @property
-    def y(self):
-        self._y = self._get_parameter("y")
-        return self._y
-
-    @y.setter
-    def y(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "y", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "y", param)
-        self._y = self._get_parameter("y")
-
-    @property
-    def z(self):
-        self._z = self._get_parameter("z")
-        return self._z
-
-    @z.setter
-    def z(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "z", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "z", param)
-        self._z = self._get_parameter("z")
-
-    @property
-    def d_x(self):
-        self._d_x = self._get_parameter("Dx")
-        return self._d_x
-
-    @d_x.setter
-    def d_x(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "Dx", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "Dx", param)
-        self._d_x = self._get_parameter("Dx")
-
-    @property
-    def d_y(self):
-        self._d_y = self._get_parameter("Dy")
-        return self._d_y
-
-    @d_y.setter
-    def d_y(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "Dy", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "Dy", param)
-        self._d_y = self._get_parameter("Dy")
-
-    @property
-    def d_z(self):
-        self._d_z = self._get_parameter("Dz")
-        return self._d_z
-
-    @d_z.setter
-    def d_z(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "Dz", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "Dz", param)
-        self._d_z = self._get_parameter("Dz")
 
     @property
     def distance_from_previous(self):
@@ -514,6 +433,10 @@ class ConicCylindricalMirror(OpticalElement):
 
     """
     def __init__(self, inverse_p=0, inverse_q=0.1, theta0=0, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "ConicBaseCylindricalMirror"
+        else:
+            kwargs["element_type"] = "ConicBaseCylindricalMirror"
         super().__init__(**kwargs)
         self.inverse_p = inverse_p
         self.inverse_q = inverse_q
@@ -561,6 +484,10 @@ class ConicCylindricalMirror(OpticalElement):
 
 class CylindricalMirror(OpticalElement):
     def __init__(self, curvature=0, axis_angle=0, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "CylindricalMirror"
+        else:
+            kwargs["element_type"] = "CylindricalMirror"
         super().__init__(**kwargs)
         self.curvature = curvature
         self.axis_angle = axis_angle
@@ -594,6 +521,10 @@ class CylindricalMirror(OpticalElement):
 
 class ToroidalMirror(OpticalElement):
     def __init__(self, minor_curvature=0, major_curvature=0, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "ToroidalMirror"
+        else:
+            kwargs["element_type"] = "ToroidalMirror"
         super().__init__(**kwargs)
         self.major_curvature = major_curvature
         self.minor_curvature = minor_curvature
@@ -629,6 +560,10 @@ class PlaneHoloGrating(OpticalElement):
     def __init__(self, azimuth_angle1=0, azimuth_angle2=0, elevation_angle1=0, inverse_distance1=np.inf,
                  inverse_distance2=np.inf, order_align=1, order_use=1, recording_wavelength=351.1e-9,
                  line_density=1e6, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "PlaneHoloGrating"
+        else:
+            kwargs["element_type"] = "PlaneHoloGrating"
         super().__init__(**kwargs)
         self.azimuth_angle1 = azimuth_angle1
         self.azimuth_angle2 = azimuth_angle2
