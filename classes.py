@@ -500,6 +500,39 @@ class Source(OpticalElement):
         self._sigma_y_div = self._get_parameter("sigmaYdiv")
 
 
+class CylindricalMirror(OpticalElement):
+    def __init__(self, curvature=0, axis_angle=0, **kwargs):
+        super().__init__(**kwargs)
+        self.curvature = curvature
+        self.axis_angle = axis_angle
+
+    @property
+    def curvature(self):
+        self._curvature = self._get_parameter("curvature")
+        return self._curvature
+
+    @curvature.setter
+    def curvature(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "curvature", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "curvature", param)
+        self._curvature = self._get_parameter("curvature")
+
+    @property
+    def axis_angle(self):
+        self._axis_angle = self._get_parameter("axis_angle")
+        return self._axis_angle
+
+    @axis_angle.setter
+    def axis_angle(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "axis_angle", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "axis_angle", param)
+        self._axis_angle = self._get_parameter("axis_angle")
+
+
 class ToroidalMirror(OpticalElement):
     def __init__(self, minor_curvature=0, major_curvature=0, **kwargs):
         super().__init__(**kwargs)
