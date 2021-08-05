@@ -291,6 +291,17 @@ class OpticalElement(object):
         if next_oe is not None:
             chain_element_by_id(self._element_id, next_oe.element_id)
 
+    @property
+    def recording_mode(self):
+        return self._recording_mode
+
+    @recording_mode.setter
+    def recording_mode(self, value):
+        assert value in [RecordingMode.recording_output, RecordingMode.recording_input,
+                                  RecordingMode.recording_none]
+        set_recording(self.element_id, value)
+        self._recording_mode = value
+
     def __repr__(self):
         description = f"Element {self._name} of class {self.__class__}"
         description += f"\n\t at {self._distance_from_previous} m from {self._previous}"
