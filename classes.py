@@ -103,7 +103,7 @@ class BeamlineChainDict(dict):
         for key in self.keys():
             ret_str += f"Chaîne {key}:\n\t"
             chain = self.__getitem__(key)
-            ret_str += chain.__repr__()
+            ret_str += chain.__repr__()+"\n"
         return ret_str
 
 
@@ -332,8 +332,14 @@ class OpticalElement(object):
 
     def __repr__(self):
         description = f"Element {self._name} of class {self.__class__}"
-        description += f"\n\t at {self._distance_from_previous} m from {self._previous}"
-        description += f"\n\t pointing to {self._next.name}"
+        if self._previous is not None:
+            description += f"\n\t at {self._distance_from_previous} m from {self._previous.name}"
+        else:
+            description += f"\n\t at {self._distance_from_previous} m from None"
+        if self._next is not None:
+            description += f"\n\t pointing to {self._next.name}"
+        else:
+            description += f"\n\t pointing to None"
         description += f"\n\t oriented in pitch at {self._theta / degree} deg " \
                        f"(deviation {180 - 2 * self._theta / degree} deg)"
         description += f"\n\t oriented in roll at {self._phi / degree} deg"
