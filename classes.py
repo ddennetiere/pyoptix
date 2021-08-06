@@ -483,6 +483,24 @@ class Source(OpticalElement):
         self._sigma_y_div = self._get_parameter("sigmaYdiv")
 
 
+class PlaneMirror(OpticalElement):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "PlaneMirror"
+        else:
+            kwargs["element_type"] = "PlaneMirror"
+        super().__init__(**kwargs)
+
+
+class PlaneFilm(OpticalElement):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "PlaneFilm"
+        else:
+            kwargs["element_type"] = "PlaneFilm"
+        super().__init__(**kwargs)
+
+
 class RevolutionQuadricMirror(OpticalElement):
     """
     p is defined at coordinate (pcos(theta), -psin(theta))
@@ -499,7 +517,7 @@ class RevolutionQuadricMirror(OpticalElement):
         if "element_type" in kwargs:
             assert kwargs["element_type"] in ["ConicBaseCylindricalMirror", "RevolutionQuadricMirror"]
         else:
-            kwargs["element_type"] = "ConicBaseCylindricalMirror"
+            kwargs["element_type"] = "RevolutionQuadricMirror"
         super().__init__(**kwargs)
         self.inverse_p = inverse_p
         self.inverse_q = inverse_q
