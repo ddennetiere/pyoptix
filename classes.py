@@ -492,15 +492,6 @@ class PlaneMirror(OpticalElement):
         super().__init__(**kwargs)
 
 
-class PlaneFilm(OpticalElement):
-    def __init__(self, **kwargs):
-        if "element_type" in kwargs:
-            assert kwargs["element_type"] == "PlaneFilm"
-        else:
-            kwargs["element_type"] = "PlaneFilm"
-        super().__init__(**kwargs)
-
-
 class RevolutionQuadricMirror(OpticalElement):
     """
     p is defined at coordinate (pcos(theta), -psin(theta))
@@ -575,7 +566,8 @@ class ConicCylindricalMirror(RevolutionQuadricMirror):
 class SphericalMirror(OpticalElement):
     def __init__(self, curvature=0, **kwargs):
         if "element_type" in kwargs:
-            assert kwargs["element_type"] == "SphericalMirror"
+            assert kwargs["element_type"] in ("SphericalMirror", "SphericalFilm", "SphericalHoloGrating",
+                                              "SphericalPoly1DGrating")
         else:
             kwargs["element_type"] = "SphericalMirror"
         super().__init__(**kwargs)
@@ -598,7 +590,8 @@ class SphericalMirror(OpticalElement):
 class CylindricalMirror(OpticalElement):
     def __init__(self, curvature=0, axis_angle=0, **kwargs):
         if "element_type" in kwargs:
-            assert kwargs["element_type"] == "CylindricalMirror"
+            assert kwargs["element_type"] in ("CylindricalMirror", "CylindricalFilm", "CylindricalHoloGrating",
+                                              "CylindricalPoly1DGrating")
         else:
             kwargs["element_type"] = "CylindricalMirror"
         super().__init__(**kwargs)
@@ -635,7 +628,8 @@ class CylindricalMirror(OpticalElement):
 class ToroidalMirror(OpticalElement):
     def __init__(self, minor_curvature=0, major_curvature=0, **kwargs):
         if "element_type" in kwargs:
-            assert kwargs["element_type"] == "ToroidalMirror"
+            assert kwargs["element_type"] in ("ToroidalMirror", "ToroidalFilm", "ToroidalHoloGrating",
+                                              "ToroidalPoly1DGrating")
         else:
             kwargs["element_type"] = "ToroidalMirror"
         super().__init__(**kwargs)
@@ -669,12 +663,49 @@ class ToroidalMirror(OpticalElement):
         self._major_curvature = self._get_parameter("major_curvature")
 
 
+class PlaneFilm(OpticalElement):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "PlaneFilm"
+        else:
+            kwargs["element_type"] = "PlaneFilm"
+        super().__init__(**kwargs)
+
+
+class SphericalFilm(SphericalMirror):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "SphericalFilm"
+        else:
+            kwargs["element_type"] = "SphericalFilm"
+        super().__init__(**kwargs)
+
+
+class CylindricalFilm(CylindricalMirror):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "CylindricalFilm"
+        else:
+            kwargs["element_type"] = "CylindricalFilm"
+        super().__init__(**kwargs)
+
+
+class ToroidalFilm(ToroidalMirror):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "ToroidalFilm"
+        else:
+            kwargs["element_type"] = "ToroidalFilm"
+        super().__init__(**kwargs)
+
+
 class PlaneHoloGrating(OpticalElement):
     def __init__(self, azimuth_angle1=0, azimuth_angle2=0, elevation_angle1=0, inverse_distance1=np.inf,
                  inverse_distance2=np.inf, order_align=1, order_use=1, recording_wavelength=351.1e-9,
                  line_density=1e6, **kwargs):
         if "element_type" in kwargs:
-            assert kwargs["element_type"] == "PlaneHoloGrating"
+            assert kwargs["element_type"] in ("PlaneHoloGrating", "SphericalHoloGrating", "CylindricalHoloGrating",
+                                              "ToroidalHoloGrating")
         else:
             kwargs["element_type"] = "PlaneHoloGrating"
         super().__init__(**kwargs)
@@ -806,6 +837,33 @@ class PlaneHoloGrating(OpticalElement):
         self._line_density = self._get_parameter("lineDensity")
 
 
+class SphericalHoloGrating(SphericalMirror, PlaneHoloGrating):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "SphericalHoloGrating"
+        else:
+            kwargs["element_type"] = "SphericalHoloGrating"
+        super().__init__(**kwargs)
+
+
+class CylindricalHoloGrating(CylindricalMirror, PlaneHoloGrating):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "CylindricalHoloGrating"
+        else:
+            kwargs["element_type"] = "CylindricalHoloGrating"
+        super().__init__(**kwargs)
+
+
+class ToroidalHoloGrating(ToroidalMirror, PlaneHoloGrating):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "ToroidalHoloGrating"
+        else:
+            kwargs["element_type"] = "ToroidalHoloGrating"
+        super().__init__(**kwargs)
+
+
 class PlaneGrating(PlaneHoloGrating):
     def __init__(self, **kwargs):
         kwargs["inverse_distance1"] = 0
@@ -852,7 +910,8 @@ class PlanePoly1DGrating(OpticalElement):
         if line_density_coeffs is None:
             line_density_coeffs = []
         if "element_type" in kwargs:
-            assert kwargs["element_type"] == "PlanePoly1DGrating"
+            assert kwargs["element_type"] in ("PlanePoly1DGrating", "SphericalPoly1DGrating", "CylindricalPoly1DGrating",
+                                              "ToroidalPoly1DGrating")
         else:
             kwargs["element_type"] = "PlanePoly1DGrating"
         super().__init__(**kwargs)
@@ -902,6 +961,33 @@ class PlanePoly1DGrating(OpticalElement):
             param.value = DOUBLE(value)
             set_parameter(self._element_id, f"lineDensityCoeff_{i}", param)
             self._line_density_coeffs.append(self._get_parameter(f"lineDensityCoeff_{i}"))
+
+
+class SphericalPoly1DGrating(SphericalMirror, PlanePoly1DGrating):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "SphericalPoly1DGrating"
+        else:
+            kwargs["element_type"] = "SphericalPoly1DGrating"
+        super().__init__(**kwargs)
+
+
+class CylindricalPoly1DGrating(CylindricalMirror, PlanePoly1DGrating):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "CylindricalPoly1DGrating"
+        else:
+            kwargs["element_type"] = "CylindricalPoly1DGrating"
+        super().__init__(**kwargs)
+
+
+class ToroidalPoly1DGrating(ToroidalMirror, PlanePoly1DGrating):
+    def __init__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "ToroidalPoly1DGrating"
+        else:
+            kwargs["element_type"] = "ToroidalPoly1DGrating"
+        super().__init__(**kwargs)
 
 
 
