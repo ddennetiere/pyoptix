@@ -829,6 +829,64 @@ class PlaneGrating(PlaneHoloGrating):
             raise Exception("Property 'elevation_angle1' is not settable")
 
 
+class PlanePoly1DGrating(OpticalElement):
+    def __init__(self, degree=1, line_density=1e6, line_density_coeffs=None, **kwargs):
+        if line_density_coeffs is None:
+            line_density_coeffs = []
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "PlanePoly1DGrating"
+        else:
+            kwargs["element_type"] = "PlanePoly1DGrating"
+        super().__init__(**kwargs)
+        self.degree = degree
+        self.line_density = line_density
+        self.line_density_coeffs = line_density_coeffs
+
+    @property
+    def degree(self):
+        self._degree = super().degree
+        return self._degree
+
+    @degree.setter
+    def degree(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "degree", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "degree", param)
+        self._degree = self._get_parameter("degree")
+
+    @property
+    def line_density(self):
+        self._line_density = self._get_parameter("lineDensity")
+        return self._line_density
+
+    @line_density.setter
+    def line_density(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "lineDensity", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "lineDensity", param)
+        self._line_density = self._get_parameter("lineDensity")
+
+    @property
+    def line_density_coeffs(self):
+        self._line_density_coeffs = []
+        for i in range(1, self.degree-1):
+            self._line_density_coeffs.append(self._get_parameter(f"lineDensityCoeff_{i}"))
+        return self._line_density_coeffs
+
+    @line_density_coeffs.setter
+    def line_density_coeffs(self, value):
+        self._line_density_coeffs = []
+        for i in range(1, self.degree-1):
+            param = Parameter()
+            get_parameter(self._element_id, f"lineDensityCoeff_{i}", param)
+            param.value = DOUBLE(value)
+            set_parameter(self._element_id, f"lineDensityCoeff_{i}", param)
+            self._line_density_coeffs.append(self._get_parameter(f"lineDensityCoeff_{i}"))
+
+
+
 def parse_xml(filename):
     tree = etree.parse(filename)
     beamline = Beamline()
