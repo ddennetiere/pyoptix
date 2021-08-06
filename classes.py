@@ -483,7 +483,7 @@ class Source(OpticalElement):
         self._sigma_y_div = self._get_parameter("sigmaYdiv")
 
 
-class ConicCylindricalMirror(OpticalElement):
+class RevolutionQuadricMirror(OpticalElement):
     """
     p is defined at coordinate (pcos(theta), -psin(theta))
     q is defined at coordinate (qcos(theta), qsin(theta))
@@ -497,7 +497,7 @@ class ConicCylindricalMirror(OpticalElement):
 
     def __init__(self, inverse_p=0, inverse_q=0.1, theta0=0, **kwargs):
         if "element_type" in kwargs:
-            assert kwargs["element_type"] == "ConicBaseCylindricalMirror"
+            assert kwargs["element_type"] in ["ConicBaseCylindricalMirror", "RevolutionQuadricMirror"]
         else:
             kwargs["element_type"] = "ConicBaseCylindricalMirror"
         super().__init__(**kwargs)
@@ -543,6 +543,38 @@ class ConicCylindricalMirror(OpticalElement):
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "theta0", param)
         self._theta0 = self._get_parameter("theta0")
+
+
+class ConicCylindricalMirror(RevolutionQuadricMirror):
+    def __int__(self, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "ConicBaseCylindricalMirror"
+        else:
+            kwargs["element_type"] = "ConicBaseCylindricalMirror"
+        super().__init__(**kwargs)
+
+
+class SphericalMirror(OpticalElement):
+    def __init__(self, curvature=0, **kwargs):
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "SphericalMirror"
+        else:
+            kwargs["element_type"] = "SphericalMirror"
+        super().__init__(**kwargs)
+        self.curvature = curvature
+
+    @property
+    def curvature(self):
+        self._curvature = self._get_parameter("curvature")
+        return self._curvature
+
+    @curvature.setter
+    def curvature(self, value):
+        param = Parameter()
+        get_parameter(self._element_id, "curvature", param)
+        param.value = DOUBLE(value)
+        set_parameter(self._element_id, "curvature", param)
+        self._curvature = self._get_parameter("curvature")
 
 
 class CylindricalMirror(OpticalElement):
@@ -754,6 +786,47 @@ class PlaneHoloGrating(OpticalElement):
         param.value = DOUBLE(value)
         set_parameter(self._element_id, "lineDensity", param)
         self._line_density = self._get_parameter("lineDensity")
+
+
+class PlaneGrating(PlaneHoloGrating):
+    def __init__(self, **kwargs):
+        kwargs["inverse_distance1"] = 0
+        kwargs["inverse_distance2"] = 0
+        kwargs["elevation_angle1"] = np.arccos(0.93963)
+        super().__init__(**kwargs)
+        self.inverse_distance1 = 0
+        self.inverse_distance2 = 0
+        self.elevation_angle1 = np.arccos(0.93963)
+
+    @property
+    def inverse_distance1(self):
+        self._inverse_distance1 = super().inverse_distance1
+        return self._inverse_distance1
+
+    @inverse_distance1.setter
+    def inverse_distance1(self, value):
+        if value != 0:
+            raise Exception("Property 'inverse_distance1' is not settable")
+
+    @property
+    def inverse_distance2(self):
+        self._inverse_distance2 = super().inverse_distance2
+        return self._inverse_distance2
+
+    @inverse_distance2.setter
+    def inverse_distance2(self, value):
+        if value != 0:
+            raise Exception("Property 'inverse_distance2' is not settable")
+
+    @property
+    def elevation_angle1(self):
+        self._elevation_angle1 = super().elevation_angle1
+        return self._elevation_angle1
+
+    @elevation_angle1.setter
+    def elevation_angle1(self, value):
+        if value != np.arccos(0.93963):
+            raise Exception("Property 'elevation_angle1' is not settable")
 
 
 def parse_xml(filename):
