@@ -7,9 +7,11 @@ from ctypes import *
 from ctypes import WINFUNCTYPE, Structure, pointer, byref, POINTER, c_char_p, c_void_p, c_double, c_float, \
     create_string_buffer
 import numpy as np
-from classes import Beamline, OpticalElement, Parameter, Diagram, RecordingMode
+# from ..classes import Beamline, OpticalElement, Parameter, Diagram, RecordingMode
+import classes
 from exposed_functions import *
-from ui_objects import scatter_plot_2d, show, plot_spd
+# from ..ui_objects import scatter_plot_2d, show, plot_spd
+import ui_objects
 
 global optix
 
@@ -23,6 +25,9 @@ if __name__ == "__main__":
     parser.add_argument("--test_linkage",
                         help="shows the linkage of the elements through which light will be propagated",
                         action="store_true")
+    parser.add_argument("--test_beamline",
+                        help="Turns the linked beamline into a pyoptix Beamline object",
+                        action="store_true")
     parser.add_argument("--test_add_element", help="adds a screen in the beamline", action="store_true")
     parser.add_argument("--test_radiate", help="runs the raytracing", action="store_true")
     parser.add_argument("--test_spot_diagram",
@@ -35,6 +40,7 @@ if __name__ == "__main__":
     test_parameter = args.test_parameter
     test_edit_parameter = args.test_edit_parameter
     test_linkage = args.test_linkage
+    test_beamline = args.test_beamline
     test_add_element = args.test_add_element
     test_radiate = args.test_radiate
     test_spot_diagram = args.test_spot_diagram
@@ -52,7 +58,7 @@ if __name__ == "__main__":
     elname = create_string_buffer(32, c_char)
     if test_parameter or test_edit_parameter:
         param_name = create_string_buffer(48)
-        param = Parameter()
+        param = classes.Parameter()
     print("#" * 80)
     enumerate_elements(hsys, elemID, elname)
     sourceID = None
@@ -97,7 +103,7 @@ if __name__ == "__main__":
     if test_edit_parameter:
         element_name = "Reseau_1600H"
         print("Paramètres de l'élément", element_name)
-        theta = Parameter()
+        theta = classes.Parameter()
         enumerate_parameters(elements_ID[element_name], hparam, param_name, param, confirm=True)
         while hparam:
             print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
@@ -110,7 +116,7 @@ if __name__ == "__main__":
         print("Imported theta", theta.value)
         theta.value = 0.1
         set_parameter(elements_ID["Reseau_1600H"], "theta", theta)
-        theta2 = Parameter()
+        theta2 = classes.Parameter()
         get_parameter(elements_ID["Reseau_1600H"], "theta", theta2)
         print("New theta", theta2.value)
 
@@ -126,9 +132,13 @@ if __name__ == "__main__":
             next_ID = get_next_element(this_ID, show_return=False, confirm=False)
             this_ID = next_ID
         print("Chained beamline :", linked_beamline)
-        for oe_name in linked_beamline:
-            oe = OpticalElement(element_id=elements_ID[oe_name])
-            print(oe)
+        if test_beamline:
+            Cassiopee = classes.Beamline()
+            Cassiopee.chains["linked_beamline"] = []
+            for oe_name in linked_beamline:
+                oe = classes.OpticalElement(element_id=elements_ID[oe_name])
+                print(oe)
+                Cassiopee.chains["linked_beamline"].append(oe)
 
     if test_add_element:
         elements_ID["screen"] = create_element("PlaneFilm", "screen")
@@ -138,7 +148,7 @@ if __name__ == "__main__":
         chain_element_by_id(elements_ID["f"], elements_ID["screen"])
     if test_spot_diagram:
         assert test_add_element
-        set_recording(elements_ID["screen"], RecordingMode.recording_output)
+        set_recording(elements_ID["screen"], classes.RecordingMode.recording_output)
 
     if test_radiate:
         print(lamda_align)
@@ -148,11 +158,7 @@ if __name__ == "__main__":
         radiate(sourceID)
 
     if test_spot_diagram:
-        assert test_add_element
-        if not test_edit_parameter:
-            nrays2 = Parameter()
-            get_parameter(sourceID, "nRays", nrays2)
-            print("New nrays", nrays2.value)
+        assert test_radiate
 
         # new_distance = Parameter()
         # get_parameter(elements_ID["pupille"], "distance", new_distance)
@@ -160,24 +166,21 @@ if __name__ == "__main__":
         # set_parameter(elements_ID["pupille"], "distance", new_distance)
         # get_parameter(elements_ID["pupille"], "distance", new_distance)
         # print("New distance", new_distance.value)
-        diagram = Diagram(ndim=5, nreserved=int(nrays2.value))
-        get_spot_diagram(elements_ID["screen"], diagram, distance=20)
+        diagram = classes.Diagram(ndim=5, nreserved=int(generated_rays))
+        get_spot_diagram(elements_ID["screen"], diagram, distance=0)
         print(np.ctypeslib.as_array(diagram.min, shape=(diagram.dim,)))
         print(diagram.count)
         import pandas as pd
         spots = pd.DataFrame(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim)),
                              columns=("X", "Y", "dX", "dY", "Lambda"))
-        # import matplotlib.pyplot as plt
-        # plt.scatter(spots["X"], spots["Y"])
-        # plt.show()
         print(spots.head())
         figs = []
-        figs.append(plot_spd(spots, x_key="X", y_key="Y", light_plot=True, show_map=True))
-        figs.append(plot_spd(spots, x_key="X", y_key="dX", light_plot=False))
-        figs.append(plot_spd(spots, x_key="Y", y_key="dY", light_plot=True))
+        figs.append(ui_objects.plot_spd(spots, x_key="X", y_key="Y", light_plot=True, show_map=True))
+        figs.append(ui_objects.plot_spd(spots, x_key="X", y_key="dX", light_plot=False))
+        figs.append(ui_objects.plot_spd(spots, x_key="Y", y_key="dY", light_plot=True))
 
         for fig in figs:
-            show(fig)
+            ui_objects.show(fig)
 
     if test_ID:
         print("ran test_ID")
