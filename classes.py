@@ -340,17 +340,18 @@ class OpticalElement(object):
         description += f"\n\t oriented in yaw at {self._psi / degree} deg\n"
         return description
 
-    def show_diagram(self, nrays):
+    def show_diagram(self, nrays, distance_from_oe=0, light_xy=False, map_xy=False,
+                     light_xxp=False, light_yyp=False, show_first_rays=False):
         assert self.recording_mode != RecordingMode.recording_none
         diagram = Diagram(ndim=5, nreserved=int(nrays))
-        get_spot_diagram(self.element_id, diagram, distance=0)
+        get_spot_diagram(self.element_id, diagram, distance=distance_from_oe)
         spots = pd.DataFrame(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim)),
                              columns=("X", "Y", "dX", "dY", "Lambda"))
-        print(spots.head())
-        figs = []
-        figs.append(plot_spd(spots, x_key="X", y_key="Y", light_plot=False, show_map=False))
-        figs.append(plot_spd(spots, x_key="X", y_key="dX", light_plot=False))
-        figs.append(plot_spd(spots, x_key="Y", y_key="dY", light_plot=True))
+        if show_first_rays:
+            print(spots.head())
+        figs = [plot_spd(spots, x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy),
+                plot_spd(spots, x_key="X", y_key="dX", light_plot=light_xxp),
+                plot_spd(spots, x_key="Y", y_key="dY", light_plot=light_yyp)]
 
         for fig in figs:
             show(fig)
