@@ -2,11 +2,11 @@
 import numpy as np
 from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_int64, create_string_buffer
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
-from exposed_functions import *
+from .exposed_functions import *
 from scipy.constants import degree
 from lxml import etree
 import pandas as pd
-from ui_objects import show, plot_spd
+from .ui_objects import show, plot_spd
 
 
 # dictionnary for optix to pyoptix attribute import
@@ -93,7 +93,8 @@ class BeamlineChainDict(dict):
         ret_str = ""
         for key in self.keys():
             ret_str += f"Chaîne {key}:\n\t"
-            for oe in self.__getitem__(key):
+            chain = self.__getitem__(key)
+            for oe in chain:
                 ret_str += f"{oe.name} -> "
             ret_str += "\n"
         return ret_str[:-4]
@@ -118,6 +119,16 @@ class Beamline(object):
     def active_chain(self, chain_name):
         assert chain_name in self._chains.keys()
         self._active_chain = self.chains[chain_name]
+        for i, oe in enumerate(self._active_chain):
+            try:
+                oe.next = self._active_chain[i + 1]
+            except IndexError:
+                pass
+        ret_str = f"Chaîne {chain_name}:\n\t"
+        for oe in self._active_chain:
+            ret_str += f"{oe.name} -> "
+        ret_str += "\n"
+        print(ret_str[:-3])
 
     def align(self, lambda_align, from_element=None):
         if from_element is not None:
