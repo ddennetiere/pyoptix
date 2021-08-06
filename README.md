@@ -58,11 +58,16 @@ Télécharger la librairie libxml2-2 et linker libxml2.a dans le linker (sans ch
 git clone ssh://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/PyOptiX
 ```
 
-6. Télécharger bokeh
+6. Installer bokeh
 
 ```bash
 conda install bokeh
 ```
 
+7. Installer pandas
+
+```bash
+conda install pandas
+```
 
 
