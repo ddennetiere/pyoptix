@@ -84,20 +84,27 @@ class Diagram(Structure):
         self.spots = cast(p_spots, POINTER(c_double))
 
 
+class ChainList(list):
+    def __repr__(self):
+        ret_str = ''
+        for oe in self:
+            ret_str += f"{oe.name} -> "
+        ret_str += "\n"
+        return ret_str[:-4]
+
+
 class BeamlineChainDict(dict):
     def __setitem__(self, key, value):
         assert isinstance(value, list)
-        super(BeamlineChainDict, self).__setitem__(key, value)
+        super(BeamlineChainDict, self).__setitem__(key, ChainList(value))
 
     def __repr__(self):
         ret_str = ""
         for key in self.keys():
             ret_str += f"Chaîne {key}:\n\t"
             chain = self.__getitem__(key)
-            for oe in chain:
-                ret_str += f"{oe.name} -> "
-            ret_str += "\n"
-        return ret_str[:-4]
+            ret_str += chain.__repr__()
+        return ret_str
 
 
 class Beamline(object):
@@ -125,10 +132,8 @@ class Beamline(object):
             except IndexError:
                 pass
         ret_str = f"Chaîne {chain_name}:\n\t"
-        for oe in self._active_chain:
-            ret_str += f"{oe.name} -> "
-        ret_str += "\n"
-        print(ret_str[:-3])
+        ret_str += self._active_chain.__repr__()
+        print(ret_str)
 
     def align(self, lambda_align, from_element=None):
         if from_element is not None:
