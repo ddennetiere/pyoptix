@@ -333,8 +333,9 @@ class OpticalElement(object):
     def __repr__(self):
         description = f"Element {self._name} of class {self.__class__}"
         description += f"\n\t at {self._distance_from_previous} m from {self._previous}"
-        description += f"\n\t pointing to {self._next}"
-        description += f"\n\t oriented in pitch at {self._theta / degree} deg (deviation {180 - 2 * self._theta / degree} deg)"
+        description += f"\n\t pointing to {self._next.name}"
+        description += f"\n\t oriented in pitch at {self._theta / degree} deg " \
+                       f"(deviation {180 - 2 * self._theta / degree} deg)"
         description += f"\n\t oriented in roll at {self._phi / degree} deg"
         description += f"\n\t oriented in yaw at {self._psi / degree} deg\n"
         return description
