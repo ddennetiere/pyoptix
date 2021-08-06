@@ -295,7 +295,6 @@ class OpticalElement(object):
 
     @property
     def previous(self):
-        self._previous = self._get_parameter("previous")
         return self._previous
 
     @previous.setter
@@ -305,7 +304,7 @@ class OpticalElement(object):
             get_parameter(self._element_id, "previous", param)
             param.value = DOUBLE(previous_oe.element_id)
             set_parameter(self._element_id, "previous", param)
-            self._previous = self._get_parameter("previous")
+            self._previous = previous_oe
         else:
             self._previous = None
 
@@ -318,6 +317,7 @@ class OpticalElement(object):
         self._next = next_oe
         if next_oe is not None:
             chain_element_by_id(self._element_id, next_oe.element_id)
+            next_oe.previous = self
 
     @property
     def recording_mode(self):
