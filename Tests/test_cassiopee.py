@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
-import ctypes, os
-# from ctypes import cdll, windll
+import os
 import sys
-from ctypes.wintypes import *
-from ctypes import *
-from ctypes import WINFUNCTYPE, Structure, pointer, byref, POINTER, c_char_p, c_void_p, c_double, c_float, \
-    create_string_buffer
+from ctypes import create_string_buffer, c_char
+sys.path.append(os.path.abspath("../.."))
+print(sys.path)
 import numpy as np
-# from ..classes import Beamline, OpticalElement, Parameter, Diagram, RecordingMode
 import classes
 from exposed_functions import *
-# from ..ui_objects import scatter_plot_2d, show, plot_spd
 import ui_objects
 
 global optix

@@ -2,11 +2,13 @@
 import numpy as np
 from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_int64, create_string_buffer
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
-from .exposed_functions import *
+from pyoptix.exposed_functions import *
+# import pyoptix.exposed_functions
 from scipy.constants import degree
 from lxml import etree
 import pandas as pd
-from .ui_objects import show, plot_spd
+from pyoptix.ui_objects import show, plot_spd
+# import pyoptix.ui_objects
 
 
 # dictionnary for optix to pyoptix attribute import
