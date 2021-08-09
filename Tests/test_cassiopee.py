@@ -5,9 +5,9 @@ from ctypes import create_string_buffer, c_char
 sys.path.append(os.path.abspath("../.."))
 print(sys.path)
 import numpy as np
-import classes
-from exposed_functions import *
-import ui_objects
+import pyoptix.classes as classes
+from pyoptix.exposed_functions import *
+import pyoptix.ui_objects as ui_objects
 
 global optix
 
