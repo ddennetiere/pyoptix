@@ -2,13 +2,14 @@
 import numpy as np
 from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_int64, create_string_buffer
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
-from pyoptix.exposed_functions import *
-# import pyoptix.exposed_functions
+from pyoptix.exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
+                                       get_element_name, set_recording, get_next_element, get_previous_element,
+                                       get_spot_diagram, chain_element_by_id, create_element, clear_impacts)
 from scipy.constants import degree
 from lxml import etree
 import pandas as pd
-from pyoptix.ui_objects import show, plot_spd
-# import pyoptix.ui_objects
+from pyoptix.ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet
+from numpy import pi
 
 
 # dictionnary for optix to pyoptix attribute import
@@ -159,6 +160,99 @@ class Beamline(object):
         if new_element not in self._elements:
             self._elements.append(new_element)
 
+    def draw_active_chain(self):
+        def rotate(x, y, theta=0):
+            xp = x * np.cos(theta) + y * np.sin(theta)
+            yp = -x * np.sin(theta) + y * np.cos(theta)
+            return xp, yp
+
+        def make_box(oe_type="film", center=(0, 0), angle=0, figure=None, direction="straight", height=10, color="blue"):
+            if oe_type == "film":
+                width = 1
+            else:
+                width = 10
+            direction_offset = 0
+            if direction == "up":
+                direction_offset = -height / 2
+            if direction == "down":
+                direction_offset = height / 2
+
+            x1, x2 = -width / 2, -width / 2
+            x3, x4 = width / 2, width / 2
+            y2, y3 = -height / 2 + direction_offset, -height / 2 + direction_offset
+            y1, y4 = height / 2 + direction_offset, height / 2 + direction_offset
+            x1, y1 = rotate(x1, y1, angle)
+            x2, y2 = rotate(x2, y2, angle)
+            x3, y3 = rotate(x3, y3, angle)
+            x4, y4 = rotate(x4, y4, angle)
+            polygon = PolyAnnotation(
+                fill_color=color,
+                fill_alpha=0.3,
+                xs=[x1 + center[0], x2 + center[0], x3 + center[0], x4 + center[0]],
+                ys=[y1 + center[1], y2 + center[1], y3 + center[1], y4 + center[1]],
+            )
+            figure.add_layout(polygon)
+
+        print(self.active_chain)
+        total_phi = 0
+        total_theta_side = 0
+        total_theta_top = 0
+        top_points = [(0, 0)]
+        side_points = [(0, +50)]
+        length = 25
+        p = figure()
+        for oe in self.active_chain:
+            total_phi += oe.phi
+            if oe.theta == 0:
+                make_box(oe_type="film", center=top_points[-1], angle=-total_theta_top * pi / 180, figure=p,
+                         direction="straight", height=10)
+                make_box(oe_type="film", center=side_points[-1], angle=-total_theta_side * pi / 180, figure=p,
+                         direction="straight", height=10)
+            elif abs(abs(total_phi) % pi) < 1e-5:
+                if abs(total_phi % (2 * pi) - pi) < 1e-5:
+                    make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side - 15) * pi / 180, figure=p,
+                             direction="down", height=10)
+                    total_theta_side -= 30
+                else:
+                    make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side + 15) * pi / 180, figure=p,
+                             direction="up", height=10)
+                    total_theta_side = 30
+                make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top) * pi / 180, figure=p,
+                         direction="straight", height=10)
+            elif abs(abs(total_phi) % (pi / 2)) < 1e-5:
+                if abs(total_phi % (pi * 2) - pi / 2) < 1e-5:
+                    make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top + 15) * pi / 180, figure=p,
+                             direction="up", height=10)
+                    total_theta_top += 30
+                else:
+                    make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top - 15) * pi / 180, figure=p,
+                             direction="down", height=10)
+                    total_theta_top -= 30
+                make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side) * pi / 180, figure=p,
+                         direction="straight", height=10)
+            else:
+                raise Exception("unable to parse oe", oe.name)
+            top_points.append((top_points[-1][0] + length,
+                               top_points[-1][1] + length * np.tan(total_theta_top * pi / 180)))
+            side_points.append((side_points[-1][0] + length,
+                                side_points[-1][1] + length * np.tan(total_theta_side * pi / 180)))
+        side_points = np.array(side_points)
+        top_points = np.array(top_points)
+        source_top = ColumnDataSource(data=dict(X=top_points[:-1, 0],
+                                      Y=top_points[:-1, 1],
+                                      names=[element.name for element in self.active_chain]))
+        source_side = ColumnDataSource(data=dict(X=side_points[:-1, 0],
+                                       Y=side_points[:-1, 1],
+                                       names=[element.name for element in self.active_chain]))
+        p.line(side_points[:-1, 0], side_points[:-1, 1], color="red", legend_label="side view")
+        p.line(top_points[:-1, 0], top_points[:-1, 1], color="blue", legend_label="top view")
+        labels_top = LabelSet(x='X', y='Y', text='names', angle=30,
+                          x_offset=0, y_offset=-15, source=source_top, render_mode='canvas')
+        labels_side = LabelSet(x='X', y='Y', text='names', angle=-30,
+                          x_offset=0, y_offset=15, source=source_side, render_mode='canvas')
+        p.add_layout(labels_top)
+        p.add_layout(labels_side)
+        show(p)
 
 class OpticalElement(object):
     def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0, x=0, y=0, z=0,

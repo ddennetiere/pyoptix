@@ -9,6 +9,8 @@ from bokeh.models import BoxSelectTool, LassoSelectTool, Spacer, Label
 from bokeh.layouts import row, column
 from bokeh.util.hex import hexbin
 from bokeh.transform import linear_cmap
+from bokeh.models import PolyAnnotation, ColumnDataSource, LabelSet
+
 
 
 # Definition des fonctions d'affichage
