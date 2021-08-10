@@ -396,10 +396,7 @@ class OpticalElement(object):
     @previous.setter
     def previous(self, previous_oe):
         if previous_oe is not None:
-            param = Parameter()
-            get_parameter(self._element_id, "previous", param)
-            param.value = DOUBLE(previous_oe.element_id)
-            set_parameter(self._element_id, "previous", param)
+            chain_element_by_id(previous_oe.element_id, self._element_id)
             self._previous = previous_oe
         else:
             self._previous = None
