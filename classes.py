@@ -287,6 +287,30 @@ class OpticalElement(object):
         get_parameter(self._element_id, param_name, param)
         return param.value
 
+    def _set_parameter(self, param_name, value):
+        param = Parameter()
+        get_parameter(self._element_id, param_name, param)
+        if isinstance(value, dict):
+            for key in value.keys():
+                assert key in ("value", "bounds", "multiplier", "type", "group", "flags")
+                if key in ("value", "multiplier"):
+                    param.__dict__[key] = DOUBLE(value[key])
+                elif key in ("type", "group", "flags"):
+                    param.__dict__[key] = INT(value[key])
+                else:
+                    bounds = Bounds()
+                    bounds.min = DOUBLE(value[key][0])
+                    bounds.max = DOUBLE(value[key][1])
+                    param.__dict__[key] = bounds
+        else:
+            try:
+                value = float(value)
+                param.value = DOUBLE(value)
+            except TypeError:
+                raise AttributeError("value of parameter must be castable in a float or a dictionnary")
+        set_parameter(self._element_id, param_name, param)
+        return self._get_parameter(param_name)
+
     @property
     def element_id(self):
         return self._element_id
