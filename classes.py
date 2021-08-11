@@ -329,11 +329,7 @@ class OpticalElement(object):
 
     @phi.setter
     def phi(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "phi", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "phi", param)
-        self._phi = self._get_parameter("phi")
+        self._phi = self._set_parameter("phi", value)
 
     @property
     def psi(self):
@@ -342,11 +338,7 @@ class OpticalElement(object):
 
     @psi.setter
     def psi(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "psi", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "psi", param)
-        self._psi = self._get_parameter("psi")
+        self._psi = self._set_parameter("psi", value)
 
     @property
     def theta(self):
@@ -355,11 +347,7 @@ class OpticalElement(object):
 
     @theta.setter
     def theta(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "theta", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "theta", param)
-        self._theta = self._get_parameter("theta")
+        self._theta = self._set_parameter("theta", value)
 
     @property
     def d_phi(self):
@@ -368,11 +356,7 @@ class OpticalElement(object):
 
     @d_phi.setter
     def d_phi(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "Dphi", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "Dphi", param)
-        self._d_phi = self._get_parameter("Dphi")
+        self._d_phi = self._set_parameter("Dphi", value)
 
     @property
     def d_psi(self):
@@ -381,11 +365,7 @@ class OpticalElement(object):
 
     @d_psi.setter
     def d_psi(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "Dpsi", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "Dpsi", param)
-        self._d_psi = self._get_parameter("Dpsi")
+        self._d_psi = self._set_parameter("Dpsi", value)
 
     @property
     def d_theta(self):
@@ -394,11 +374,7 @@ class OpticalElement(object):
 
     @d_theta.setter
     def d_theta(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "Dtheta", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "Dtheta", param)
-        self._d_theta = self._get_parameter("Dtheta")
+        self._d_theta = self._set_parameter("Dtheta", value)
 
     @property
     def distance_from_previous(self):
@@ -407,11 +383,7 @@ class OpticalElement(object):
 
     @distance_from_previous.setter
     def distance_from_previous(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "distance", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "distance", param)
-        self._distance_from_previous = self._get_parameter("distance")
+        self._distance_from_previous = self._set_parameter("distance", value)
 
     @property
     def previous(self):
@@ -541,11 +513,7 @@ class Source(OpticalElement):
 
     @nrays.setter
     def nrays(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "nRays", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "nRays", param)
-        self._nrays = self._get_parameter("nRays")
+        self._nrays = self._set_parameter("nRays", value)
 
     @property
     def sigma_x(self):
@@ -554,11 +522,7 @@ class Source(OpticalElement):
 
     @sigma_x.setter
     def sigma_x(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "sigmaX", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "sigmaX", param)
-        self._sigma_x = self._get_parameter("sigmaX")
+        self._sigma_x = self._set_parameter("sigmaX", value)
 
     @property
     def sigma_y(self):
@@ -567,11 +531,7 @@ class Source(OpticalElement):
 
     @sigma_y.setter
     def sigma_y(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "sigmaY", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "sigmaY", param)
-        self._sigma_y = self._get_parameter("sigmaY")
+        self._sigma_y = self._set_parameter("sigmaY", value)
 
     @property
     def sigma_x_div(self):
@@ -580,11 +540,7 @@ class Source(OpticalElement):
 
     @sigma_x_div.setter
     def sigma_x_div(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "sigmaXdiv", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "sigmaXdiv", param)
-        self._sigma_x_div = self._get_parameter("sigmaXdiv")
+        self._sigma_x_div = self._set_parameter("sigmaXdiv", value)
 
     @property
     def sigma_y_div(self):
@@ -593,11 +549,7 @@ class Source(OpticalElement):
 
     @sigma_y_div.setter
     def sigma_y_div(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "sigmaYdiv", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "sigmaYdiv", param)
-        self._sigma_y_div = self._get_parameter("sigmaYdiv")
+        self._sigma_y_div = self._set_parameter("sigmaYdiv", value)
 
 
 class PlaneMirror(OpticalElement):
@@ -638,11 +590,7 @@ class RevolutionQuadricMirror(OpticalElement):
 
     @inverse_p.setter
     def inverse_p(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "invp", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "invp", param)
-        self._inverse_p = self._get_parameter("invp")
+        self._inverse_p = self._set_parameter("invp", value)
 
     @property
     def inverse_q(self):
@@ -651,11 +599,7 @@ class RevolutionQuadricMirror(OpticalElement):
 
     @inverse_q.setter
     def inverse_q(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "invq", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "invq", param)
-        self._inverse_q = self._get_parameter("invq")
+        self._inverse_q = self._set_parameter("invq", value)
 
     @property
     def theta0(self):
@@ -664,11 +608,7 @@ class RevolutionQuadricMirror(OpticalElement):
 
     @theta0.setter
     def theta0(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "theta0", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "theta0", param)
-        self._theta0 = self._get_parameter("theta0")
+        self._theta0 = self._set_parameter("theta0", value)
 
 
 class ConicCylindricalMirror(RevolutionQuadricMirror):
@@ -697,11 +637,7 @@ class SphericalMirror(OpticalElement):
 
     @curvature.setter
     def curvature(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "curvature", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "curvature", param)
-        self._curvature = self._get_parameter("curvature")
+        self._curvature = self._set_parameter("curvature", value)
 
 
 class CylindricalMirror(OpticalElement):
@@ -722,11 +658,7 @@ class CylindricalMirror(OpticalElement):
 
     @curvature.setter
     def curvature(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "curvature", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "curvature", param)
-        self._curvature = self._get_parameter("curvature")
+        self._curvature = self._set_parameter("curvature", value)
 
     @property
     def axis_angle(self):
@@ -735,11 +667,7 @@ class CylindricalMirror(OpticalElement):
 
     @axis_angle.setter
     def axis_angle(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "axis_angle", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "axis_angle", param)
-        self._axis_angle = self._get_parameter("axis_angle")
+        self._axis_angle = self._set_parameter("axis_angle", value)
 
 
 class ToroidalMirror(OpticalElement):
@@ -760,11 +688,7 @@ class ToroidalMirror(OpticalElement):
 
     @minor_curvature.setter
     def minor_curvature(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "minor_curvature", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "minor_curvature", param)
-        self._minor_curvature = self._get_parameter("minor_curvature")
+        self._minor_curvature = self._set_parameter("minor_curvature", value)
 
     @property
     def major_curvature(self):
@@ -773,11 +697,7 @@ class ToroidalMirror(OpticalElement):
 
     @major_curvature.setter
     def major_curvature(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "major_curvature", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "major_curvature", param)
-        self._major_curvature = self._get_parameter("major_curvature")
+        self._major_curvature = self._set_parameter("major_curvature", value)
 
 
 class PlaneFilm(OpticalElement):
@@ -843,11 +763,7 @@ class PlaneHoloGrating(OpticalElement):
 
     @azimuth_angle1.setter
     def azimuth_angle1(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "azimuthAngle1", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "azimuthAngle1", param)
-        self._azimuth_angle1 = self._get_parameter("azimuthAngle1")
+        self._azimuth_angle1 = self._set_parameter("azimuthAngle1", value)
 
     @property
     def azimuth_angle2(self):
@@ -856,11 +772,7 @@ class PlaneHoloGrating(OpticalElement):
 
     @azimuth_angle2.setter
     def azimuth_angle2(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "azimuthAngle2", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "azimuthAngle2", param)
-        self._azimuth_angle2 = self._get_parameter("azimuthAngle2")
+        self._azimuth_angle2 = self._set_parameter("azimuthAngle2", value)
 
     @property
     def elevation_angle1(self):
@@ -869,11 +781,7 @@ class PlaneHoloGrating(OpticalElement):
 
     @elevation_angle1.setter
     def elevation_angle1(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "elevationAngle1", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "elevationAngle1", param)
-        self._elevation_angle1 = self._get_parameter("elevationAngle1")
+        self._elevation_angle1 = self._set_parameter("elevationAngle1", value)
 
     @property
     def inverse_distance1(self):
@@ -882,11 +790,7 @@ class PlaneHoloGrating(OpticalElement):
 
     @inverse_distance1.setter
     def inverse_distance1(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "inverseDist1", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "inverseDist1", param)
-        self._inverse_distance1 = self._get_parameter("inverseDist1")
+        self._inverse_distance1 = self._set_parameter("inverseDist1", value)
 
     @property
     def inverse_distance2(self):
@@ -895,11 +799,7 @@ class PlaneHoloGrating(OpticalElement):
 
     @inverse_distance2.setter
     def inverse_distance2(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "inverseDist2", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "inverseDist2", param)
-        self._inverse_distance2 = self._get_parameter("inverseDist2")
+        self._inverse_distance2 = self._set_parameter("inverseDist2", value)
 
     @property
     def order_align(self):
@@ -908,11 +808,7 @@ class PlaneHoloGrating(OpticalElement):
 
     @order_align.setter
     def order_align(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "order_align", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "order_align", param)
-        self._order_align = self._get_parameter("order_align")
+        self._order_align = self._set_parameter("order_align", value)
 
     @property
     def order_use(self):
@@ -921,11 +817,7 @@ class PlaneHoloGrating(OpticalElement):
 
     @order_use.setter
     def order_use(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "order_use", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "order_use", param)
-        self._order_use = self._get_parameter("order_use")
+        self._order_use = self._set_parameter("order_use", value)
 
     @property
     def recording_wavelength(self):
@@ -934,11 +826,7 @@ class PlaneHoloGrating(OpticalElement):
 
     @recording_wavelength.setter
     def recording_wavelength(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "recordingWavelength", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "recordingWavelength", param)
-        self._recording_wavelength = self._get_parameter("recordingWavelength")
+        self._recording_wavelength = self._set_parameter("recordingWavelength", value)
 
     @property
     def line_density(self):
@@ -947,11 +835,7 @@ class PlaneHoloGrating(OpticalElement):
 
     @line_density.setter
     def line_density(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "lineDensity", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "lineDensity", param)
-        self._line_density = self._get_parameter("lineDensity")
+        self._line_density = self._set_parameter("lineDensity", value)
 
 
 class SphericalHoloGrating(SphericalMirror, PlaneHoloGrating):
@@ -1043,11 +927,7 @@ class PlanePoly1DGrating(OpticalElement):
 
     @degree.setter
     def degree(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "degree", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "degree", param)
-        self._degree = self._get_parameter("degree")
+        self._degree = self._set_parameter("degree", value)
 
     @property
     def line_density(self):
@@ -1056,11 +936,7 @@ class PlanePoly1DGrating(OpticalElement):
 
     @line_density.setter
     def line_density(self, value):
-        param = Parameter()
-        get_parameter(self._element_id, "lineDensity", param)
-        param.value = DOUBLE(value)
-        set_parameter(self._element_id, "lineDensity", param)
-        self._line_density = self._get_parameter("lineDensity")
+        self._line_density = self._set_parameter("lineDensity", value)
 
     @property
     def line_density_coeffs(self):
@@ -1072,12 +948,9 @@ class PlanePoly1DGrating(OpticalElement):
     @line_density_coeffs.setter
     def line_density_coeffs(self, value):
         self._line_density_coeffs = []
+        assert isinstance(value, list)
         for i in range(1, self.degree-1):
-            param = Parameter()
-            get_parameter(self._element_id, f"lineDensityCoeff_{i}", param)
-            param.value = DOUBLE(value)
-            set_parameter(self._element_id, f"lineDensityCoeff_{i}", param)
-            self._line_density_coeffs.append(self._get_parameter(f"lineDensityCoeff_{i}"))
+            self._line_density_coeffs.append(self._set_parameter(f"lineDensityCoeff_{i}", value[i]))
 
 
 class SphericalPoly1DGrating(SphericalMirror, PlanePoly1DGrating):
