@@ -11,7 +11,6 @@ import pandas as pd
 from pyoptix.ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet
 from numpy import pi
 
-
 # dictionnary for optix to pyoptix attribute import
 optix_dictionnary = {
     "DX": "d_x",
@@ -39,11 +38,18 @@ optix_dictionnary = {
 
 
 class Bounds(Structure):
+    """
+    C structure to be used in optix parameters
+    """
     _fields_ = [("min", c_double),
                 ("max", c_double)]
 
 
 class Parameter(Structure):
+    """
+    C structure defining modifiable fields of optix optical element parameters. Note bounds type is Bounds. See Bounds
+    docstring.
+    """
     _fields_ = [("value", c_double),
                 ("bounds", Bounds),
                 ("multiplier", c_double),
@@ -60,6 +66,9 @@ class RecordingMode(object):
 
 
 class Diagram(Structure):
+    """
+    C structure for accessing optix spot diagrams
+    """
     _fields_ = [("dim", c_int),
                 ("reserved", c_int),
                 ("count", c_int),
@@ -88,6 +97,10 @@ class Diagram(Structure):
 
 
 class ChainList(list):
+    """
+    Classe inheriting list allowing clear and concise text prints of beamlines
+    """
+
     def __repr__(self):
         ret_str = ''
         for oe in self:
@@ -97,6 +110,11 @@ class ChainList(list):
 
 
 class BeamlineChainDict(dict):
+    """
+    Class inheriting from dict for holding and representing all possible optical elements chains in a beamline.
+    Allows for convenient commutations between chains.
+    """
+
     def __setitem__(self, key, value):
         assert isinstance(value, list)
         super(BeamlineChainDict, self).__setitem__(key, ChainList(value))
@@ -106,11 +124,15 @@ class BeamlineChainDict(dict):
         for key in self.keys():
             ret_str += f"Chaîne {key}:\n\t"
             chain = self.__getitem__(key)
-            ret_str += chain.__repr__()+"\n"
+            ret_str += chain.__repr__() + "\n"
         return ret_str
 
 
 class Beamline(object):
+    """
+    Class for describing a beamline in optix
+    """
+
     def __init__(self):
         super().__init__()
         self._elements = []
@@ -119,14 +141,26 @@ class Beamline(object):
 
     @property
     def chains(self):
+        """
+        :return: all the beamline chains as BeamlineChainDict
+        """
         return self._chains
 
     @property
     def active_chain(self):
+        """
+        :return: the chain along which rays will be propagated
+        """
         return self._active_chain
 
     @active_chain.setter
     def active_chain(self, chain_name):
+        """
+        Sets the chain whose key is `chain_name` as the active chain and links all optical elements accordingly
+        :param chain_name: name of the chain to become active
+        :type chain_name: str
+        :return: None
+        """
         assert chain_name in self._chains.keys()
         self._active_chain = self.chains[chain_name]
         for i, oe in enumerate(self._active_chain):
@@ -134,26 +168,52 @@ class Beamline(object):
                 oe.next = self._active_chain[i + 1]
             except IndexError:
                 pass
+            if i:
+                oe.previous = self._active_chain[i - 1]
         ret_str = f"Chaîne {chain_name}:\n\t"
         ret_str += self._active_chain.__repr__()
         print(ret_str)
 
     def align(self, lambda_align, from_element=None):
+        """
+        Computes the absolute positions of the optics using the optics parameters. To be called before radiate.
+        :param lambda_align: Wavelength to be used for coordinate calculations in m. Can be different from actual
+        radiated wavelength
+        :type lambda_align: float
+        :param from_element: Source element from which to compute the coordinates
+        :type from_element: OpticalElement or inherited
+        :return: code result from relative optix function
+        """
         if from_element is not None:
             return align(from_element.element_id, lambda_align)
         else:
             return align(self.active_chain[0].element_id, lambda_align)
 
     def clear_impacts(self):
+        """
+        Removes any impact on the spot diagrams
+        :return: code result from the optix function
+        """
         return clear_impacts(self.active_chain[0].element_id)
 
     def radiate(self, from_element=None):
+        """
+        Propagates rays from a source element
+        :param from_element: Source element from which to propagate rays
+        :type from_element: Source element or inherited
+        :return:
+        """
         if from_element is not None:
             return radiate(from_element.element_id)
         else:
             return radiate(self.active_chain[0].element_id)
 
     def generate(self, lambda_radiate):
+        """
+        Generates rays at `lambda_radiate` wavelength
+        :param lambda_radiate: Wavelength of the rays in m
+        :return:
+        """
         return generate(self.active_chain[0].element_id, lambda_radiate)
 
     def _add_element(self, new_element):
@@ -161,12 +221,17 @@ class Beamline(object):
             self._elements.append(new_element)
 
     def draw_active_chain(self):
+        """
+        Draws a *not to scale* diagram of the beamline top and side views for debug purposes
+        :return: None
+        """
         def rotate(x, y, theta=0):
             xp = x * np.cos(theta) + y * np.sin(theta)
             yp = -x * np.sin(theta) + y * np.cos(theta)
             return xp, yp
 
-        def make_box(oe_type="film", center=(0, 0), angle=0, figure=None, direction="straight", height=10, color="blue"):
+        def make_box(oe_type="film", center=(0, 0), angle=0, figure=None, direction="straight", height=10,
+                     color="blue"):
             if oe_type == "film":
                 width = 1
             else:
@@ -210,25 +275,25 @@ class Beamline(object):
                          direction="straight", height=10)
             elif abs(abs(total_phi) % pi) < 1e-5:
                 if abs(total_phi % (2 * pi) - pi) < 1e-5:
-                    make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side - 15) * pi / 180, figure=p,
-                             direction="down", height=10)
+                    make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side - 15) * pi / 180,
+                             figure=p, direction="down", height=10)
                     total_theta_side -= 30
                 else:
-                    make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side + 15) * pi / 180, figure=p,
-                             direction="up", height=10)
+                    make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side + 15) * pi / 180,
+                             figure=p, direction="up", height=10)
                     total_theta_side = 30
-                make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top) * pi / 180, figure=p,
+                make_box(oe_type="mirror", center=top_points[-1], angle=-total_theta_top * pi / 180, figure=p,
                          direction="straight", height=10)
             elif abs(abs(total_phi) % (pi / 2)) < 1e-5:
                 if abs(total_phi % (pi * 2) - pi / 2) < 1e-5:
-                    make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top + 15) * pi / 180, figure=p,
-                             direction="up", height=10)
+                    make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top + 15) * pi / 180,
+                             figure=p, direction="up", height=10)
                     total_theta_top += 30
                 else:
-                    make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top - 15) * pi / 180, figure=p,
-                             direction="down", height=10)
+                    make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top - 15) * pi / 180,
+                             figure=p, direction="down", height=10)
                     total_theta_top -= 30
-                make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side) * pi / 180, figure=p,
+                make_box(oe_type="mirror", center=side_points[-1], angle=-total_theta_side * pi / 180, figure=p,
                          direction="straight", height=10)
             else:
                 raise Exception("unable to parse oe", oe.name)
@@ -239,26 +304,82 @@ class Beamline(object):
         side_points = np.array(side_points)
         top_points = np.array(top_points)
         source_top = ColumnDataSource(data=dict(X=top_points[:-1, 0],
-                                      Y=top_points[:-1, 1],
-                                      names=[element.name for element in self.active_chain]))
+                                                Y=top_points[:-1, 1],
+                                                names=[element.name for element in self.active_chain]))
         source_side = ColumnDataSource(data=dict(X=side_points[:-1, 0],
-                                       Y=side_points[:-1, 1],
-                                       names=[element.name for element in self.active_chain]))
+                                                 Y=side_points[:-1, 1],
+                                                 names=[element.name for element in self.active_chain]))
         p.line(side_points[:-1, 0], side_points[:-1, 1], color="red", legend_label="side view")
         p.line(top_points[:-1, 0], top_points[:-1, 1], color="blue", legend_label="top view")
         labels_top = LabelSet(x='X', y='Y', text='names', angle=30,
-                          x_offset=0, y_offset=-15, source=source_top, render_mode='canvas')
+                              x_offset=0, y_offset=-15, source=source_top, render_mode='canvas')
         labels_side = LabelSet(x='X', y='Y', text='names', angle=-30,
-                          x_offset=0, y_offset=15, source=source_side, render_mode='canvas')
+                               x_offset=0, y_offset=15, source=source_side, render_mode='canvas')
         p.add_layout(labels_top)
         p.add_layout(labels_side)
         show(p)
 
+
 class OpticalElement(object):
-    def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0, x=0, y=0, z=0,
-                 d_x=0, d_y=0, d_z=0, next=None, previous=None, distance_from_previous=0, element_id=None,
+    """
+    Base class for all pyoptix optical element
+    """
+    def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0,
+                 d_x=0, d_y=0, d_z=0, next_element=None, previous=None, distance_from_previous=0, element_id=None,
                  element_type=""):
+        """
+        Constructor for all optical elements. Parameters can be set in constructor or at a later time.
+
+        Underlying OpticalElement parameters are complex c structure for optimization ond different magic handling.
+        See class Parameter docstring.
+        Two methods of setting parameters are provided: implicit and explicit. Implicit method
+        `OpticalElement.parameter = value` only sets the value of the parameter without changing any other field.
+        Explicit method `OpticalElement.parameter = {"key":value,...}` sets any parameter field without changing those
+        not in the provided dictionary keys.
+
+        Positioning referential of OpticalElement is linked to its surface : Z is normal to the surface,
+        X is along it width, Z along its height. For optical elements in normal incidence such as films usually, this
+        convention makes Y vertical in absence of phi modifier. Warning : referentials are inherited from an element
+        to the next. A horizontally deflecting mirror should have phi=pi/2, but the next mirror if deflecting
+        horizontally towards the other side should have phi=pi. See provided examples and use method
+        Beamline.draw_active_chain profusely.
+
+        If parameter `element_id` is set to an preexisting pyoptix object, all parameters will be imported from
+        pyoptix
+
+        :param name: Name of the OpticalElement as will be stored in optix and displayed by Beamline
+        :type name: str (32 char long max)
+        :param phi: Angle of rotation around Y (rad) (roll)
+        :type phi: float
+        :param psi: Angle of rotation around Z (rad) (yaw)
+        :type psi: float
+        :param theta: Angle of rotation around X (rad) (incidence or pitch)
+        :type theta: float
+        :param d_phi: Misalignment of angle of rotation around Y (rad) (roll), not transferred to the next element
+        :type d_phi: float
+        :param d_psi: Misalignment of angle of rotation around Z (rad) (yaw), not transferred to the next element
+        :type d_psi: float
+        :param d_theta: Misalignment of angle of rotation around X (rad) (pitch), not transferred to the next element
+        :type d_theta: float
+        :param d_x: Misalignment of the position along X (not transferred to the next element) in m
+        :type d_x: float
+        :param d_y: Misalignment of the position along Y (not transferred to the next element) in m
+        :type d_y: float
+        :param d_z: Misalignment of the position along Z (not transferred to the next element) in m
+        :type d_z: float
+        :param next_element: Next element in the active chain
+        :type next_element: OpticalElement or inherited
+        :param previous: Previous element in the chain
+        :type previous: OpticalElement or inherited
+        :param distance_from_previous: distance from the previous optical element in m
+        :type distance_from_previous: float
+        :param element_id: Handle of underlying optix object if object already exists
+        :type element_id: wintypes.INT
+        :param element_type: class of the OpticalElement (if unsure of which to chose, use an inherited class)
+        :type element_type: str
+        """
         super().__init__()
+        self._recording_mode = RecordingMode.recording_none
         self._element_id = None
         self._element_type = element_type
         if element_id is not None:
@@ -278,7 +399,7 @@ class OpticalElement(object):
         self.d_x = d_x
         self.d_y = d_y
         self.d_z = d_z
-        self.next = next
+        self.next = next_element
         self.previous = previous
         self.distance_from_previous = distance_from_previous
 
@@ -435,8 +556,28 @@ class OpticalElement(object):
         description += f"\n\t oriented in yaw at {self._psi / degree} deg\n"
         return description
 
-    def show_diagram(self, nrays, distance_from_oe=0, light_xy=False, map_xy=False,
+    def show_diagram(self, nrays, distance_from_oe=0, map_xy=False, light_xy=False,
                      light_xxp=False, light_yyp=False, show_first_rays=False):
+        """
+        If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
+        X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
+        For quick display, light_xy, light_xxp and light_yyp can be set to True.
+        For more realistic rendering, map_xy can be set to True.
+        :param nrays: number of expected rays. Should match the parameter nrays of the source element.
+        :type nrays: int
+        :param distance_from_oe: distance from the element at which to draw the spot diagram in m
+        :type distance_from_oe: str
+        :param map_xy: set to True for hexagonal pixel rendering of X vs Y diagram
+        :type map_xy: bool
+        :param light_xy: set to True for quick monochromatic rendering of X vs Y scatter plot
+        :type light_xy: bool
+        :param light_xxp: set to True for quick monochromatic rendering of X' vs X scatter plot
+        :type light_xxp: bool
+        :param light_yyp: set to True for quick monochromatic rendering of Y' vs Y scatter plot
+        :type light_yyp: bool
+        :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
+        :return: None
+        """
         assert self.recording_mode != RecordingMode.recording_none
         diagram = Diagram(ndim=5, nreserved=int(nrays))
         get_spot_diagram(self.element_id, diagram, distance=distance_from_oe)
@@ -452,6 +593,14 @@ class OpticalElement(object):
             show(fig)
 
     def from_element_id(self, element_id, print_all=False):
+        """
+        Sets all the optical element parameters using a preexisting optix object which handle is passed as `element_id`
+        :param element_id: Handle of the preexisting optix objects
+        :type element_id: wintypes.INT
+        :param print_all: set to true to print all values of parameters
+        :type print_all: bool
+        :return: None
+        """
         hparam = HANDLE(0)
         self._element_id = element_id
         print("initializing ", self.name)
@@ -491,6 +640,14 @@ class OpticalElement(object):
             self._previous = None
 
     def set_recording(self, recording_mode="output"):
+        """
+        Sets the recording mode for the spot diagram associated with the element.
+        Recording mode can be "output" (records rays affected by the element), "input" (records ray just before
+        reaching the element), "not_recording" (does not record the rays)
+        :param recording_mode: When to record the rays in reference to the element (see above)
+        :type recording_mode: str
+        :return: None
+        """
         set_recording(self._element_id,
                       {"output": RecordingMode.recording_output,
                        "input": RecordingMode.recording_input,
@@ -907,22 +1064,23 @@ class PlaneGrating(PlaneHoloGrating):
 
 
 class PlanePoly1DGrating(OpticalElement):
-    def __init__(self, degree=1, line_density=1e6, line_density_coeffs=None, **kwargs):
+    def __init__(self, polynomial_degree=1, line_density=1e6, line_density_coeffs=None, **kwargs):
         if line_density_coeffs is None:
             line_density_coeffs = []
         if "element_type" in kwargs:
-            assert kwargs["element_type"] in ("PlanePoly1DGrating", "SphericalPoly1DGrating", "CylindricalPoly1DGrating",
+            assert kwargs["element_type"] in ("PlanePoly1DGrating", "SphericalPoly1DGrating",
+                                              "CylindricalPoly1DGrating",
                                               "ToroidalPoly1DGrating")
         else:
             kwargs["element_type"] = "PlanePoly1DGrating"
         super().__init__(**kwargs)
-        self.degree = degree
+        self.degree = polynomial_degree
         self.line_density = line_density
         self.line_density_coeffs = line_density_coeffs
 
     @property
     def degree(self):
-        self._degree = super().degree
+        self._degree = self._get_parameter("degree")
         return self._degree
 
     @degree.setter
@@ -941,7 +1099,7 @@ class PlanePoly1DGrating(OpticalElement):
     @property
     def line_density_coeffs(self):
         self._line_density_coeffs = []
-        for i in range(1, self.degree-1):
+        for i in range(1, self.degree - 1):
             self._line_density_coeffs.append(self._get_parameter(f"lineDensityCoeff_{i}"))
         return self._line_density_coeffs
 
@@ -949,7 +1107,7 @@ class PlanePoly1DGrating(OpticalElement):
     def line_density_coeffs(self, value):
         self._line_density_coeffs = []
         assert isinstance(value, list)
-        for i in range(1, self.degree-1):
+        for i in range(1, self.degree - 1):
             self._line_density_coeffs.append(self._set_parameter(f"lineDensityCoeff_{i}", value[i]))
 
 
@@ -980,12 +1138,11 @@ class ToroidalPoly1DGrating(ToroidalMirror, PlanePoly1DGrating):
         super().__init__(**kwargs)
 
 
-
 def parse_xml(filename):
     tree = etree.parse(filename)
     beamline = Beamline()
     for user in tree.xpath("/system/element"):
-        new_element = OpticalElement(name=user.get("name"), next=user.get("next"), previous=user.get("previous"))
+        new_element = OpticalElement(name=user.get("name"), next_element=user.get("next"), previous=user.get("previous"))
         beamline.add_element(new_element)
     beamline.chain()
 
