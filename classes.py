@@ -655,7 +655,47 @@ class OpticalElement(object):
 
 
 class Source(OpticalElement):
+    """
+    Base class for all Sources elements. Can be used as is with the correct element type or using the inherited
+    classes
+    """
+    def __init__(self, **kwargs):
+        """
+        Constructor of a Source type element. Inherits OpticalElement class.
+        Acceptable element_types are "GaussianSource", "RadialSource" or
+        "XYGridSource"
+        :param kwargs: See OpticalElement doc for other parameters
+        """
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] in ["GaussianSource", "RadialSource", "XYGridSource"]
+        super().__init__(**kwargs)
+
+
+class GaussianSource(Source):
+    """
+    Base class for all Sources elements. Can be used as is with the correct element type or using the inherited
+    classes
+    """
     def __init__(self, sigma_x=0, sigma_y=0, sigma_x_div=0, sigma_y_div=0, nrays=0, **kwargs):
+        """
+        Constructor of a gaussian source type element of size sigma_x*sigma_y and divergence sigma_x_div*sigma_y_div.
+        Will generate nrays rays when method generate is called.
+        :param sigma_x: RMS source size in X direction in m
+        :type sigma_x: float
+        :param sigma_y: RMS source size in Y direction in m
+        :type sigma_y: float
+        :param sigma_x_div: RMS source divergence in X direction
+        :type sigma_x_div: float
+        :param sigma_y_div: RMS source divergence in Y direction
+        :type sigma_y_div: float
+        :param nrays: number of rays to be generated
+        :type nrays: int
+        :param kwargs: See OpticalElement doc for other parameters
+        """
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "GaussianSource"
+        else:
+            kwargs["element_type"] = "GaussianSource"
         super().__init__(**kwargs)
         self.sigma_x = sigma_x
         self.sigma_y = sigma_y
@@ -710,7 +750,14 @@ class Source(OpticalElement):
 
 
 class PlaneMirror(OpticalElement):
+    """
+    Class for plane mirrors. Inherits OpticalElement
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor for the PlaneMirror class
+        :param kwargs: See OpticalElement doc for parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "PlaneMirror"
         else:
@@ -720,6 +767,11 @@ class PlaneMirror(OpticalElement):
 
 class RevolutionQuadricMirror(OpticalElement):
     """
+    Class for quadric mirrors. Inherits OpticalElement. Inherited by classes "ConicBaseCylindricalMirror" and
+    "RevolutionQuadricMirror"
+
+    Generates all quadric surfaced mirrors using quadric parameters p, q and theta such as:
+
     p is defined at coordinate (pcos(theta), -psin(theta))
     q is defined at coordinate (qcos(theta), qsin(theta))
     Due to this convention, the cylinder base (directrix) is
@@ -731,6 +783,20 @@ class RevolutionQuadricMirror(OpticalElement):
     """
 
     def __init__(self, inverse_p=0, inverse_q=0.1, theta0=0, **kwargs):
+        """
+        Constructor for the RevolutionQuadricMirror class. For details of convention of quadric parameter, see
+        RevolutionQuadricMirror class doc.
+
+        Note: while p and q are the usual quadric parameter, here 1/p (inverse_p) and 1/q (inverse_q) parameters are
+        instanciated so as to have continuity between all quadrics in an optimization problem.
+        :param inverse_p: Inverse distance from center of the mirror to object focal point in m-1
+        :type inverse_p: float
+        :param inverse_q: Inverse distance from center of the mirror to image focal point in m-1
+        :type inverse_q: float
+        :param theta0: Angle of incidence at the center of the mirror in rad
+        :type theta0: float
+        :param kwargs: See OpticalElement doc for parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] in ["ConicBaseCylindricalMirror", "RevolutionQuadricMirror"]
         else:
@@ -769,7 +835,16 @@ class RevolutionQuadricMirror(OpticalElement):
 
 
 class ConicCylindricalMirror(RevolutionQuadricMirror):
+    """
+    Class for conic cylindrical mirrors. Inherits RevolutionQuadricMirror.
+    The conic surface is defined as for the RevolutionQuadricMirror class
+    except it is invariant along the X axe (width).
+    """
     def __int__(self, **kwargs):
+        """
+        Constructor for the ConicCylindricalMirror class.
+        :param kwargs: See RevolutionQuadricMirror doc for parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "ConicBaseCylindricalMirror"
         else:
@@ -778,7 +853,19 @@ class ConicCylindricalMirror(RevolutionQuadricMirror):
 
 
 class SphericalMirror(OpticalElement):
+    """
+    Class for the spherical mirrors. Inherits OpticalElement. Inherited by "SphericalFilm",
+    "SphericalHoloGrating" and "SphericalPoly1DGrating"
+
+    Defines a 2d spherical mirror of radius 1/curvature.
+    """
     def __init__(self, curvature=0, **kwargs):
+        """
+        Constructor for the SphericalMirror class. Radius of curvature of the surface is defined as 1/curvature
+        :param curvature: inverse of the radius of the sphere in m-1
+        :type curvature: float
+        :param kwargs: See OpticalElement doc for other parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] in ("SphericalMirror", "SphericalFilm", "SphericalHoloGrating",
                                               "SphericalPoly1DGrating")
@@ -798,7 +885,23 @@ class SphericalMirror(OpticalElement):
 
 
 class CylindricalMirror(OpticalElement):
+    """
+    Class for the cylindrical spherical mirrors. Inherits OpticalElement. Inherited by "CylindricalFilm",
+    "CylindricalHoloGrating" and "CylindricalPoly1DGrating".
+
+    Defines a 1d spherical mirror of radius 1/curvature invariant along an axes at axis_angle from the X axes of
+    the mirror.
+    """
     def __init__(self, curvature=0, axis_angle=0, **kwargs):
+        """
+        Constructor for the CylindricalMirror class. curvature is the inverse of the base circle radius,
+        cylinder axis is at an angle axis_angle from the mirror X axis.
+        :param curvature: inverse of the base circle radius in m-1
+        :type curvature: float
+        :param axis_angle: angle between the mirror X axis and the cylinder axis of invariance
+        :type axis_angle: float
+        :param kwargs: See OpticalElement doc for other parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] in ("CylindricalMirror", "CylindricalFilm", "CylindricalHoloGrating",
                                               "CylindricalPoly1DGrating")
@@ -828,7 +931,22 @@ class CylindricalMirror(OpticalElement):
 
 
 class ToroidalMirror(OpticalElement):
+    """
+    Class for the toroidal mirrors. Inherits OpticalElement. Inherited by "ToroidalFilm",
+    "ToroidalHoloGrating" and "ToroidalPoly1DGrating".
+
+    Defines a toroidal mirror of major radius 1/major_curvature along its length and minor radius 1/minor_curvature
+    along its width.
+    """
     def __init__(self, minor_curvature=0, major_curvature=0, **kwargs):
+        """
+        Constructor for the ToroidalMirror class.
+        :param minor_curvature: inverse of radius of curvature in the width of the mirror (around tangential axis)
+        :type minor_curvature: float
+        :param major_curvature: inverse of radius of curvature in the length of the mirror (around sagittal axis)
+        :type major_curvature: float
+        :param kwargs: See OpticalElement doc for other parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] in ("ToroidalMirror", "ToroidalFilm", "ToroidalHoloGrating",
                                               "ToroidalPoly1DGrating")
@@ -858,7 +976,14 @@ class ToroidalMirror(OpticalElement):
 
 
 class PlaneFilm(OpticalElement):
+    """
+    Class for plane films. Inherits OpticalElement
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the PlaneFilm class
+        :param kwargs: See OpticalElement doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "PlaneFilm"
         else:
@@ -867,7 +992,14 @@ class PlaneFilm(OpticalElement):
 
 
 class SphericalFilm(SphericalMirror):
+    """
+    Class for spherical films. Inherits SphericalMirror
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the SphericalFilm class
+        :param kwargs: See SphericalMirror doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "SphericalFilm"
         else:
@@ -876,7 +1008,14 @@ class SphericalFilm(SphericalMirror):
 
 
 class CylindricalFilm(CylindricalMirror):
+    """
+    Class for cylindrical films. Inherits CylindricalMirror
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the CylindricalFilm class
+        :param kwargs: See CylindricalMirror doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "CylindricalFilm"
         else:
@@ -885,7 +1024,14 @@ class CylindricalFilm(CylindricalMirror):
 
 
 class ToroidalFilm(ToroidalMirror):
+    """
+    Class for toroidal films. Inherits ToroidalMirror
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the ToroidalFilm class
+        :param kwargs: See ToroidalMirror doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "ToroidalFilm"
         else:
