@@ -1040,9 +1040,45 @@ class ToroidalFilm(ToroidalMirror):
 
 
 class PlaneHoloGrating(OpticalElement):
+    """
+    Class for plane holographic grating.
+
+    This simulates a grating which pattern was recorded using lights sources at point M and N emitting at
+    recording_wavelength wavelength.
+    M coordinates are defined in spherical coordinates by (azimuth_angle1, elevation_angle1 and distance1).
+    N coordinates are partially defined in spherical coordinates by (azimuth_angle2 and distance2). Elevation angle of
+    point N is computed from line density of the grating and the other M and N coordinates.
+
+    Conventions for angles are :
+    * angles are defined between -pi/2 and pi/2
+    * waves are diverging (real source point) if elevation and distance are of the same sign, converging otherwise
+    (virtual source points)
+    """
     def __init__(self, azimuth_angle1=0, azimuth_angle2=0, elevation_angle1=0, inverse_distance1=np.inf,
                  inverse_distance2=np.inf, order_align=1, order_use=1, recording_wavelength=351.1e-9,
                  line_density=1e6, **kwargs):
+        """
+        Constructor for the PlaneHoloGrating class
+        :param azimuth_angle1: coordinate in azimuth (around Z axis) of source point M in rad
+        :type azimuth_angle1: float
+        :param azimuth_angle2: coordinate in azimuth (around Z axis) of source point N in rad
+        :type azimuth_angle2: float
+        :param elevation_angle1: coordinate in elevation (in (k,Z) plane) of source point M in rad
+        :type elevation_angle1: float
+        :param inverse_distance1: inverse distance of the M point from the grating center in m-1
+        :type inverse_distance1: float
+        :param inverse_distance2: inverse distance of the N point from the grating center in m-1
+        :type inverse_distance2: float
+        :param order_align: order of diffraction at which the grating is aligned
+        :type order_align: int
+        :param order_use: order of diffraction at which the grating diffracts
+        :type order_use: int
+        :param recording_wavelength: wavelength of the light emitted from M and N points in m
+        :type recording_wavelength: float
+        :param line_density: line density at the center of the grating in m-1
+        :type line_density: float
+        :param kwargs: See OpticalElement doc for other parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] in ("PlaneHoloGrating", "SphericalHoloGrating", "CylindricalHoloGrating",
                                               "ToroidalHoloGrating")
@@ -1142,7 +1178,14 @@ class PlaneHoloGrating(OpticalElement):
 
 
 class SphericalHoloGrating(SphericalMirror, PlaneHoloGrating):
+    """
+    Class for spherical holographic gratings. Inherits SphericalMirror and PlaneHoloGrating
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the SphericalHoloGrating class
+        :param kwargs: See SphericalMirror and PlaneHoloGrating doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "SphericalHoloGrating"
         else:
@@ -1151,7 +1194,14 @@ class SphericalHoloGrating(SphericalMirror, PlaneHoloGrating):
 
 
 class CylindricalHoloGrating(CylindricalMirror, PlaneHoloGrating):
+    """
+    Class for cylindrical holographic gratings. Inherits CylindricalMirror and PlaneHoloGrating
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the CylindricalHoloGrating class
+        :param kwargs: See CylindricalMirror and PlaneHoloGrating doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "CylindricalHoloGrating"
         else:
@@ -1160,7 +1210,14 @@ class CylindricalHoloGrating(CylindricalMirror, PlaneHoloGrating):
 
 
 class ToroidalHoloGrating(ToroidalMirror, PlaneHoloGrating):
+    """
+    Class for toroidal holographic gratings. Inherits ToroidalMirror and PlaneHoloGrating
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the ToroidalHoloGrating class
+        :param kwargs: See ToroidalMirror and PlaneHoloGrating doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "ToroidalHoloGrating"
         else:
@@ -1169,7 +1226,15 @@ class ToroidalHoloGrating(ToroidalMirror, PlaneHoloGrating):
 
 
 class PlaneGrating(PlaneHoloGrating):
+    """
+    Class for plane gratings. Inherits PlaneHoloGrating, inverse_distances are 0 so there is no variation of
+    line density
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the ToroidalHoloGrating class
+        :param kwargs: See PlaneHoloGrating doc for the parameters
+        """
         kwargs["inverse_distance1"] = 0
         kwargs["inverse_distance2"] = 0
         kwargs["elevation_angle1"] = np.arccos(0.93963)
