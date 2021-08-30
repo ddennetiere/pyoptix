@@ -12,7 +12,6 @@ from bokeh.transform import linear_cmap
 from bokeh.models import PolyAnnotation, ColumnDataSource, LabelSet
 
 
-
 # Definition des fonctions d'affichage
 def blue(grayscale):
     if grayscale < 0.33:
@@ -51,6 +50,20 @@ TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save, box_zoom"
 
 
 def plot_spd(dataframe, x_key="x", y_key="y", **kwargs):
+    """
+    Wrapper function for the PyOptix object of the scatter_plot_2d function. Data is expected as first parameter
+    in a pandas.Dataframe, the column names must contain X_key and y_key.
+
+    :param dataframe: Data to be plotted.
+    :type dataframe: pandas.Dataframe
+    :param x_key: name of the Dataframe column containing the X value
+    :type x_key: str
+    :param y_key:  name of the Dataframe column containing the Y value
+    :type y_key: str
+    :param kwargs: See scatter_plot_2d doc for additionnal parameters
+    :return: layout of the plot to be used as parameter of bokeh.plotting.show
+    :rtype: bokeh.models.layouts.LayoutDOM
+    """
     if x_key[0] == "d":
         x_unit = "rad"
     else:
@@ -65,6 +78,40 @@ def plot_spd(dataframe, x_key="x", y_key="y", **kwargs):
 
 
 def scatter_plot_2d(x, y, **kwargs):
+    """
+    Function that draws a scatter plot using bokeh. Scatter points are colored as a function of local density so as
+    to better grip spot shape when density gets high.
+
+    :param x: X data coordinate
+    :type x: numpy.ndarray
+    :param y: Y data coordinate
+    :type y: numpy.ndarray
+    :param title: Title of the plot
+    :type title: str
+    :param x_unit: Unit of the X coordinate
+    :type x_unit: str
+    :param y_unit: Unit of the Y coordinate
+    :type y_unit: str
+    :param show_map: Plot an hexagonal map instead of scatter plot
+    :type show_map: bool
+    :param light_plot: Does not color scatter points for quick plot
+    :type light_plot: bool
+    :param othonorm: Sets X range = Y range so as to have a real life spot shape
+    :type othonorm: bool
+    :param radius: Radius of scatter point, default = 5
+    :type radius: float
+    :param x_label: Label of the X coordinate
+    :type x_label: str
+    :param y_label: Label of the y coordinate
+    :type y_label: str
+    :param save_in_file: Name of the file to save the layout to as a png. Default = "", which means not saving to file
+    :type save_in_file: str
+    :param return_FWHM: If True, returns the Full Width at Half Maximum of the spot is both dimensions as well as the
+        plot layout
+    :type return_FWHM: bool
+    :return: layout of the plot to be used as parameter of bokeh.plotting.show or tuple (layout, FWHMs)
+    :rtype: bokeh.models.layouts.LayoutDOM or (LayoutDOM, (float, float))
+    """
     if 'title' in kwargs.keys():
         title = kwargs['title']
     else:
@@ -139,7 +186,7 @@ def scatter_plot_2d(x, y, **kwargs):
     hzeros = np.zeros(len(hedges) - 1)
     hmax = max(hhist) * 1.1
 
-    LINE_ARGS = dict(color="#3A5785", line_color=None)
+    line_args = dict(color="#3A5785", line_color=None)
 
     ph = figure(toolbar_location=None, plot_width=p.plot_width, plot_height=200, x_range=p.x_range,
                 y_range=(-hmax, hmax), min_border=10, min_border_left=50, y_axis_location="right")
@@ -148,8 +195,8 @@ def scatter_plot_2d(x, y, **kwargs):
     ph.background_fill_color = "#fafafa"
 
     ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hhist, color="white", line_color="#3A5785")
-    hh1 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.5, **LINE_ARGS)
-    hh2 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.1, **LINE_ARGS)
+    hh1 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.5, **line_args)
+    hh2 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.1, **line_args)
 
     mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (2.35 * x.std(), x_unit))
     ph.add_layout(mytext)
@@ -166,8 +213,8 @@ def scatter_plot_2d(x, y, **kwargs):
     pv.background_fill_color = "#fafafa"
 
     pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vhist, color="white", line_color="#3A5785")
-    vh1 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **LINE_ARGS)
-    vh2 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **LINE_ARGS)
+    vh1 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **line_args)
+    vh2 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **line_args)
 
     mytext = Label(x=-vhist.max() / 2, y=y.mean(), text='%.2e %s FWHM' % (2.35 * y.std(), y_unit), angle=-np.pi / 2)
     pv.add_layout(mytext)
