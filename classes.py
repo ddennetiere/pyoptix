@@ -98,7 +98,7 @@ class Diagram(Structure):
 
 class ChainList(list):
     """
-    Classe inheriting list allowing clear and concise text prints of beamlines
+    Class inheriting list allowing clear and concise text prints of beamlines
     """
 
     def __repr__(self):
@@ -578,19 +578,36 @@ class OpticalElement(object):
         :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
         :return: None
         """
-        assert self.recording_mode != RecordingMode.recording_none
-        diagram = Diagram(ndim=5, nreserved=int(nrays))
-        get_spot_diagram(self.element_id, diagram, distance=distance_from_oe)
-        spots = pd.DataFrame(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim)),
-                             columns=("X", "Y", "dX", "dY", "Lambda"))
-        if show_first_rays:
-            print(spots.head())
+        spots = self.get_diagram(nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
         figs = [plot_spd(spots, x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy),
                 plot_spd(spots, x_key="X", y_key="dX", light_plot=light_xxp),
                 plot_spd(spots, x_key="Y", y_key="dY", light_plot=light_yyp)]
 
         for fig in figs:
             show(fig)
+
+    def get_diagram(self, nrays, distance_from_oe=0, show_first_rays=False):
+        """
+        If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
+        X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
+        For quick display, light_xy, light_xxp and light_yyp can be set to True.
+        For more realistic rendering, map_xy can be set to True.
+        :param nrays: number of expected rays. Should match the parameter nrays of the source element.
+        :type nrays: int
+        :param distance_from_oe: distance from the element at which to draw the spot diagram in m
+        :type distance_from_oe: str
+        :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
+        :type show_first_rays: bool
+        :return: pandas.Dataframe containing all rays intercept on the optics surface
+        """
+        assert self.recording_mode != RecordingMode.recording_none
+        diagram = Diagram(ndim=5, nreserved=int(nrays))
+        get_spot_diagram(self.element_id, diagram, distance=distance_from_oe)
+        spots = pd.DataFrame(np.copy(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim))),
+                             columns=("X", "Y", "dX", "dY", "Lambda"))
+        if show_first_rays:
+            print(spots.head())
+        return spots
 
     def from_element_id(self, element_id, print_all=False):
         """
