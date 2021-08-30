@@ -1,4 +1,30 @@
 # -*- coding: utf-8 -*-
+"""
+Test file to show the import of a preexisting SOLEMIO file, CASSIOPEE in this instance.
+
+This file should be called with optionnal argument depending on what the user wants to see working:
+
+python test_cassiopee.py [--optionnal_test]
+
+options are :
+--test_ID
+    Shows internal handles of optix imported objects
+--test_enumerate
+    Enumerates all optical element in the beamline
+--test_parameter
+    Enumerates all parameter of all the optical element in the beamline
+--test_edit_parameter
+    Changes the value of an optix parameter and prints the new stored value
+--test_linkage
+    Links the optical element as they are linked in the beamline SOLEMIO file
+--test_add_element
+    Adds an element that does not exist in the SOLEMIO file (a film here)
+--test_radiate
+    Generates and propagates rays from the source to the EXP1 film
+--test_spot_diagram
+    Shows the different useful spot diagrams in the EXP1 plane (XY, XX', YY')
+
+"""
 import os
 import sys
 from ctypes import create_string_buffer, c_char
@@ -151,7 +177,7 @@ if __name__ == "__main__":
         align(sourceID, lamda_align, show_return=True)
         clear_impacts(sourceID)
         generated_rays = generate(sourceID, lamda_align, show_return=True)
-        radiate(sourceID)
+        radiate(sourceID, show_return=True)
 
     if test_spot_diagram:
         assert test_radiate
