@@ -1291,12 +1291,12 @@ class PlanePoly1DGrating(OpticalElement):
 
     @property
     def degree(self):
-        self._degree = self._get_parameter("degree")
+        self._degree = int(self._get_parameter("degree"))
         return self._degree
 
     @degree.setter
     def degree(self, value):
-        self._degree = self._set_parameter("degree", value)
+        self._degree = int(self._set_parameter("degree", value))
 
     @property
     def line_density(self):
