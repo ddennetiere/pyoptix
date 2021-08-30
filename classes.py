@@ -1275,7 +1275,27 @@ class PlaneGrating(PlaneHoloGrating):
 
 
 class PlanePoly1DGrating(OpticalElement):
+    """
+    Class for plane polynomial gratings, which line density varies as a function if only one coordinate in a polynomial
+    way. The center of the grating is assumed to be at the 0 value of the coordinate,leading to the parameter
+    `line_density` defining the line density at the grating center.
+
+    Inherits OpticalElement. Inherited by SphericalPoly1DGrating, CylindricalPoly1DGrating and
+    ToroidalPoly1DGrating.
+    """
     def __init__(self, polynomial_degree=1, line_density=1e6, line_density_coeffs=None, **kwargs):
+        """
+        Constructor method for the class PlanePoly1DGrating.
+        :param polynomial_degree: degree of the polynomial law for varying line density. 0 makes an evenly spaced
+            classical grating
+        :type polynomial_degree: int
+        :param line_density: line density at the center of the grating (in m-1)
+        :type line_density: float
+        :param line_density_coeffs: coefficients of the polynomial law in m-2, m-3, etc. List length must match
+            polynomial_degree
+        :type line_density_coeffs: list of float
+        :param kwargs: See OpticalElement doc for additional parameters
+        """
         if line_density_coeffs is None:
             line_density_coeffs = []
         if "element_type" in kwargs:
@@ -1323,7 +1343,18 @@ class PlanePoly1DGrating(OpticalElement):
 
 
 class SphericalPoly1DGrating(SphericalMirror, PlanePoly1DGrating):
+    """
+    Class for spherical polynomial gratings, which line density varies as a function if only one coordinate in a
+    polynomial way. The center of the grating is assumed to be at the 0 value of the coordinate,leading to the parameter
+    `line_density` defining the line density at the grating center.
+
+    Inherits SphericalMirror and PlanePoly1DGrating.
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the SphericalPoly1DGrating class
+        :param kwargs: See SphericalMirror and PlanePoly1DGrating doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "SphericalPoly1DGrating"
         else:
@@ -1332,7 +1363,18 @@ class SphericalPoly1DGrating(SphericalMirror, PlanePoly1DGrating):
 
 
 class CylindricalPoly1DGrating(CylindricalMirror, PlanePoly1DGrating):
+    """
+    Class for cylindrical polynomial gratings, which line density varies as a function if only one coordinate in a
+    polynomial way. The center of the grating is assumed to be at the 0 value of the coordinate,leading to the parameter
+    `line_density` defining the line density at the grating center.
+
+    Inherits CylindricalMirror and PlanePoly1DGrating.
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the CylindricalPoly1DGrating class
+        :param kwargs: See CylindricalMirror and PlanePoly1DGrating doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "CylindricalPoly1DGrating"
         else:
@@ -1341,7 +1383,18 @@ class CylindricalPoly1DGrating(CylindricalMirror, PlanePoly1DGrating):
 
 
 class ToroidalPoly1DGrating(ToroidalMirror, PlanePoly1DGrating):
+    """
+    Class for toroidal polynomial gratings, which line density varies as a function if only one coordinate in a
+    polynomial way. The center of the grating is assumed to be at the 0 value of the coordinate,leading to the parameter
+    `line_density` defining the line density at the grating center.
+
+    Inherits ToroidalMirror and PlanePoly1DGrating.
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor of the ToroidalPoly1DGrating class
+        :param kwargs: See ToroidalMirror and PlanePoly1DGrating doc for the parameters
+        """
         if "element_type" in kwargs:
             assert kwargs["element_type"] == "ToroidalPoly1DGrating"
         else:
