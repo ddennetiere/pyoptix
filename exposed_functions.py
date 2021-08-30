@@ -1,6 +1,6 @@
 import functools
 import ctypes
-from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
+from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE, BOOLEAN
 
 global optix
 
@@ -88,7 +88,7 @@ def generate(source_id, lamda):
 @catch_c_error
 def radiate(source_id):
     optix.Radiate.argtypes = [HANDLE]
-    optix.Radiate.restype = INT
+    optix.Radiate.restype = BOOLEAN
     ret = optix.Radiate(source_id)
     return ret
 
