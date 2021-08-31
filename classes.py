@@ -409,6 +409,15 @@ class OpticalElement(object):
         self.previous = previous
         self.distance_from_previous = distance_from_previous
 
+    def get_whole_parameter(self, param_name):
+        param = Parameter()
+        inv_dict_optix = {v: k for k, v in optix_dictionnary.items()}
+        if param_name in inv_dict_optix.keys():
+            param_name = inv_dict_optix[param_name]
+        get_parameter(self._element_id, param_name, param)
+        return {"value": param.value, "bounds": (param.bounds.min, param.bounds.max),
+                "multiplier": param.multiplier, "type": param.type, "group": param.group, "flags": param.flags}
+
     def _get_parameter(self, param_name):
         param = Parameter()
         get_parameter(self._element_id, param_name, param)
