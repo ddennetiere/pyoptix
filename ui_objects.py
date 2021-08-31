@@ -78,7 +78,8 @@ def plot_spd(dataframe, x_key="x", y_key="y", **kwargs):
     return layout
 
 
-def scatter_plot_2d(x, y, **kwargs):
+def scatter_plot_2d(x, y, title="", x_unit="", y_unit="", show_map=False, light_plot=False, orthonorm=False, radius=5,
+                    x_label="", y_label="", save_in_file="", return_fwhm=False):
     """
     Function that draws a scatter plot using bokeh. Scatter points are colored as a function of local density so as
     to better grip spot shape when density gets high.
@@ -97,8 +98,8 @@ def scatter_plot_2d(x, y, **kwargs):
     :type show_map: bool
     :param light_plot: Does not color scatter points for quick plot
     :type light_plot: bool
-    :param othonorm: Sets X range = Y range so as to have a real life spot shape
-    :type othonorm: bool
+    :param orthonorm: Sets X range = Y range so as to have a real life spot shape
+    :type orthonorm: bool
     :param radius: Radius of scatter point, default = 5
     :type radius: float
     :param x_label: Label of the X coordinate
@@ -107,32 +108,12 @@ def scatter_plot_2d(x, y, **kwargs):
     :type y_label: str
     :param save_in_file: Name of the file to save the layout to as a png. Default = "", which means not saving to file
     :type save_in_file: str
-    :param return_FWHM: If True, returns the Full Width at Half Maximum of the spot is both dimensions as well as the
+    :param return_fwhm: If True, returns the Full Width at Half Maximum of the spot is both dimensions as well as the
         plot layout
-    :type return_FWHM: bool
+    :type return_fwhm: bool
     :return: layout of the plot to be used as parameter of bokeh.plotting.show or tuple (layout, FWHMs)
     :rtype: bokeh.models.layouts.LayoutDOM or (LayoutDOM, (float, float))
     """
-    if 'title' in kwargs.keys():
-        title = kwargs['title']
-    else:
-        title = ""
-    if "x_unit" in kwargs.keys():
-        x_unit = kwargs["x_unit"]
-    else:
-        x_unit = "m"
-    if "y_unit" in kwargs.keys():
-        y_unit = kwargs["y_unit"]
-    else:
-        y_unit = "m"
-    if "show_map" in kwargs.keys():
-        show_map = kwargs["show_map"]
-    else:
-        show_map = False
-    if "light_plot" not in kwargs.keys():
-        light_plot = False
-    else:
-        light_plot = kwargs["light_plot"]
     if not light_plot and not show_map:
         # Calculate the point density
         xy = np.vstack([x, y])
@@ -143,26 +124,14 @@ def scatter_plot_2d(x, y, **kwargs):
         colors_jet = ["blue"]*x.shape[0]
     # create the scatter plot
 
-    if 'othonorm' in kwargs.keys():
-        if kwargs['orthonorm']:
-            x_ptp = np.ptp(x)
-            y_ptp = np.ptp(y)
-            x_range = (x.mean() - max(x_ptp, y_ptp) / 2, x.mean() + max(x_ptp, y_ptp) / 2)
-            y_range = (y.mean() - max(x_ptp, y_ptp) / 2, y.mean() + max(x_ptp, y_ptp) / 2)
-        else:
-            x_range = (x.min(), x.max())
-            y_range = (y.min(), y.max())
+    if orthonorm:
+        x_ptp = np.ptp(x)
+        y_ptp = np.ptp(y)
+        x_range = (x.mean() - max(x_ptp, y_ptp) / 2, x.mean() + max(x_ptp, y_ptp) / 2)
+        y_range = (y.mean() - max(x_ptp, y_ptp) / 2, y.mean() + max(x_ptp, y_ptp) / 2)
     else:
         x_range = (x.min(), x.max())
         y_range = (y.min(), y.max())
-
-    if 'radius' in kwargs.keys():
-        radius = kwargs['radius']
-    else:
-        # radius = min(x.ptp(), y.ptp())/1000
-        # radius =  4e-6/z.mean()
-        # radius = y.std() / 100
-        radius = 5
 
     p = figure(tools=TOOLS, plot_width=600, plot_height=600, min_border=10, min_border_left=50,
                toolbar_location="above", x_axis_location=None, y_axis_location=None,
@@ -222,15 +191,13 @@ def scatter_plot_2d(x, y, **kwargs):
 
     layout = column(row(p, pv), row(ph, Spacer(width=200, height=200)))
 
-    if "x_label" in kwargs.keys():
-        ph.xaxis.axis_label = kwargs["x_label"]
-    if "y_label" in kwargs.keys():
-        pv.yaxis.axis_label = kwargs["y_label"]
+    ph.xaxis.axis_label = x_label
+    pv.yaxis.axis_label = y_label
 
-    if "save_in_file" in kwargs.keys():
-        export_png(layout, filename=kwargs["save_in_file"])
+    if save_in_file != "":
+        export_png(layout, filename=save_in_file)
 
-    if "return_FWHM" in kwargs.keys():
+    if return_fwhm:
         return layout, (2.35 * x.std(), 2.35 * y.std())
     else:
         return layout
