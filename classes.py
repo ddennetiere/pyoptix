@@ -534,6 +534,8 @@ class OpticalElement(object):
         if next_oe is not None:
             chain_element_by_id(self._element_id, next_oe.element_id)
             next_oe.previous = self
+        else:
+            chain_element_by_id(self._element_id, 0)
 
     @property
     def recording_mode(self):
