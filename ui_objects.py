@@ -1,16 +1,12 @@
 from bokeh.plotting import figure, show
 from bokeh.io import export_png
 import numpy as np
-from scipy.constants import *
 from scipy.stats import gaussian_kde
 from bokeh.models import BoxSelectTool, LassoSelectTool, Spacer, Label
 from bokeh.layouts import row, column
 from bokeh.util.hex import hexbin
 from bokeh.transform import linear_cmap
 from bokeh.models import PolyAnnotation, ColumnDataSource, LabelSet
-
-
-hc = h*c/eV/nano
 
 
 # Definition des fonctions d'affichage

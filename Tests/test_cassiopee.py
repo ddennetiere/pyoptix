@@ -25,13 +25,16 @@ options are :
     Shows the different useful spot diagrams in the EXP1 plane (XY, XX', YY')
 
 """
-import os
-import sys
-from ctypes import create_string_buffer, c_char
+from ctypes import create_string_buffer, c_char, sizeof
 import numpy as np
-from ...pyoptix import classes
-from ...pyoptix.exposed_functions import *
-from ...pyoptix import ui_objects
+import sys
+sys.path.append("../..")
+from pyoptix import classes
+from pyoptix.exposed_functions import (load_optix, load_solemio_file, HANDLE, enumerate_elements, enumerate_parameters,
+                                      get_element_id, get_element_name, find_element_id, DOUBLE, get_parameter,
+                                      set_parameter, get_next_element, create_element, chain_element_by_id,
+                                      set_recording, align , radiate, generate, clear_impacts, get_spot_diagram)
+from pyoptix import ui_objects
 
 global optix
 
@@ -64,6 +67,7 @@ if __name__ == "__main__":
     test_add_element = args.test_add_element
     test_radiate = args.test_radiate
     test_spot_diagram = args.test_spot_diagram
+    generated_rays = None
     # initialisation auto
     try:
         test = optix
@@ -75,10 +79,9 @@ if __name__ == "__main__":
     # optix.LoadSolemioFile.argtypes = [c_char_p]
     load_solemio_file(create_string_buffer(b"D:\\Dennetiere\\Programmes Python\\optix\\solemio\\CASSIOPEE"))
     hsys, hparam, elemID = HANDLE(0), HANDLE(0), HANDLE(0)
-    elname = create_string_buffer(32, c_char)
-    if test_parameter or test_edit_parameter:
-        param_name = create_string_buffer(48)
-        param = classes.Parameter()
+    elname = create_string_buffer(32, sizeof(c_char))
+    param_name = create_string_buffer(48)
+    param = classes.Parameter()
     print("#" * 80)
     enumerate_elements(hsys, elemID, elname)
     sourceID = None
@@ -194,10 +197,9 @@ if __name__ == "__main__":
         spots = pd.DataFrame(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim)),
                              columns=("X", "Y", "dX", "dY", "Lambda"))
         print(spots.head())
-        figs = []
-        figs.append(ui_objects.plot_spd(spots, x_key="X", y_key="Y", light_plot=True, show_map=True))
-        figs.append(ui_objects.plot_spd(spots, x_key="X", y_key="dX", light_plot=False))
-        figs.append(ui_objects.plot_spd(spots, x_key="Y", y_key="dY", light_plot=True))
+        figs = [ui_objects.plot_spd(spots, x_key="X", y_key="Y", light_plot=True, show_map=True),
+                ui_objects.plot_spd(spots, x_key="X", y_key="dX", light_plot=False),
+                ui_objects.plot_spd(spots, x_key="Y", y_key="dY", light_plot=True)]
 
         for fig in figs:
             ui_objects.show(fig)
