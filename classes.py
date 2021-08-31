@@ -189,12 +189,18 @@ class Beamline(object):
         else:
             return align(self.active_chain[0].element_id, lambda_align)
 
-    def clear_impacts(self):
+    def clear_impacts(self, clear_source=False):
         """
-        Removes any impact on the spot diagrams
+        Removes any impact on the spot diagrams computed on all element following the source object at the exception
+        of the source itself, as it needs its impact to repropagate rays from the previous distribution
+        :param clear_source: also clears the source
+        :type clear_source: bool
         :return: code result from the optix function
         """
-        return clear_impacts(self.active_chain[0].element_id)
+        from_element = 1
+        if clear_source:
+            from_element = 0
+        return clear_impacts(self.active_chain[from_element].element_id)
 
     def radiate(self, from_element=None):
         """
