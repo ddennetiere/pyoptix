@@ -2,14 +2,15 @@ from bokeh.plotting import figure, show
 from bokeh.io import export_png
 import numpy as np
 from scipy.constants import *
-hc = h*c/eV/nano
-
 from scipy.stats import gaussian_kde
 from bokeh.models import BoxSelectTool, LassoSelectTool, Spacer, Label
 from bokeh.layouts import row, column
 from bokeh.util.hex import hexbin
 from bokeh.transform import linear_cmap
 from bokeh.models import PolyAnnotation, ColumnDataSource, LabelSet
+
+
+hc = h*c/eV/nano
 
 
 # Definition des fonctions d'affichage
@@ -179,7 +180,7 @@ def scatter_plot_2d(x, y, **kwargs):
         p.hex_tile(q="q", r="r", size=min(np.ptp(x), np.ptp(y))/100, line_color=None, source=bins,
                    fill_color=linear_cmap('counts', 'Viridis256', 0, max(bins.counts)), alpha=1)
     else:
-        r = p.circle(x, y, size=radius, color=colors_jet, alpha=0.1)
+        p.circle(x, y, size=radius, color=colors_jet, alpha=0.1)
 
     # create the horizontal histogram
     hhist, hedges = np.histogram(x, bins=max(20, int(x.shape[0] / 1000)))
@@ -195,8 +196,8 @@ def scatter_plot_2d(x, y, **kwargs):
     ph.background_fill_color = "#fafafa"
 
     ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hhist, color="white", line_color="#3A5785")
-    hh1 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.5, **line_args)
-    hh2 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.1, **line_args)
+    ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.5, **line_args)
+    ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.1, **line_args)
 
     mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (2.35 * x.std(), x_unit))
     ph.add_layout(mytext)
@@ -213,8 +214,8 @@ def scatter_plot_2d(x, y, **kwargs):
     pv.background_fill_color = "#fafafa"
 
     pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vhist, color="white", line_color="#3A5785")
-    vh1 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **line_args)
-    vh2 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **line_args)
+    pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **line_args)
+    pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **line_args)
 
     mytext = Label(x=-vhist.max() / 2, y=y.mean(), text='%.2e %s FWHM' % (2.35 * y.std(), y_unit), angle=-np.pi / 2)
     pv.add_layout(mytext)

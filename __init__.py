@@ -1,6 +1,4 @@
 # coding: utf-8
-# import sys
-# sys.path.append("..")
 from .exposed_functions import load_optix
 from bokeh.io import output_notebook as bok_on
 

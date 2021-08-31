@@ -9,7 +9,7 @@ def init_optix():
     # initialisation auto
     try:
         test = optix
-        print(test, "  already initialized")
+        print(test, "already initialized")
     except NameError:
         load_optix()
         print("OptiX library initialized")
@@ -33,7 +33,7 @@ def catch_c_error(function):
         if not ret:
             buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
             optix.GetOptiXLastError(buf, 256)
-            print(function.__name__, args, kwargs,"error", buf.value)
+            print(function.__name__, args, kwargs, "error", buf.value)
         else:
             if confirm and confirm_ok:
                 print(function.__name__, "ok")
@@ -46,8 +46,6 @@ def load_optix():
     global optix
     print("intialzing SR library")
     optix = ctypes.cdll.LoadLibrary(r'D:\Dennetiere\optix\release\OptiX.dll')
-    # optix.LoadSolemioFile.restype = BYTE  # gcc bool match to ctypes BYTE
-    # optix.LoadSolemioFile.argtypes = [LPCSTR]
     optix.GetOptiXLastError.restype = BYTE
     optix.GetOptiXLastError.argtypes = [ctypes.c_char_p, INT]
     return optix
@@ -220,7 +218,7 @@ def get_spot_diagram(element_id, diagram, distance=0):
     ret = optix.GetSpotDiagram(element_id, ctypes.byref(diagram), DOUBLE(distance))
     return ret
 
+
 @catch_c_error
 def version():
     optix.Version()
-

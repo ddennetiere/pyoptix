@@ -2,13 +2,13 @@
 import numpy as np
 from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_int64, create_string_buffer
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
-from pyoptix.exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
-                                       get_element_name, set_recording, get_next_element, get_previous_element,
-                                       get_spot_diagram, chain_element_by_id, create_element, clear_impacts)
+from .exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
+                                get_element_name, set_recording, get_next_element, get_previous_element,
+                                get_spot_diagram, chain_element_by_id, create_element, clear_impacts)
 from scipy.constants import degree
 from lxml import etree
 import pandas as pd
-from pyoptix.ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet
+from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet
 from numpy import pi
 
 # dictionnary for optix to pyoptix attribute import
@@ -230,7 +230,7 @@ class Beamline(object):
             yp = -x * np.sin(theta) + y * np.cos(theta)
             return xp, yp
 
-        def make_box(oe_type="film", center=(0, 0), angle=0, figure=None, direction="straight", height=10,
+        def make_box(oe_type="film", center=(0, 0), angle=0, fig=None, direction="straight", height=10,
                      color="blue"):
             if oe_type == "film":
                 width = 1
@@ -256,7 +256,7 @@ class Beamline(object):
                 xs=[x1 + center[0], x2 + center[0], x3 + center[0], x4 + center[0]],
                 ys=[y1 + center[1], y2 + center[1], y3 + center[1], y4 + center[1]],
             )
-            figure.add_layout(polygon)
+            fig.add_layout(polygon)
 
         print(self.active_chain)
         total_phi = 0
@@ -269,31 +269,31 @@ class Beamline(object):
         for oe in self.active_chain:
             total_phi += oe.phi
             if oe.theta == 0:
-                make_box(oe_type="film", center=top_points[-1], angle=-total_theta_top * pi / 180, figure=p,
+                make_box(oe_type="film", center=top_points[-1], angle=-total_theta_top * pi / 180, fig=p,
                          direction="straight", height=10)
-                make_box(oe_type="film", center=side_points[-1], angle=-total_theta_side * pi / 180, figure=p,
+                make_box(oe_type="film", center=side_points[-1], angle=-total_theta_side * pi / 180, fig=p,
                          direction="straight", height=10)
             elif abs(abs(total_phi) % pi) < 1e-5:
                 if abs(total_phi % (2 * pi) - pi) < 1e-5:
                     make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side - 15) * pi / 180,
-                             figure=p, direction="down", height=10)
+                             fig=p, direction="down", height=10)
                     total_theta_side -= 30
                 else:
                     make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side + 15) * pi / 180,
-                             figure=p, direction="up", height=10)
+                             fig=p, direction="up", height=10)
                     total_theta_side = 30
-                make_box(oe_type="mirror", center=top_points[-1], angle=-total_theta_top * pi / 180, figure=p,
+                make_box(oe_type="mirror", center=top_points[-1], angle=-total_theta_top * pi / 180, fig=p,
                          direction="straight", height=10)
             elif abs(abs(total_phi) % (pi / 2)) < 1e-5:
                 if abs(total_phi % (pi * 2) - pi / 2) < 1e-5:
                     make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top + 15) * pi / 180,
-                             figure=p, direction="up", height=10)
+                             fig=p, direction="up", height=10)
                     total_theta_top += 30
                 else:
                     make_box(oe_type="mirror", center=top_points[-1], angle=-(total_theta_top - 15) * pi / 180,
-                             figure=p, direction="down", height=10)
+                             fig=p, direction="down", height=10)
                     total_theta_top -= 30
-                make_box(oe_type="mirror", center=side_points[-1], angle=-total_theta_side * pi / 180, figure=p,
+                make_box(oe_type="mirror", center=side_points[-1], angle=-total_theta_side * pi / 180, fig=p,
                          direction="straight", height=10)
             else:
                 raise Exception("unable to parse oe", oe.name)
@@ -1423,7 +1423,8 @@ def parse_xml(filename):
     tree = etree.parse(filename)
     beamline = Beamline()
     for user in tree.xpath("/system/element"):
-        new_element = OpticalElement(name=user.get("name"), next_element=user.get("next"), previous=user.get("previous"))
+        new_element = OpticalElement(name=user.get("name"), next_element=user.get("next"),
+                                     previous=user.get("previous"))
         beamline.add_element(new_element)
     beamline.chain()
 

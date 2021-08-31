@@ -2,8 +2,6 @@ from scipy.stats import pearsonr
 from scipy.optimize import minimize
 import pandas as pd
 import numpy as np
-from .exposed_functions import get_spot_diagram
-from .classes import Diagram, RecordingMode
 
 
 def focus(beamline, variable_oe, variable, screen, dimension="y", method=None):
@@ -27,4 +25,3 @@ def focus(beamline, variable_oe, variable, screen, dimension="y", method=None):
         return solution.x
     else:
         raise RuntimeError("Unable to reach an optimum")
-

@@ -28,12 +28,10 @@ options are :
 import os
 import sys
 from ctypes import create_string_buffer, c_char
-sys.path.append(os.path.abspath("../.."))
-print(sys.path)
 import numpy as np
-import pyoptix.classes as classes
-from pyoptix.exposed_functions import *
-import pyoptix.ui_objects as ui_objects
+from ...pyoptix import classes
+from ...pyoptix.exposed_functions import *
+from ...pyoptix import ui_objects
 
 global optix
 
