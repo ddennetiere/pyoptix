@@ -133,11 +133,18 @@ class Beamline(object):
     Class for describing a beamline in optix
     """
 
-    def __init__(self):
+    def __init__(self, name="Beamline"):
+        """
+        Constructor of the class Beamline which holds the name of the beamline and all configurations of it called
+        chains
+        :param name: Name of the beamline
+        :type name: str
+        """
         super().__init__()
         self._elements = []
         self._chains = BeamlineChainDict({})
         self._active_chain = None
+        self.name = name
 
     @property
     def chains(self):
@@ -574,7 +581,7 @@ class OpticalElement(object):
         return description
 
     def show_diagram(self, nrays, distance_from_oe=0, map_xy=False, light_xy=False,
-                     light_xxp=False, light_yyp=False, show_first_rays=False):
+                     light_xxp=False, light_yyp=False, show_first_rays=False, beamline=None):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
@@ -592,13 +599,26 @@ class OpticalElement(object):
         :type light_xxp: bool
         :param light_yyp: set to True for quick monochromatic rendering of Y' vs Y scatter plot
         :type light_yyp: bool
+        :param beamline: Beamline of the optical element
+        :type beamline: pyoptix.Beamline
         :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
         :return: None
         """
+        beamline_name = None
+        chain_name = None
+        if beamline is not None:
+            beamline_name = beamline.name
+            for n, v in beamline.chains.items():
+                if v == beamline.active_chain:
+                    chain_name = n
+        print(beamline_name, chain_name)
         spots = self.get_diagram(nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
-        figs = [plot_spd(spots, x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy),
-                plot_spd(spots, x_key="X", y_key="dX", light_plot=light_xxp),
-                plot_spd(spots, x_key="Y", y_key="dY", light_plot=light_yyp)]
+        figs = [plot_spd(spots, x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
+                         beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name),
+                plot_spd(spots, x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
+                         chain_name=chain_name, oe_name=self._name),
+                plot_spd(spots, x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
+                         chain_name=chain_name, oe_name=self._name)]
 
         for fig in figs:
             show(fig)

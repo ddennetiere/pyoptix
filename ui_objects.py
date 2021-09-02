@@ -46,7 +46,7 @@ def to_jet(grayscale):
 TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save, box_zoom"
 
 
-def plot_spd(dataframe, x_key="x", y_key="y", **kwargs):
+def plot_spd(dataframe, x_key="x", y_key="y", oe_name="", **kwargs):
     """
     Wrapper function for the PyOptix object of the scatter_plot_2d function. Data is expected as first parameter
     in a pandas.Dataframe, the column names must contain X_key and y_key.
@@ -58,6 +58,8 @@ def plot_spd(dataframe, x_key="x", y_key="y", **kwargs):
     :param y_key:  name of the Dataframe column containing the Y value
     :type y_key: str
     :param kwargs: See scatter_plot_2d doc for additionnal parameters
+    :param oe_name: Name of the optical element where the diagram is captured
+    :type oe_name: str
     :return: layout of the plot to be used as parameter of bokeh.plotting.show
     :rtype: bokeh.models.layouts.LayoutDOM
     """
@@ -69,7 +71,17 @@ def plot_spd(dataframe, x_key="x", y_key="y", **kwargs):
         y_unit = "rad"
     else:
         y_unit = "m"
-    layout = scatter_plot_2d(dataframe[x_key], dataframe[y_key], title=f"{y_key} vs {x_key}",
+    title = f"{y_key} vs {x_key}"
+    if oe_name != "":
+        title += f" on {oe_name}"
+    if "beamline_name" in kwargs.keys() and "chain_name" in kwargs.keys():
+        beamline_name = kwargs.pop("beamline_name")
+        chain_name = kwargs.pop("chain_name")
+        if beamline_name is not None:
+            title += f" of {beamline_name}"
+        if chain_name is not None:
+            title += f" in config. {chain_name}"
+    layout = scatter_plot_2d(dataframe[x_key], dataframe[y_key], title=title,
                              x_label=x_key, x_unit=x_unit, y_label=y_key, y_unit=y_unit, **kwargs)
     return layout
 
