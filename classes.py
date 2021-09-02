@@ -339,6 +339,28 @@ class Beamline(object):
             p.add_layout(labels_side)
         show(p)
 
+    def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=500):
+        self.clear_impacts(clear_source=True)
+        self.align(wavelength)
+        self.generate(wavelength)
+        self.radiate()
+        spd_lambda = mono_slit.get_diagram(self.active_chain[0].nrays)
+        self.clear_impacts(clear_source=True)
+        self.generate(wavelength+wavelength/dlambda_over_lambda)
+        self.radiate()
+        spd_delta_lambda = mono_slit.get_diagram(self.active_chain[0].nrays)
+        if orientation == "vertical":
+            dim = "Y"
+        elif orientation == "horizontal":
+            dim = "X"
+        else:
+            raise AttributeError("Unknown orientation")
+        mono_chr_fwhm = 2.35*np.std(spd_lambda[dim])
+        distance = abs(np.mean(spd_lambda[dim]) - np.mean(spd_delta_lambda[dim]))
+        resolution = dlambda_over_lambda*distance/mono_chr_fwhm
+        return resolution
+
+
 
 class OpticalElement(object):
     """
