@@ -57,7 +57,7 @@ def plot_spd(dataframe, x_key="x", y_key="y", oe_name="", **kwargs):
     :type x_key: str
     :param y_key:  name of the Dataframe column containing the Y value
     :type y_key: str
-    :param kwargs: See scatter_plot_2d doc for additionnal parameters
+    :param kwargs: See scatter_plot_2d doc for additional parameters
     :param oe_name: Name of the optical element where the diagram is captured
     :type oe_name: str
     :return: layout of the plot to be used as parameter of bokeh.plotting.show
