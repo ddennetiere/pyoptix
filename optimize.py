@@ -4,8 +4,8 @@ import pandas as pd
 import numpy as np
 
 
-def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nrays=None, method=None,
-          show_progress=False, tol=1e-3):
+def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nrays=None, method="Nelder-Mead",
+          show_progress=False, tol=1e-3, options=None):
     """
     Function to be called for minimizing a focused spot diagram placed at "screen" by varying the parameter "variable"
     of the optical element "variable_oe" of the "beamline" beamline. Each iteration is realigned at wavelength
@@ -27,17 +27,21 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
     :type dimension: str
     :param nrays: Number of rays to propagate
     :type nrays: int
-    :param method: Method to be used for minimisation
+    :param method: Method to be used for minimisation, default "Nedler-Mead"
     :type method: str
     :param show_progress: If True, each iteration will print the current variable value and value of the function
                           to be minimized
     :type show_progress: bool
     :param tol: Tolerance for the optimizer, See scipy.optimize.minimize documentation
     :type tol: float
+    :param options: Method-specific options, see scipy.optimize.minimize for details
+    :type options: dict
     :return: optimal value of the variable to achieve focusing
     :rtype: float
     :raises RuntimeError: if variable has no effect or minimum cannot be reached with asked tolerance
     """
+    if options is None:
+        options = {}
     old_nrays = int(beamline.active_chain[0].nrays)
     old_link = screen.next
     screen.next = None
@@ -66,7 +70,13 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
         if show_progress:
             print(value, ret)
         return ret
-    solution = minimize(correlation, variable_oe.__getattribute__(variable), method=method, tol=tol, bounds=bounds)
+
+    if "fatol" not in options.keys() and method == "Nedler-Mead":
+        options["fatol"] = tol
+    if "xatol" not in options.keys() and method == "Nedler-Mead":
+        options["xatol"] = tol
+    solution = minimize(correlation, variable_oe.__getattribute__(variable), method=method, tol=tol, bounds=bounds,
+                        options=options)
     print(f"Minimization success: {solution.success}, converged to {variable_oe.name}.{variable} = {solution.x}")
     beamline.active_chain[0].nrays = int(old_nrays)
     screen.next = old_link
