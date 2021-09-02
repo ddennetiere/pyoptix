@@ -233,9 +233,14 @@ class Beamline(object):
         if new_element not in self._elements:
             self._elements.append(new_element)
 
-    def draw_active_chain(self):
+    def draw_active_chain(self, top_only=False, side_only=False):
         """
         Draws a *not to scale* diagram of the beamline top and side views for debug purposes
+
+        :param top_only: If True only draws the beamline viewed from the top
+        :type top_only: bool
+        :param side_only: If True only draws the beamline viewed from the side
+        :type side_only: bool
         :return: None
         """
         def rotate(x, y, theta=0):
@@ -322,14 +327,16 @@ class Beamline(object):
         source_side = ColumnDataSource(data=dict(X=side_points[:-1, 0],
                                                  Y=side_points[:-1, 1],
                                                  names=[element.name for element in self.active_chain]))
-        p.line(side_points[:-1, 0], side_points[:-1, 1], color="red", legend_label="side view")
-        p.line(top_points[:-1, 0], top_points[:-1, 1], color="blue", legend_label="top view")
-        labels_top = LabelSet(x='X', y='Y', text='names', angle=30,
-                              x_offset=0, y_offset=-15, source=source_top, render_mode='canvas')
-        labels_side = LabelSet(x='X', y='Y', text='names', angle=-30,
-                               x_offset=0, y_offset=15, source=source_side, render_mode='canvas')
-        p.add_layout(labels_top)
-        p.add_layout(labels_side)
+        if not side_only:
+            p.line(top_points[:-1, 0], top_points[:-1, 1], color="blue", legend_label="top view")
+            labels_top = LabelSet(x='X', y='Y', text='names', angle=30,
+                                  x_offset=0, y_offset=-15, source=source_top, render_mode='canvas')
+            p.add_layout(labels_top)
+        if not top_only:
+            p.line(side_points[:-1, 0], side_points[:-1, 1], color="red", legend_label="side view")
+            labels_side = LabelSet(x='X', y='Y', text='names', angle=-30,
+                                   x_offset=0, y_offset=15, source=source_side, render_mode='canvas')
+            p.add_layout(labels_side)
         show(p)
 
 
