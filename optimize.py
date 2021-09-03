@@ -2,6 +2,60 @@ from scipy.stats import pearsonr
 from scipy.optimize import minimize
 import pandas as pd
 import numpy as np
+from ipywidgets import interact, Layout
+import ipywidgets as widgets
+from bokeh.io import push_notebook
+
+
+def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable_step=0.1, screen=None, beamline=None,
+                     wavelength=6e-9, display="yyp", light_spd=False):
+    """
+    Prints out the spot diagram kind asked in display on the surface of 'screen' and a slider object which when moved
+    will update the spot diagram.
+    The slider sets the value of the variable 'variable' of the optical element 'variable_oe' between
+    'variable_bounds' by increment of 'variable_step'.
+    All propagated rays are at wavelength 'wavelength'.
+    :param variable_oe: Optical element whose parameter must be varied
+    :type variable_oe: any class inheriting pyoptix.OpticalElement
+    :param variable: name of the parameter to be varied
+    :type variable: str
+    :param wavelength: wavelength at which beamline must be aligned in m.
+    :type wavelength: float
+    :param screen: recording surface where beam must be focused
+    :type screen: any class inheriting pyoptix.OpticalElement
+    :param variable_bounds: Bounds of the variable and thus the slider
+    :type variable_bounds: tuple fo float
+    :param variable_step: Minimum increment for the slider
+    :type variable_step: float
+    :param beamline: Beamline along which to propagate rays
+    :type beamline: pyoptix.Beamline
+    :param display: Indicates which representation is to be shown, can be "xy", "xxp" or "yyp"
+    :type display:str
+    :param light_spd: set to True for quick monochromatic rendering of the scatter plot
+    :type light_spd: bool
+    :return: None
+    :rtype: NoneType
+    """
+    assert display != "all"
+    assert " " not in display
+    datasource, handles = screen.show_diagram(beamline.active_chain[0].nrays, beamline=beamline, display=display,
+                                              light_yyp=light_spd, light_xy=light_spd, light_xxp=light_spd)
+    beamline.clear_impacts(clear_source=True)
+    beamline.generate(wavelength)
+    v0 = variable_oe.__getattribute__(variable)
+
+    def f(x):
+        beamline.clear_impacts(clear_source=False)
+        variable_oe.__setattr__(variable, x)
+        beamline.align(wavelength)
+        beamline.radiate()
+        spd = screen.get_diagram(beamline.active_chain[0].nrays)
+        datasource.data.update(spd)
+        push_notebook(handle=handles[0])
+
+    interact(f, x=widgets.FloatSlider(min=variable_bounds[0], max=variable_bounds[1], step=variable_step,
+                                      value=v0, continuous_update=False, layout=Layout(width='90%'),
+                                      description=f"{variable}"))
 
 
 def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nrays=None, method="Nelder-Mead",
