@@ -46,13 +46,13 @@ def to_jet(grayscale):
 TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save, box_zoom"
 
 
-def plot_spd(dataframe, x_key="x", y_key="y", oe_name="", **kwargs):
+def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
     """
     Wrapper function for the PyOptix object of the scatter_plot_2d function. Data is expected as first parameter
     in a pandas.Dataframe, the column names must contain X_key and y_key.
 
-    :param dataframe: Data to be plotted.
-    :type dataframe: pandas.Dataframe
+    :param columndatasource: ColumnDataSource to be plotted with keys given by xkey and ykey
+    :type columndatasource: bokeh.models.ColumnDataSource
     :param x_key: name of the Dataframe column containing the X value
     :type x_key: str
     :param y_key:  name of the Dataframe column containing the Y value
@@ -81,21 +81,23 @@ def plot_spd(dataframe, x_key="x", y_key="y", oe_name="", **kwargs):
             title += f" of {beamline_name}"
         if chain_name is not None:
             title += f" in config. {chain_name}"
-    layout = scatter_plot_2d(dataframe[x_key], dataframe[y_key], title=title,
+    layout = scatter_plot_2d(columndatasource, x_key, y_key, title=title,
                              x_label=x_key, x_unit=x_unit, y_label=y_key, y_unit=y_unit, **kwargs)
     return layout
 
 
-def scatter_plot_2d(x, y, title="", x_unit="", y_unit="", show_map=False, light_plot=False, orthonorm=False, radius=5,
+def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=False, light_plot=False, orthonorm=False, radius=5,
                     x_label="", y_label="", save_in_file="", return_fwhm=False):
     """
     Function that draws a scatter plot using bokeh. Scatter points are colored as a function of local density so as
     to better grip spot shape when density gets high.
 
-    :param x: X data coordinate
-    :type x: numpy.ndarray
-    :param y: Y data coordinate
-    :type y: numpy.ndarray
+    :param cds: ColumnDataSource to be plotted with keys given by xkey and ykey
+    :type cds: bokeh.models.ColumnDataSource
+    :param xkey: X data coordinate
+    :type xkey: numpy.ndarray
+    :param ykey: Y data coordinate
+    :type ykey: numpy.ndarray
     :param title: Title of the plot
     :type title: str
     :param x_unit: Unit of the X coordinate
@@ -122,6 +124,8 @@ def scatter_plot_2d(x, y, title="", x_unit="", y_unit="", show_map=False, light_
     :return: layout of the plot to be used as parameter of bokeh.plotting.show or tuple (layout, FWHMs)
     :rtype: bokeh.models.layouts.LayoutDOM or (LayoutDOM, (float, float))
     """
+    x = cds.data[xkey]
+    y = cds.data[ykey]
     if not light_plot and not show_map:
         # Calculate the point density
         xy = np.vstack([x, y])
@@ -130,6 +134,7 @@ def scatter_plot_2d(x, y, title="", x_unit="", y_unit="", show_map=False, light_
         colors_jet = ["#%02x%02x%02x" % (to_jet(grayscale)) for grayscale in z]
     else:
         colors_jet = ["blue"]*x.shape[0]
+    cds.data["color"] = colors_jet
     # create the scatter plot
 
     if orthonorm:
@@ -157,7 +162,8 @@ def scatter_plot_2d(x, y, title="", x_unit="", y_unit="", show_map=False, light_
         p.hex_tile(q="q", r="r", size=min(np.ptp(x), np.ptp(y))/100, line_color=None, source=bins,
                    fill_color=linear_cmap('counts', 'Viridis256', 0, max(bins.counts)), alpha=1)
     else:
-        p.circle(x, y, size=radius, color=colors_jet, alpha=0.1)
+        p.circle(x=xkey, y=ykey, source=cds, size=radius, color="color", alpha=0.1)
+        # p.circle(x, y, size=radius, color=colors_jet, alpha=0.1)
 
     # create the horizontal histogram
     hhist, hedges = np.histogram(x, bins=max(20, int(x.shape[0] / 1000)))

@@ -610,7 +610,7 @@ class OpticalElement(object):
         return description
 
     def show_diagram(self, nrays, distance_from_oe=0, map_xy=False, light_xy=False,
-                     light_xxp=False, light_yyp=False, show_first_rays=False, beamline=None):
+                     light_xxp=False, light_yyp=False, show_first_rays=False, beamline=None, display="all"):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
@@ -631,7 +631,10 @@ class OpticalElement(object):
         :param beamline: Beamline of the optical element
         :type beamline: pyoptix.Beamline
         :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
-        :return: None
+        :param display: Indicates which representation is to be shown, can be "xy", "xy, xxp"... or "all"
+        :type display:
+        :return: tuple of (spd_data, handle(s) of the figures)
+        :rtype: tuple
         """
         beamline_name = None
         chain_name = None
@@ -642,15 +645,23 @@ class OpticalElement(object):
                     chain_name = n
         print(beamline_name, chain_name)
         spots = self.get_diagram(nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
-        figs = [plot_spd(spots, x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
-                         beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name),
-                plot_spd(spots, x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
-                         chain_name=chain_name, oe_name=self._name),
-                plot_spd(spots, x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
-                         chain_name=chain_name, oe_name=self._name)]
-
+        datasource = ColumnDataSource(spots)
+        figs = []
+        if display == "all":
+            display = "xy, xxp, yyp"
+        if "xy" in display:
+            figs.append(plot_spd(datasource, x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
+                                 beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name))
+        if "xxp" in display:
+            figs.append(plot_spd(datasource, x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
+                                 chain_name=chain_name, oe_name=self._name))
+        if "yyp" in display:
+            figs.append(plot_spd(datasource, x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
+                                 chain_name=chain_name, oe_name=self._name))
+        handles = []
         for fig in figs:
-            show(fig)
+            handles.append(show(fig, notebook_handle=True))
+        return datasource, handles
 
     def get_diagram(self, nrays, distance_from_oe=0, show_first_rays=False):
         """
