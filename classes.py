@@ -343,23 +343,20 @@ class Beamline(object):
         self.clear_impacts(clear_source=True)
         self.align(wavelength)
         self.generate(wavelength)
-        self.radiate()
-        spd_lambda = mono_slit.get_diagram(self.active_chain[0].nrays)
-        self.clear_impacts(clear_source=True)
         self.generate(wavelength+wavelength/dlambda_over_lambda)
         self.radiate()
-        spd_delta_lambda = mono_slit.get_diagram(self.active_chain[0].nrays)
+        spd = mono_slit.get_diagram(self.active_chain[0].nrays*2)
         if orientation == "vertical":
             dim = "Y"
         elif orientation == "horizontal":
             dim = "X"
         else:
             raise AttributeError("Unknown orientation")
-        mono_chr_fwhm = 2.35*np.std(spd_lambda[dim])
-        distance = abs(np.mean(spd_lambda[dim]) - np.mean(spd_delta_lambda[dim]))
+        mono_chr_fwhm = 2.35*np.std(spd.where(spd["Lambda"] == wavelength)[dim])
+        distance = abs(np.mean(spd.where(spd["Lambda"] == wavelength, inplace=False)[dim]) -
+                       np.mean(spd.where(spd["Lambda"] == wavelength+wavelength/dlambda_over_lambda, inplace=False)[dim]))
         resolution = dlambda_over_lambda*distance/mono_chr_fwhm
         return resolution
-
 
 
 class OpticalElement(object):
@@ -610,7 +607,7 @@ class OpticalElement(object):
         return description
 
     def show_diagram(self, nrays, distance_from_oe=0, map_xy=False, light_xy=False,
-                     light_xxp=False, light_yyp=False, show_first_rays=False, beamline=None, display="all"):
+                     light_xxp=False, light_yyp=False, show_first_rays=False, beamline=None, display="all", **kwargs):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
@@ -632,7 +629,8 @@ class OpticalElement(object):
         :type beamline: pyoptix.Beamline
         :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
         :param display: Indicates which representation is to be shown, can be "xy", "xy, xxp"... or "all"
-        :type display:
+        :type display: str
+        :param kwargs: See pyoptix.ui_objects.plot_spd doc for additional parameters
         :return: tuple of (spd_data, handle(s) of the figures)
         :rtype: tuple
         """
@@ -651,13 +649,13 @@ class OpticalElement(object):
             display = "xy, xxp, yyp"
         if "xy" in display:
             figs.append(plot_spd(datasource, x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
-                                 beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name))
+                                 beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name, **kwargs))
         if "xxp" in display:
             figs.append(plot_spd(datasource, x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
-                                 chain_name=chain_name, oe_name=self._name))
+                                 chain_name=chain_name, oe_name=self._name, **kwargs))
         if "yyp" in display:
             figs.append(plot_spd(datasource, x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
-                                 chain_name=chain_name, oe_name=self._name))
+                                 chain_name=chain_name, oe_name=self._name, **kwargs))
         handles = []
         for fig in figs:
             handles.append(show(fig, notebook_handle=True))
