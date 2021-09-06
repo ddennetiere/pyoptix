@@ -8,7 +8,7 @@ from bokeh.io import push_notebook
 
 
 def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable_step=0.1, screen=None, beamline=None,
-                     wavelength=6e-9, display="yyp", light_spd=False):
+                     wavelength=6e-9, nrays=None, display="yyp", light_spd=False):
     """
     Prints out the spot diagram kind asked in display on the surface of 'screen' and a slider object which when moved
     will update the spot diagram.
@@ -21,6 +21,8 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
     :type variable: str
     :param wavelength: wavelength at which beamline must be aligned in m.
     :type wavelength: float
+    :param nrays: Number of rays to propagate
+    :type nrays: int
     :param screen: recording surface where beam must be focused
     :type screen: any class inheriting pyoptix.OpticalElement
     :param variable_bounds: Bounds of the variable and thus the slider
@@ -38,11 +40,15 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
     """
     assert display != "all"
     assert " " not in display
+    if nrays is None:
+        nrays = int(beamline.active_chain[0].nrays)
+    else:
+        beamline.active_chain[0].nrays = int(nrays)
     beamline.clear_impacts(clear_source=True)
     beamline.align(wavelength)
     beamline.generate(wavelength)
     beamline.radiate()
-    datasource, handles = screen.show_diagram(beamline.active_chain[0].nrays, beamline=beamline, display=display,
+    datasource, handles = screen.show_diagram(nrays, beamline=beamline, display=display,
                                               light_yyp=light_spd, light_xy=light_spd, light_xxp=light_spd)
     v0 = variable_oe.__getattribute__(variable)
 
@@ -51,7 +57,7 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
         variable_oe.__setattr__(variable, x)
         beamline.align(wavelength)
         beamline.radiate()
-        spd = screen.get_diagram(beamline.active_chain[0].nrays)
+        spd = screen.get_diagram(nrays)
         datasource.data.update(spd)
         push_notebook(handle=handles[0])
 
