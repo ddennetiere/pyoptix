@@ -38,10 +38,12 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
     """
     assert display != "all"
     assert " " not in display
+    beamline.clear_impacts(clear_source=True)
+    beamline.align(wavelength)
+    beamline.generate(wavelength)
+    beamline.radiate()
     datasource, handles = screen.show_diagram(beamline.active_chain[0].nrays, beamline=beamline, display=display,
                                               light_yyp=light_spd, light_xy=light_spd, light_xxp=light_spd)
-    beamline.clear_impacts(clear_source=True)
-    beamline.generate(wavelength)
     v0 = variable_oe.__getattribute__(variable)
 
     def f(x):
