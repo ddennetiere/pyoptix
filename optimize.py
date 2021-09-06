@@ -108,6 +108,8 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
     bounds = None
     if variable_oe.get_whole_parameter(variable)["bounds"] != (0, 0):
         bounds = variable_oe.get_whole_parameter(variable)["bounds"]
+    beamline.clear_impacts(clear_source=True)
+    beamline.generate(wavelength)
 
     def correlation(value):
         variable_oe.__setattr__(variable, value)
