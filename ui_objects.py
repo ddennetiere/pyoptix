@@ -124,8 +124,8 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     :return: layout of the plot to be used as parameter of bokeh.plotting.show or tuple (layout, FWHMs)
     :rtype: bokeh.models.layouts.LayoutDOM or (LayoutDOM, (float, float))
     """
-    x = cds.data[xkey]
-    y = cds.data[ykey]
+    x = np.copy(cds.data[xkey])
+    y = np.copy(cds.data[ykey])
     if not light_plot and not show_map:
         # Calculate the point density
         xy = np.vstack([x, y])
@@ -134,7 +134,7 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
         colors_jet = ["#%02x%02x%02x" % (to_jet(grayscale)) for grayscale in z]
     else:
         colors_jet = ["blue"]*x.shape[0]
-    cds.data["color"] = colors_jet
+    cds.data[f"color{xkey}{ykey}"] = colors_jet
     # create the scatter plot
 
     if orthonorm:
@@ -162,7 +162,7 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
         p.hex_tile(q="q", r="r", size=min(np.ptp(x), np.ptp(y))/100, line_color=None, source=bins,
                    fill_color=linear_cmap('counts', 'Viridis256', 0, max(bins.counts)), alpha=1)
     else:
-        p.circle(x=xkey, y=ykey, source=cds, size=radius, color="color", alpha=0.1)
+        p.circle(x=xkey, y=ykey, source=cds, size=radius, color=f"color{xkey}{ykey}", alpha=0.1)
         # p.circle(x, y, size=radius, color=colors_jet, alpha=0.1)
 
     # create the horizontal histogram
