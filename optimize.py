@@ -63,7 +63,7 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
 
     interact(f, x=widgets.FloatSlider(min=variable_bounds[0], max=variable_bounds[1], step=variable_step,
                                       value=v0, continuous_update=False, layout=Layout(width='90%'),
-                                      description=f"{variable}"))
+                                      description=f"{variable}", readout_format='.3e'))
 
 
 def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nrays=None, method="Nelder-Mead",
