@@ -740,10 +740,9 @@ class OpticalElement(object):
         :type recording_mode: str
         :return: None
         """
-        set_recording(self._element_id,
-                      {"output": RecordingMode.recording_output,
-                       "input": RecordingMode.recording_input,
-                       "not_recording": RecordingMode.recording_none}[recording_mode])
+        self._recording_mode = {"output": RecordingMode.recording_output,
+                                "input": RecordingMode.recording_input,
+                                "not_recording": RecordingMode.recording_none}[recording_mode]
 
 
 class Source(OpticalElement):
