@@ -142,7 +142,7 @@ def get_element_name(element_id, element_name):
 @catch_c_error
 def set_recording(element_id, recording_mode):
     optix.SetRecording.argtypes = [HANDLE, INT]
-    optix.SetRecording.restype = INT
+    optix.SetRecording.restype = BOOLEAN
     ret = optix.SetRecording(element_id, recording_mode)
     return ret
 
