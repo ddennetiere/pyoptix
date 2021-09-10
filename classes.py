@@ -171,6 +171,7 @@ class Beamline(object):
         assert chain_name in self._chains.keys()
         self._active_chain = self.chains[chain_name]
         for i, oe in enumerate(self._active_chain):
+            oe.beamline = self
             try:
                 oe.next = self._active_chain[i + 1]
             except IndexError:
@@ -365,7 +366,7 @@ class OpticalElement(object):
     """
     def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0,
                  d_x=0, d_y=0, d_z=0, next_element=None, previous=None, distance_from_previous=0, element_id=None,
-                 element_type=""):
+                 element_type="", beamline=None):
         """
         Constructor for all optical elements. Parameters can be set in constructor or at a later time.
 
@@ -416,6 +417,8 @@ class OpticalElement(object):
         :type element_id: wintypes.INT
         :param element_type: class of the OpticalElement (if unsure of which to chose, use an inherited class)
         :type element_type: str
+        :param beamline: Beamline of the element
+        :type beamline: pyoptix.Beamline
         """
         super().__init__()
         self._recording_mode = RecordingMode.recording_none
@@ -441,6 +444,7 @@ class OpticalElement(object):
         self.next = next_element
         self.previous = previous
         self.distance_from_previous = distance_from_previous
+        self.beamline = beamline
 
     def get_whole_parameter(self, param_name):
         param = Parameter()
@@ -606,14 +610,14 @@ class OpticalElement(object):
         description += f"\n\t oriented in yaw at {self._psi / degree} deg\n"
         return description
 
-    def show_diagram(self, nrays, distance_from_oe=0, map_xy=False, light_xy=False,
-                     light_xxp=False, light_yyp=False, show_first_rays=False, beamline=None, display="all", **kwargs):
+    def show_diagram(self, nrays=None, distance_from_oe=0, map_xy=False, light_xy=False,
+                     light_xxp=False, light_yyp=False, show_first_rays=False, display="all", **kwargs):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
         For quick display, light_xy, light_xxp and light_yyp can be set to True.
         For more realistic rendering, map_xy can be set to True.
-        :param nrays: number of expected rays. Should match the parameter nrays of the source element.
+        :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
         :type nrays: int
         :param distance_from_oe: distance from the element at which to draw the spot diagram in m
         :type distance_from_oe: str
@@ -625,8 +629,6 @@ class OpticalElement(object):
         :type light_xxp: bool
         :param light_yyp: set to True for quick monochromatic rendering of Y' vs Y scatter plot
         :type light_yyp: bool
-        :param beamline: Beamline of the optical element
-        :type beamline: pyoptix.Beamline
         :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
         :param display: Indicates which representation is to be shown, can be "xy", "xy, xxp"... or "all"
         :type display: str
@@ -636,13 +638,15 @@ class OpticalElement(object):
         """
         beamline_name = None
         chain_name = None
-        if beamline is not None:
-            beamline_name = beamline.name
-            for n, v in beamline.chains.items():
-                if v == beamline.active_chain:
+        if self.beamline is not None:
+            beamline_name = self.beamline.name
+            for n, v in self.beamline.chains.items():
+                if v == self.beamline.active_chain:
                     chain_name = n
         print(beamline_name, chain_name)
-        spots = self.get_diagram(nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
+        if nrays is None:
+            nrays = self.beamline.active_chain[0].nrays
+        spots = self.get_diagram(nrays=nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
         datasource = ColumnDataSource(spots)
         figs = []
         if display == "all":
@@ -661,13 +665,13 @@ class OpticalElement(object):
             handles.append(show(fig, notebook_handle=True))
         return datasource, handles
 
-    def get_diagram(self, nrays, distance_from_oe=0, show_first_rays=False):
+    def get_diagram(self, nrays=None, distance_from_oe=0, show_first_rays=False):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
         For quick display, light_xy, light_xxp and light_yyp can be set to True.
         For more realistic rendering, map_xy can be set to True.
-        :param nrays: number of expected rays. Should match the parameter nrays of the source element.
+        :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
         :type nrays: int
         :param distance_from_oe: distance from the element at which to draw the spot diagram in m
         :type distance_from_oe: str
@@ -676,6 +680,8 @@ class OpticalElement(object):
         :return: pandas.Dataframe containing all rays intercept on the optics surface
         """
         assert self.recording_mode != RecordingMode.recording_none
+        if nrays is None:
+            nrays = self.beamline.active_chain[0].nrays
         diagram = Diagram(ndim=5, nreserved=int(nrays))
         get_spot_diagram(self.element_id, diagram, distance=distance_from_oe)
         spots = pd.DataFrame(np.copy(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim))),

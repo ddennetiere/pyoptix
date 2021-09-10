@@ -7,7 +7,7 @@ import ipywidgets as widgets
 from bokeh.io import push_notebook
 
 
-def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable_step=0.1, screen=None, beamline=None,
+def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable_step=0.1, screen=None,
                      wavelength=6e-9, nrays=None, display="yyp", light_spd=False):
     """
     Prints out the spot diagram kind asked in display on the surface of 'screen' and a slider object which when moved
@@ -41,22 +41,22 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
     assert display != "all"
     assert " " not in display
     if nrays is None:
-        nrays = int(beamline.active_chain[0].nrays)
+        nrays = int(screen.beamline.active_chain[0].nrays)
     else:
-        beamline.active_chain[0].nrays = int(nrays)
-    beamline.clear_impacts(clear_source=True)
-    beamline.align(wavelength)
-    beamline.generate(wavelength)
-    beamline.radiate()
-    datasource, handles = screen.show_diagram(nrays, beamline=beamline, display=display,
-                                              light_yyp=light_spd, light_xy=light_spd, light_xxp=light_spd)
+        screen.beamline.active_chain[0].nrays = int(nrays)
+    screen.beamline.clear_impacts(clear_source=True)
+    screen.beamline.align(wavelength)
+    screen.beamline.generate(wavelength)
+    screen.beamline.radiate()
+    datasource, handles = screen.show_diagram(display=display, light_yyp=light_spd, light_xy=light_spd,
+                                              light_xxp=light_spd)
     v0 = variable_oe.__getattribute__(variable)
 
     def f(x):
-        beamline.clear_impacts(clear_source=False)
+        screen.beamline.clear_impacts(clear_source=False)
         variable_oe.__setattr__(variable, x)
-        beamline.align(wavelength)
-        beamline.radiate()
+        screen.beamline.align(wavelength)
+        screen.beamline.radiate()
         spd = screen.get_diagram(nrays)
         datasource.data.update(spd)
         push_notebook(handle=handles[0])
