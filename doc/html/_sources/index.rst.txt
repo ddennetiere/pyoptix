@@ -1,0 +1,56 @@
+.. PyOptiX documentation master file, created by
+   sphinx-quickstart on Tue Sep 21 10:55:45 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to PyOptiX's documentation!
+===================================
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+   
+
+
+Indices and tables
+------------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+
+
+PyOptiX classes
+---------------
+
+.. automodule:: pyoptix.classes
+   :autosummary:
+   :members:
+   :special-members: __init__
+   :inherited-members:
+   
+   
+   
+PyOptiX optimizers
+------------------
+
+.. automodule:: pyoptix.optimize
+   :members:
+   :special-members:
+   :inherited-members:
+   
+   
+   
+   
+PyOptiX vizualisations
+----------------------
+These functions are those called by OpticalElement.show_diagram, they are
+given here in case a user would want to plot something unforseen.
+
+.. automodule:: pyoptix.ui_objects
+   :members:
+   :special-members:
+   :inherited-members:
+   
