@@ -136,7 +136,8 @@ class Beamline(object):
     def __init__(self, name="Beamline"):
         """
         Constructor of the class Beamline which holds the name of the beamline and all configurations of it called
-        chains
+        chains.
+
         :param name: Name of the beamline
         :type name: str
         """
@@ -163,7 +164,8 @@ class Beamline(object):
     @active_chain.setter
     def active_chain(self, chain_name):
         """
-        Sets the chain whose key is `chain_name` as the active chain and links all optical elements accordingly
+        Sets the chain whose key is `chain_name` as the active chain and links all optical elements accordingly.
+
         :param chain_name: name of the chain to become active
         :type chain_name: str
         :return: None
@@ -185,8 +187,9 @@ class Beamline(object):
     def align(self, lambda_align, from_element=None):
         """
         Computes the absolute positions of the optics using the optics parameters. To be called before radiate.
+
         :param lambda_align: Wavelength to be used for coordinate calculations in m. Can be different from actual
-        radiated wavelength
+            radiated wavelength
         :type lambda_align: float
         :param from_element: Source element from which to compute the coordinates
         :type from_element: OpticalElement or inherited
@@ -200,7 +203,8 @@ class Beamline(object):
     def clear_impacts(self, clear_source=False):
         """
         Removes any impact on the spot diagrams computed on all element following the source object at the exception
-        of the source itself, as it needs its impact to repropagate rays from the previous distribution
+        of the source itself, as it needs its impact to repropagate rays from the previous distribution.
+
         :param clear_source: also clears the source
         :type clear_source: bool
         :return: code result from the optix function
@@ -212,7 +216,8 @@ class Beamline(object):
 
     def radiate(self, from_element=None):
         """
-        Propagates rays from a source element
+        Propagates rays from a source element.
+
         :param from_element: Source element from which to propagate rays
         :type from_element: Source element or inherited
         :return:
@@ -224,7 +229,8 @@ class Beamline(object):
 
     def generate(self, lambda_radiate):
         """
-        Generates rays at `lambda_radiate` wavelength
+        Generates rays at `lambda_radiate` wavelength.
+
         :param lambda_radiate: Wavelength of the rays in m
         :return:
         """
@@ -236,7 +242,7 @@ class Beamline(object):
 
     def draw_active_chain(self, top_only=False, side_only=False):
         """
-        Draws a *not to scale* diagram of the beamline top and side views for debug purposes
+        Draws a *not to scale* diagram of the beamline top and side views for debug purposes.
 
         :param top_only: If True only draws the beamline viewed from the top
         :type top_only: bool
@@ -341,6 +347,22 @@ class Beamline(object):
         show(p)
 
     def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=500):
+        """
+        Computes the resolution of a beamline in its `mono_slit` plane at a given `wavelength`. An a priori resolution
+        must be given as `dlambda_over_lambda` for calculation purposes and the orientation of deviation relative
+        to the slit plane must also be given.
+
+        :param mono_slit: Slit plane
+        :type mono_slit: pyoptix.OpticalElement
+        :param wavelength: wavelength at which to compute resolution
+        :type wavelength: float
+        :param orientation: Orientation of the grating deviation "vertical" or "horizontal"
+        :type orientation: str
+        :param dlambda_over_lambda: a priori resolution
+        :type dlambda_over_lambda: float
+        :return: Resolution in dlambda/lambda
+        :rtype: float
+        """
         self.clear_impacts(clear_source=True)
         self.align(wavelength)
         self.generate(wavelength)
@@ -617,6 +639,7 @@ class OpticalElement(object):
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
         For quick display, light_xy, light_xxp and light_yyp can be set to True.
         For more realistic rendering, map_xy can be set to True.
+
         :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
         :type nrays: int
         :param distance_from_oe: distance from the element at which to draw the spot diagram in m
@@ -671,6 +694,7 @@ class OpticalElement(object):
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
         For quick display, light_xy, light_xxp and light_yyp can be set to True.
         For more realistic rendering, map_xy can be set to True.
+
         :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
         :type nrays: int
         :param distance_from_oe: distance from the element at which to draw the spot diagram in m
@@ -692,7 +716,8 @@ class OpticalElement(object):
 
     def from_element_id(self, element_id, print_all=False):
         """
-        Sets all the optical element parameters using a preexisting optix object which handle is passed as `element_id`
+        Sets all the optical element parameters using a preexisting optix object which handle is passed as `element_id`.
+
         :param element_id: Handle of the preexisting optix objects
         :type element_id: wintypes.INT
         :param print_all: set to true to print all values of parameters
@@ -741,7 +766,8 @@ class OpticalElement(object):
         """
         Sets the recording mode for the spot diagram associated with the element.
         Recording mode can be "output" (records rays affected by the element), "input" (records ray just before
-        reaching the element), "not_recording" (does not record the rays)
+        reaching the element), "not_recording" (does not record the rays).
+
         :param recording_mode: When to record the rays in reference to the element (see above)
         :type recording_mode: str
         :return: None
@@ -777,6 +803,7 @@ class GaussianSource(Source):
         """
         Constructor of a gaussian source type element of size sigma_x*sigma_y and divergence sigma_x_div*sigma_y_div.
         Will generate nrays rays when method generate is called.
+
         :param sigma_x: RMS source size in X direction in m
         :type sigma_x: float
         :param sigma_y: RMS source size in Y direction in m
@@ -872,10 +899,11 @@ class RevolutionQuadricMirror(OpticalElement):
     p is defined at coordinate (pcos(theta), -psin(theta))
     q is defined at coordinate (qcos(theta), qsin(theta))
     Due to this convention, the cylinder base (directrix) is
-    •an ellipse if p−1*q−1<0
-    •an hyperbola if p−1*q−1<0
-    •a parabola if either p−1=0 or q−1=0
-    •Warning : p−1=q−1 is forbidden and will result as an error at any time.
+
+    - an ellipse if p−1*q−1<0
+    - an hyperbola if p−1*q−1>0
+    - a parabola if either p−1=0 or q−1=0
+    - Warning : p−1=q−1 is forbidden and will result as an error at any time.
 
     """
 
@@ -886,6 +914,7 @@ class RevolutionQuadricMirror(OpticalElement):
 
         Note: while p and q are the usual quadric parameter, here 1/p (inverse_p) and 1/q (inverse_q) parameters are
         instanciated so as to have continuity between all quadrics in an optimization problem.
+
         :param inverse_p: Inverse distance from center of the mirror to object focal point in m-1
         :type inverse_p: float
         :param inverse_q: Inverse distance from center of the mirror to image focal point in m-1
@@ -958,7 +987,8 @@ class SphericalMirror(OpticalElement):
     """
     def __init__(self, curvature=0, **kwargs):
         """
-        Constructor for the SphericalMirror class. Radius of curvature of the surface is defined as 1/curvature
+        Constructor for the SphericalMirror class. Radius of curvature of the surface is defined as 1/curvature.
+
         :param curvature: inverse of the radius of the sphere in m-1
         :type curvature: float
         :param kwargs: See OpticalElement doc for other parameters
@@ -993,6 +1023,7 @@ class CylindricalMirror(OpticalElement):
         """
         Constructor for the CylindricalMirror class. curvature is the inverse of the base circle radius,
         cylinder axis is at an angle axis_angle from the mirror X axis.
+
         :param curvature: inverse of the base circle radius in m-1
         :type curvature: float
         :param axis_angle: angle between the mirror X axis and the cylinder axis of invariance
@@ -1038,6 +1069,7 @@ class ToroidalMirror(OpticalElement):
     def __init__(self, minor_curvature=0, major_curvature=0, **kwargs):
         """
         Constructor for the ToroidalMirror class.
+
         :param minor_curvature: inverse of radius of curvature in the width of the mirror (around tangential axis)
         :type minor_curvature: float
         :param major_curvature: inverse of radius of curvature in the length of the mirror (around sagittal axis)
@@ -1094,7 +1126,8 @@ class SphericalFilm(SphericalMirror):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the SphericalFilm class
+        Constructor of the SphericalFilm class.
+
         :param kwargs: See SphericalMirror doc for the parameters
         """
         if "element_type" in kwargs:
@@ -1110,7 +1143,8 @@ class CylindricalFilm(CylindricalMirror):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the CylindricalFilm class
+        Constructor of the CylindricalFilm class.
+
         :param kwargs: See CylindricalMirror doc for the parameters
         """
         if "element_type" in kwargs:
@@ -1156,6 +1190,7 @@ class PlaneHoloGrating(OpticalElement):
                  line_density=1e6, **kwargs):
         """
         Constructor for the PlaneHoloGrating class
+
         :param azimuth_angle1: coordinate in azimuth (around Z axis) of source point M in rad
         :type azimuth_angle1: float
         :param azimuth_angle2: coordinate in azimuth (around Z axis) of source point N in rad
@@ -1280,7 +1315,8 @@ class SphericalHoloGrating(SphericalMirror, PlaneHoloGrating):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the SphericalHoloGrating class
+        Constructor of the SphericalHoloGrating class.
+
         :param kwargs: See SphericalMirror and PlaneHoloGrating doc for the parameters
         """
         if "element_type" in kwargs:
@@ -1296,7 +1332,8 @@ class CylindricalHoloGrating(CylindricalMirror, PlaneHoloGrating):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the CylindricalHoloGrating class
+        Constructor of the CylindricalHoloGrating class.
+
         :param kwargs: See CylindricalMirror and PlaneHoloGrating doc for the parameters
         """
         if "element_type" in kwargs:
@@ -1312,7 +1349,8 @@ class ToroidalHoloGrating(ToroidalMirror, PlaneHoloGrating):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the ToroidalHoloGrating class
+        Constructor of the ToroidalHoloGrating class.
+
         :param kwargs: See ToroidalMirror and PlaneHoloGrating doc for the parameters
         """
         if "element_type" in kwargs:
@@ -1329,7 +1367,8 @@ class PlaneGrating(PlaneHoloGrating):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the ToroidalHoloGrating class
+        Constructor of the ToroidalHoloGrating class.
+
         :param kwargs: See PlaneHoloGrating doc for the parameters
         """
         kwargs["inverse_distance1"] = 0
@@ -1383,6 +1422,7 @@ class PlanePoly1DGrating(OpticalElement):
     def __init__(self, polynomial_degree=1, line_density=1e6, line_density_coeffs=None, **kwargs):
         """
         Constructor method for the class PlanePoly1DGrating.
+
         :param polynomial_degree: degree of the polynomial law for varying line density. 0 makes an evenly spaced
             classical grating
         :type polynomial_degree: int
@@ -1449,7 +1489,8 @@ class SphericalPoly1DGrating(SphericalMirror, PlanePoly1DGrating):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the SphericalPoly1DGrating class
+        Constructor of the SphericalPoly1DGrating class.
+
         :param kwargs: See SphericalMirror and PlanePoly1DGrating doc for the parameters
         """
         if "element_type" in kwargs:
@@ -1489,7 +1530,8 @@ class ToroidalPoly1DGrating(ToroidalMirror, PlanePoly1DGrating):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the ToroidalPoly1DGrating class
+        Constructor of the ToroidalPoly1DGrating class.
+
         :param kwargs: See ToroidalMirror and PlanePoly1DGrating doc for the parameters
         """
         if "element_type" in kwargs:

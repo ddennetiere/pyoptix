@@ -15,6 +15,7 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
     The slider sets the value of the variable 'variable' of the optical element 'variable_oe' between
     'variable_bounds' by increment of 'variable_step'.
     All propagated rays are at wavelength 'wavelength'.
+
     :param variable_oe: Optical element whose parameter must be varied
     :type variable_oe: any class inheriting pyoptix.OpticalElement
     :param variable: name of the parameter to be varied
@@ -29,10 +30,8 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
     :type variable_bounds: tuple fo float
     :param variable_step: Minimum increment for the slider
     :type variable_step: float
-    :param beamline: Beamline along which to propagate rays
-    :type beamline: pyoptix.Beamline
     :param display: Indicates which representation is to be shown, can be "xy", "xxp" or "yyp"
-    :type display:str
+    :type display: str
     :param light_spd: set to True for quick monochromatic rendering of the scatter plot
     :type light_spd: bool
     :return: None
@@ -75,6 +74,7 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
     "dimension" parameter with respectively "x", "y" or "xy". Number of rays for the computation can be specified or
     the nrays parameter of the beamline source will be used. Minimization method can be specified, see
     scipy.optimize.minimize documentation for available algorithms.
+
     :param beamline: Beamline along which to propagate rays
     :type beamline: pyoptix.Beamline
     :param variable_oe: Optical element whose parameter must be varied
@@ -92,7 +92,7 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
     :param method: Method to be used for minimisation, default "Nedler-Mead"
     :type method: str
     :param show_progress: If True, each iteration will print the current variable value and value of the function
-                          to be minimized
+        to be minimized
     :type show_progress: bool
     :param tol: Tolerance for the optimizer, See scipy.optimize.minimize documentation
     :type tol: float
