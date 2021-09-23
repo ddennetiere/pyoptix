@@ -896,14 +896,14 @@ class RevolutionQuadricMirror(OpticalElement):
 
     Generates all quadric surfaced mirrors using quadric parameters p, q and theta such as:
 
-    p is defined at coordinate (pcos(theta), -psin(theta))
-    q is defined at coordinate (qcos(theta), qsin(theta))
+    p is defined at coordinate (p*cos(theta), -p*sin(theta))
+    q is defined at coordinate (q*cos(theta), q*sin(theta))
     Due to this convention, the cylinder base (directrix) is
 
-    - an ellipse if p−1*q−1<0
-    - an hyperbola if p−1*q−1>0
-    - a parabola if either p−1=0 or q−1=0
-    - Warning : p−1=q−1 is forbidden and will result as an error at any time.
+    - an ellipse if p^{−1}*q^{−1}<0
+    - an hyperbola if p^{−1}*q^{−1}>0
+    - a parabola if either p^{−1}=0 or q^{−1}=0
+    - Warning : p^{−1}=q^{−1} is forbidden and will result as an error at any time.
 
     """
 
