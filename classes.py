@@ -707,7 +707,7 @@ class OpticalElement(object):
         if nrays is None:
             nrays = self.beamline.active_chain[0].nrays
         diagram = Diagram(ndim=5, nreserved=int(nrays))
-        get_spot_diagram(self.element_id, diagram, distance=distance_from_oe)
+        get_spot_diagram(self.element_id, diagram, distance_from_oe)
         spots = pd.DataFrame(np.copy(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim))),
                              columns=("X", "Y", "dX", "dY", "Lambda"))
         if show_first_rays:

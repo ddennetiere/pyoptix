@@ -212,7 +212,7 @@ def find_next_element(element_id, next_id):
 
 
 @catch_c_error
-def get_spot_diagram(element_id, diagram, distance=0):
+def get_spot_diagram(element_id, diagram, distance):
     optix.GetSpotDiagram.argtypes = (HANDLE, HANDLE, DOUBLE)
     optix.GetSpotDiagram.restype = INT
     ret = optix.GetSpotDiagram(element_id, ctypes.byref(diagram), DOUBLE(distance))
