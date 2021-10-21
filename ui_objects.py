@@ -166,7 +166,7 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
         # p.circle(x, y, size=radius, color=colors_jet, alpha=0.1)
 
     # create the horizontal histogram
-    hhist, hedges = np.histogram(x, bins=max(20, int(x.shape[0] / 1000)))
+    hhist, hedges = np.histogram(x, bins=max(20, int(x.shape[0] / 100)))
     hzeros = np.zeros(len(hedges) - 1)
     hmax = max(hhist) * 1.1
 
@@ -182,11 +182,19 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.5, **line_args)
     ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.1, **line_args)
 
-    mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (2.35 * x.std(), x_unit))
+    x_dist = x - x.mean()
+    x_dist = np.sort(x_dist)
+    x_integral_dist_pos = np.cumsum(np.where(x_dist > 0, 1, 0))
+    x_fwhm_pos = x_dist[x_integral_dist_pos > 0.87*x_integral_dist_pos.max()][0]
+    x_integral_dist_neg = np.cumsum(np.where(x_dist[::-1] < 0, 1, 0))
+    x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87*x_integral_dist_neg.max()][0]
+
+    #mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (2.35 * x.std(), x_unit))
+    mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (x_fwhm_pos - x_fwhm_neg, x_unit))
     ph.add_layout(mytext)
 
     # create the vertical histogram
-    vhist, vedges = np.histogram(y, bins=max(20, int(y.shape[0] / 1000)))
+    vhist, vedges = np.histogram(y, bins=max(20, int(y.shape[0] / 100)))
     vzeros = np.zeros(len(vedges) - 1)
     vmax = max(vhist) * 1.1
 
@@ -200,7 +208,17 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **line_args)
     pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **line_args)
 
-    mytext = Label(x=-vhist.max() / 2, y=y.mean(), text='%.2e %s FWHM' % (2.35 * y.std(), y_unit), angle=-np.pi / 2)
+
+    y_dist = y - y.mean()
+    y_dist = np.sort(y_dist)
+    y_integral_dist_pos = np.cumsum(np.where(y_dist > 0, 1, 0))
+    y_fwhm_pos = y_dist[y_integral_dist_pos > 0.87*y_integral_dist_pos.max()][0]
+    y_integral_dist_neg = np.cumsum(np.where(y_dist[::-1] < 0, 1, 0))
+    y_fwhm_neg = y_dist[::-1][y_integral_dist_neg > 0.87*y_integral_dist_neg.max()][0]
+
+    mytext = Label(x=-vhist.max() / 2, y=y.mean(), text='%.2e %s FWHM' % (y_fwhm_pos - y_fwhm_neg, y_unit),
+                   angle=-np.pi / 2)
+    # mytext = Label(x=-vhist.max() / 2, y=y.mean(), text='%.2e %s FWHM' % (2.35 * y.std(), y_unit), angle=-np.pi / 2)
     pv.add_layout(mytext)
 
     layout = column(row(p, pv), row(ph, Spacer(width=200, height=200)))
