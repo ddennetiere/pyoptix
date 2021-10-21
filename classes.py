@@ -346,7 +346,7 @@ class Beamline(object):
             p.add_layout(labels_side)
         show(p)
 
-    def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=500):
+    def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1/500):
         """
         Computes the resolution of a beamline in its `mono_slit` plane at a given `wavelength`. An a priori resolution
         must be given as `dlambda_over_lambda` for calculation purposes and the orientation of deviation relative
@@ -358,15 +358,15 @@ class Beamline(object):
         :type wavelength: float
         :param orientation: Orientation of the grating deviation "vertical" or "horizontal"
         :type orientation: str
-        :param dlambda_over_lambda: a priori resolution
+        :param dlambda_over_lambda: estimation of inverse of resolution
         :type dlambda_over_lambda: float
-        :return: Resolution in dlambda/lambda
+        :return: Resolution in lambda/dlambda
         :rtype: float
         """
         self.clear_impacts(clear_source=True)
         self.align(wavelength)
         self.generate(wavelength)
-        self.generate(wavelength+wavelength/dlambda_over_lambda)
+        self.generate(wavelength+wavelength*dlambda_over_lambda)
         self.radiate()
         spd = mono_slit.get_diagram(self.active_chain[0].nrays*2)
         if orientation == "vertical":
@@ -378,7 +378,11 @@ class Beamline(object):
         mono_chr_fwhm = 2.35*np.std(spd.where(spd["Lambda"] == wavelength)[dim])
         distance = abs(np.mean(spd.where(spd["Lambda"] == wavelength, inplace=False)[dim]) -
                        np.mean(spd.where(spd["Lambda"] == wavelength+wavelength/dlambda_over_lambda, inplace=False)[dim]))
-        resolution = dlambda_over_lambda*distance/mono_chr_fwhm
+        resolution = (1/dlambda_over_lambda)*distance/mono_chr_fwhm
+        print("FWHM monochr. :", mono_chr_fwhm)
+        print("dispersion dans le plan (m) :", distance)
+        print("dlambda_over_lambda :", dlambda_over_lambda)
+
         return resolution
 
 
