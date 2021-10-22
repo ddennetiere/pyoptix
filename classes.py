@@ -10,6 +10,7 @@ from lxml import etree
 import pandas as pd
 from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet
 from numpy import pi
+from scipy.signal import find_peaks, peak_widths
 
 # dictionnary for optix to pyoptix attribute import
 optix_dictionnary = {
@@ -346,7 +347,8 @@ class Beamline(object):
             p.add_layout(labels_side)
         show(p)
 
-    def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1/500):
+    def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1/500,
+                       show_spd=False, verbose=0, nrays=5000):
         """
         Computes the resolution of a beamline in its `mono_slit` plane at a given `wavelength`. An a priori resolution
         must be given as `dlambda_over_lambda` for calculation purposes and the orientation of deviation relative
@@ -360,28 +362,59 @@ class Beamline(object):
         :type orientation: str
         :param dlambda_over_lambda: estimation of inverse of resolution
         :type dlambda_over_lambda: float
+        :param show_spd: If True displays the calculated spots and the Y projection of spot at wavelength.
+        Default: False
+        :type show_spd: bool
+        :param verbose: If > 0, prints details of the resolution calculations. Default: 0
+        :type verbose: int
+        :param nrays: Number of rays per spot to be propagated in order to compute the resolution. Default: 5000
+        :type nrays: int
         :return: Resolution in lambda/dlambda
         :rtype: float
         """
         self.clear_impacts(clear_source=True)
+        stored_nrays = self.active_chain[0].nrays
+        slit_next_OE = mono_slit.next
+        mono_slit.next = None
+        self.active_chain[0].nrays = nrays
         self.align(wavelength)
         self.generate(wavelength)
         self.generate(wavelength+wavelength*dlambda_over_lambda)
         self.radiate()
-        spd = mono_slit.get_diagram(self.active_chain[0].nrays*2)
         if orientation == "vertical":
             dim = "Y"
         elif orientation == "horizontal":
             dim = "X"
         else:
             raise AttributeError("Unknown orientation")
-        mono_chr_fwhm = 2.35*np.std(spd.where(spd["Lambda"] == wavelength)[dim])
-        distance = abs(np.mean(spd.where(spd["Lambda"] == wavelength, inplace=False)[dim]) -
-                       np.mean(spd.where(spd["Lambda"] == wavelength+wavelength/dlambda_over_lambda, inplace=False)[dim]))
-        resolution = (1/dlambda_over_lambda)*distance/mono_chr_fwhm
-        print("FWHM monochr. :", mono_chr_fwhm)
-        print("dispersion dans le plan (m) :", distance)
-        print("dlambda_over_lambda :", dlambda_over_lambda)
+        spd = mono_slit.get_diagram(self.active_chain[0].nrays*2)
+        if show_spd:
+            print(spd)
+            mono_slit.show_diagram(self.active_chain[0].nrays * 2)
+        projection = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim])
+        projection_dl = np.array(spd.where(spd["Lambda"] == (wavelength+wavelength*dlambda_over_lambda)).dropna()[dim])
+        vhist, vedges = np.histogram(spd.where(spd["Lambda"] == wavelength).dropna()[dim], bins=100)
+        peaks, _ = find_peaks(vhist, height=vhist.max())
+        res_half = peak_widths(vhist, peaks, rel_height=0.5)
+        mono_chr_fwhm = res_half[0] * (vedges[1] - vedges[0])
+        if show_spd:
+            import matplotlib.pyplot as plt
+            plt.plot(vedges[1:], vhist)
+            plt.plot(vedges[peaks], vhist[peaks], "x")
+            h, left, right = res_half[1:]
+            widths = (h, vedges[int(left[0])], vedges[int(right[0])])
+            plt.hlines(*widths, color="C2")
+            plt.show()
+        distance = abs(np.mean(projection) - np.mean(projection_dl))
+        resolution = (1/dlambda_over_lambda)*distance/mono_chr_fwhm[0]
+        if verbose :
+            print(f"FWHM monochromatique : {mono_chr_fwhm[0]*1e6:.2f} µm")
+            print(f"dispersion dans le plan (m) : {distance*1e6:.2f} µm")
+            print(f"Lambda = {wavelength*1e9:.5f} nm")
+            print("lambda_over_dlambda for calculation :", 1/dlambda_over_lambda)
+            print("calculated resolution :", resolution)
+        self.active_chain[0].nrays = stored_nrays
+        mono_slit.next = slit_next_OE
 
         return resolution
 
