@@ -87,7 +87,7 @@ def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
 
 
 def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=False, light_plot=False, orthonorm=False, radius=5,
-                    x_label="", y_label="", save_in_file="", return_fwhm=False):
+                    x_label="", y_label="", save_in_file="", return_fwhm=False, color_scale="density"):
     """
     Function that draws a scatter plot using bokeh. Scatter points are colored as a function of local density so as
     to better grip spot shape when density gets high.
@@ -121,16 +121,28 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     :param return_fwhm: If True, returns the Full Width at Half Maximum of the spot is both dimensions as well as the
         plot layout
     :type return_fwhm: bool
+    :param color_scale: Value to color the points with, default = "density", acceptable values : xkey, ykey, "density",
+        "wavelength"
+    :type color_scale: str
     :return: layout of the plot to be used as parameter of bokeh.plotting.show or tuple (layout, FWHMs)
     :rtype: bokeh.models.layouts.LayoutDOM or (LayoutDOM, (float, float))
     """
     x = np.copy(cds.data[xkey])
     y = np.copy(cds.data[ykey])
     if not light_plot and not show_map:
-        # Calculate the point density
-        xy = np.vstack([x, y])
-        z = gaussian_kde(xy)(xy)
-        z = z / z.max()
+        if color_scale == "density":
+            # Calculate the point density
+            xy = np.vstack([x, y])
+            z = gaussian_kde(xy)(xy)
+            z = z / z.max()
+        elif color_scale == xkey:
+            z = (x - x.min())/x.ptp()
+        elif color_scale == ykey:
+            z = (y - y.min())/y.ptp()
+        elif color_scale == "wavelength":
+            z = (cds.data["Lambda"] - cds.data["Lambda"].min())/cds.data["Lambda"].ptp()
+        else:
+            raise AttributeError("Unknown color scale")
         colors_jet = ["#%02x%02x%02x" % (to_jet(grayscale)) for grayscale in z]
     else:
         colors_jet = ["blue"]*x.shape[0]
