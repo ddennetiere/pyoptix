@@ -827,7 +827,8 @@ class Source(OpticalElement):
         :param kwargs: See OpticalElement doc for other parameters
         """
         if "element_type" in kwargs:
-            assert kwargs["element_type"] in ["GaussianSource", "RadialSource", "XYGridSource"]
+            assert kwargs["element_type"] in ["GaussianSource", "RadialSource", "XYGridSource",
+                                              "AstigmaticGaussianSource"]
         super().__init__(**kwargs)
 
 
@@ -854,7 +855,7 @@ class GaussianSource(Source):
         :param kwargs: See OpticalElement doc for other parameters
         """
         if "element_type" in kwargs:
-            assert kwargs["element_type"] == "GaussianSource"
+            assert kwargs["element_type"] in ["GaussianSource", "AstigmaticGaussianSource"]
         else:
             kwargs["element_type"] = "GaussianSource"
         super().__init__(**kwargs)
@@ -908,6 +909,49 @@ class GaussianSource(Source):
     @sigma_y_div.setter
     def sigma_y_div(self, value):
         self._sigma_y_div = self._set_parameter("sigmaYdiv", value)
+
+
+class AstigmaticGaussianSource(GaussianSource):
+    """
+    Base class for all Sources elements. Can be used as is with the correct element type or using the inherited
+    classes
+    """
+    def __init__(self, waist_x=0, waist_y=0, **kwargs):
+        """
+        Constructor of a gaussian source type element of size sigma_x*sigma_y and divergence sigma_x_div*sigma_y_div.
+        Will generate nrays rays when method generate is called.
+
+        :param waist_x: distance of the horizontal source point from source plane in m
+        :type waist_x: float
+        :param waist_y: distance of the vertical source point from source plane in m
+        :type waist_y: float
+        :param kwargs: See GaussianSource doc for other parameters
+        """
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "AstigmaticGaussianSource"
+        else:
+            kwargs["element_type"] = "AstigmaticGaussianSource"
+        super().__init__(**kwargs)
+        self.waist_x = waist_x
+        self.waist_y = waist_y
+
+    @property
+    def waist_x(self):
+        self._waist_x = self._get_parameter("waistX")
+        return self._waist_x
+
+    @waist_x.setter
+    def waist_x(self, value):
+        self._waist_x = self._set_parameter("waistX", value)
+
+    @property
+    def waist_y(self):
+        self._waist_y = self._get_parameter("waistY")
+        return self._waist_y
+
+    @waist_y.setter
+    def waist_y(self, value):
+        self._waist_y = self._set_parameter("waistY", value)
 
 
 class PlaneMirror(OpticalElement):
