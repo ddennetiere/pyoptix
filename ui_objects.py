@@ -121,8 +121,8 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     :param return_fwhm: If True, returns the Full Width at Half Maximum of the spot is both dimensions as well as the
         plot layout
     :type return_fwhm: bool
-    :param color_scale: Value to color the points with, default = "density", acceptable values : xkey, ykey, "density",
-        "wavelength"
+    :param color_scale: Value to color the points with, default = "density", acceptable values : any spot diagram
+        column name or "density"
     :type color_scale: str
     :return: layout of the plot to be used as parameter of bokeh.plotting.show or tuple (layout, FWHMs)
     :rtype: bokeh.models.layouts.LayoutDOM or (LayoutDOM, (float, float))
@@ -135,12 +135,8 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
             xy = np.vstack([x, y])
             z = gaussian_kde(xy)(xy)
             z = z / z.max()
-        elif color_scale == xkey:
-            z = (x - x.min())/x.ptp()
-        elif color_scale == ykey:
-            z = (y - y.min())/y.ptp()
-        elif color_scale == "wavelength":
-            z = (cds.data["Lambda"] - cds.data["Lambda"].min())/cds.data["Lambda"].ptp()
+        elif color_scale in cds.data.keys():
+            z = (cds.data[color_scale] - cds.data[color_scale].min())/cds.data[color_scale].ptp()
         else:
             raise AttributeError("Unknown color scale")
         colors_jet = ["#%02x%02x%02x" % (to_jet(grayscale)) for grayscale in z]
