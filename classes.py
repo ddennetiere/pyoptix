@@ -712,13 +712,13 @@ class OpticalElement(object):
         if display == "all":
             display = "xy, xxp, yyp"
         if "xy" in display:
-            figs.append(plot_spd(datasource, x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
+            figs.append(plot_spd(ColumnDataSource(spots), x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
                                  beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name, **kwargs))
         if "xxp" in display:
-            figs.append(plot_spd(datasource, x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
+            figs.append(plot_spd(ColumnDataSource(spots), x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
                                  chain_name=chain_name, oe_name=self._name, **kwargs))
         if "yyp" in display:
-            figs.append(plot_spd(datasource, x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
+            figs.append(plot_spd(ColumnDataSource(spots), x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
                                  chain_name=chain_name, oe_name=self._name, **kwargs))
         handles = []
         for fig in figs:
