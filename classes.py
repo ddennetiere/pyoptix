@@ -813,6 +813,22 @@ class OpticalElement(object):
                                 "input": RecordingMode.recording_input,
                                 "not_recording": RecordingMode.recording_none}[recording_mode]
 
+    def dump_properties(self):
+        """
+        Prints all stored optix parameters
+        """
+        hparam = HANDLE(0)
+        param_name = create_string_buffer(48)
+        param = Parameter()
+        enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
+        print(f"Dump of all optix parameter for {self.name}")
+        while hparam:
+            print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                        f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+            enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
+        print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                    f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+
 
 class Source(OpticalElement):
     """
