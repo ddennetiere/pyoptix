@@ -8,3 +8,13 @@ __pycache__/*
 *.html
 Tests/.ipynb_checkpoints
 Tests/.ipynb_checkpoints/*
+Makefile
+PyOptiX.bat
+*.lnk
+Tests/resolution Hermes.py
+Tests/test.ipynb
+Tests/test_import.py
+make.bat
+source/*
+Tests/Wolter
+
