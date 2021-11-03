@@ -363,7 +363,7 @@ class Beamline(object):
         :param dlambda_over_lambda: estimation of inverse of resolution
         :type dlambda_over_lambda: float
         :param show_spd: If True displays the calculated spots and the Y projection of spot at wavelength.
-        Default: False
+            Default: False
         :type show_spd: bool
         :param verbose: If > 0, prints details of the resolution calculations. Default: 0
         :type verbose: int
