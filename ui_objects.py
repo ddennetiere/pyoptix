@@ -197,8 +197,8 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     x_integral_dist_neg = np.cumsum(np.where(x_dist[::-1] < 0, 1, 0))
     x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87*x_integral_dist_neg.max()][0]
 
-    #mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (2.35 * x.std(), x_unit))
-    mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (x_fwhm_pos - x_fwhm_neg, x_unit))
+    # mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (x_fwhm_pos - x_fwhm_neg, x_unit))
+    mytext = Label(x=3*x.min()/4, y=-hhist.max() / 2, text=f'{x_fwhm_pos - x_fwhm_neg:.2e} {x_unit} FWHM, {x.std():.2e} {x_unit} RMS')
     ph.add_layout(mytext)
 
     # create the vertical histogram
@@ -224,9 +224,8 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     y_integral_dist_neg = np.cumsum(np.where(y_dist[::-1] < 0, 1, 0))
     y_fwhm_neg = y_dist[::-1][y_integral_dist_neg > 0.87*y_integral_dist_neg.max()][0]
 
-    mytext = Label(x=-vhist.max() / 2, y=y.mean(), text='%.2e %s FWHM' % (y_fwhm_pos - y_fwhm_neg, y_unit),
+    mytext = Label(x=-vhist.max() / 2, y=3*y.max()/4, text=f'{y_fwhm_pos - y_fwhm_neg:.2e} {y_unit} FWHM, {y.std():.2e} {y_unit} RMS',
                    angle=-np.pi / 2)
-    # mytext = Label(x=-vhist.max() / 2, y=y.mean(), text='%.2e %s FWHM' % (2.35 * y.std(), y_unit), angle=-np.pi / 2)
     pv.add_layout(mytext)
 
     layout = column(row(p, pv), row(ph, Spacer(width=200, height=200)))
