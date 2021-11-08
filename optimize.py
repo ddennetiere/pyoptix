@@ -4,6 +4,11 @@ import pandas as pd
 import numpy as np
 from ipywidgets import interact, Layout
 import ipywidgets as widgets
+from bokeh.models.widgets import Slider, TextInput
+from bokeh.application import Application
+from bokeh.application.handlers import FunctionHandler
+from bokeh.layouts import row, column
+from bokeh.io import  show
 from bokeh.io import push_notebook
 
 
@@ -48,21 +53,41 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
     screen.beamline.generate(wavelength)
     screen.beamline.radiate()
     datasource, handles = screen.show_diagram(display=display, light_yyp=light_spd, light_xy=light_spd,
-                                              light_xxp=light_spd)
+                                              light_xxp=light_spd, show_spd=False)
     v0 = variable_oe.__getattribute__(variable)
 
-    def f(x):
+    # def f(x):
+    def update_data(attrname, old, new):
         screen.beamline.clear_impacts(clear_source=False)
-        variable_oe.__setattr__(variable, x)
+        variable_oe.__setattr__(variable, value_slider.value)
         screen.beamline.align(wavelength)
         screen.beamline.radiate()
         spd = screen.get_diagram(nrays)
-        datasource.data.update(spd)
-        push_notebook(handle=handles[0])
+        datasource[display].data.update(spd)
+        # push_notebook(handle=handles[0])
 
-    interact(f, x=widgets.FloatSlider(min=variable_bounds[0], max=variable_bounds[1], step=variable_step,
-                                      value=v0, continuous_update=False, layout=Layout(width='90%'),
-                                      description=f"{variable}", readout_format='.3e'))
+    def update_title(attrname, old, new):
+        handles[0][0].title.text = text.value
+
+    # interact(f, x=widgets.FloatSlider(min=variable_bounds[0], max=variable_bounds[1], step=variable_step,
+    #                                   value=v0, continuous_update=False, layout=Layout(width='90%'),
+    #                                   description=f"{variable}", readout_format='.3e'))
+    value_slider = Slider(start=variable_bounds[0], end=variable_bounds[1], step=variable_step,
+                          value=v0, sizing_mode="stretch_width")
+    text = TextInput(title="title", value='my sine wave')
+
+    value_slider.on_change('value_throttled', update_data)
+    layout = column(handles[0], value_slider, text)
+
+    def modify_doc(doc):
+        doc.add_root(row(layout, width=800))
+        doc.title = "Sliders"
+        text.on_change('value', update_title)
+
+    handler = FunctionHandler(modify_doc)
+    app = Application(handler)
+    return app
+    # show(app)
 
 
 def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nrays=None, method="Nelder-Mead",

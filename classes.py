@@ -670,7 +670,7 @@ class OpticalElement(object):
         return description
 
     def show_diagram(self, nrays=None, distance_from_oe=0, map_xy=False, light_xy=False,
-                     light_xxp=False, light_yyp=False, show_first_rays=False, display="all", **kwargs):
+                     light_xxp=False, light_yyp=False, show_first_rays=False, display="all", show_spd=True, **kwargs):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
@@ -707,23 +707,24 @@ class OpticalElement(object):
         if nrays is None:
             nrays = self.beamline.active_chain[0].nrays
         spots = self.get_diagram(nrays=nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
-        datasource = ColumnDataSource(spots)
+        datasources = {"xy": ColumnDataSource(spots), "xxp": ColumnDataSource(spots), "yyp": ColumnDataSource(spots)}
         figs = []
         if display == "all":
             display = "xy, xxp, yyp"
         if "xy" in display:
-            figs.append(plot_spd(ColumnDataSource(spots), x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
+            figs.append(plot_spd(datasources["xy"], x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
                                  beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name, **kwargs))
         if "xxp" in display:
-            figs.append(plot_spd(ColumnDataSource(spots), x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
+            figs.append(plot_spd(datasources["xxp"], x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
                                  chain_name=chain_name, oe_name=self._name, **kwargs))
         if "yyp" in display:
-            figs.append(plot_spd(ColumnDataSource(spots), x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
+            figs.append(plot_spd(datasources["yyp"], x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
                                  chain_name=chain_name, oe_name=self._name, **kwargs))
         handles = []
-        for fig in figs:
-            handles.append(show(fig, notebook_handle=True))
-        return datasource, handles
+        if show_spd:
+            for fig in figs:
+                handles.append(show(fig, notebook_handle=True))
+        return datasources, figs
 
     def get_diagram(self, nrays=None, distance_from_oe=0, show_first_rays=False):
         """
