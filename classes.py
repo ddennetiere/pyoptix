@@ -1063,7 +1063,8 @@ class ConicCylindricalMirror(RevolutionQuadricMirror):
     The conic surface is defined as for the RevolutionQuadricMirror class
     except it is invariant along the X axe (width).
     """
-    def __int__(self, **kwargs):
+
+    def __init__(self, **kwargs):
         """
         Constructor for the ConicCylindricalMirror class.
         :param kwargs: See RevolutionQuadricMirror doc for parameters
