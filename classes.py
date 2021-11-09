@@ -347,13 +347,18 @@ class Beamline(object):
             p.add_layout(labels_side)
         show(p)
 
-    def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1/500,
-                       show_spd=False, verbose=0, nrays=5000):
+    def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1/5000,
+                       show_spd=False, verbose=0, nrays=5000, criterion="fwhm"):
         """
         Computes the resolution of a beamline in its `mono_slit` plane at a given `wavelength`. An a priori resolution
         must be given as `dlambda_over_lambda` for calculation purposes and the orientation of deviation relative
-        to the slit plane must also be given.
+        to the slit plane must also be given. THe computation is as follows : two lambdas are  genreated and propagated,
+        their distance in the slit plane is computed and their width (either 2.35*rms or fwhm from histogram
+        depending on parameter criterion).
+        Resolution is then the lambda/dlambda such as the two spots don't overlap.
 
+        :param criterion: Criterion for resolution computation either rms or fwhm.
+        :type criterion: str
         :param mono_slit: Slit plane
         :type mono_slit: pyoptix.OpticalElement
         :param wavelength: wavelength at which to compute resolution
@@ -393,11 +398,14 @@ class Beamline(object):
             mono_slit.show_diagram(self.active_chain[0].nrays * 2)
         projection = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim])
         projection_dl = np.array(spd.where(spd["Lambda"] == (wavelength+wavelength*dlambda_over_lambda)).dropna()[dim])
-        vhist, vedges = np.histogram(spd.where(spd["Lambda"] == wavelength).dropna()[dim], bins=100)
-        peaks, _ = find_peaks(vhist, height=vhist.max())
-        res_half = peak_widths(vhist, peaks, rel_height=0.5)
-        mono_chr_fwhm = res_half[0] * (vedges[1] - vedges[0])
-        if show_spd:
+        if criterion == "fwhm":
+            vhist, vedges = np.histogram(spd.where(spd["Lambda"] == wavelength).dropna()[dim], bins=100)
+            peaks, _ = find_peaks(vhist, height=vhist.max())
+            res_half = peak_widths(vhist, peaks, rel_height=0.5)
+            mono_chr_fwhm = (res_half[0] * (vedges[1] - vedges[0]))[0]
+        else:
+            mono_chr_fwhm = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim]).std()*2.35
+        if show_spd and criterion == "fwhm":
             import matplotlib.pyplot as plt
             plt.plot(vedges[1:], vhist)
             plt.plot(vedges[peaks], vhist[peaks], "x")
@@ -406,9 +414,9 @@ class Beamline(object):
             plt.hlines(*widths, color="C2")
             plt.show()
         distance = abs(np.mean(projection) - np.mean(projection_dl))
-        resolution = (1/dlambda_over_lambda)*distance/mono_chr_fwhm[0]
+        resolution = (1/dlambda_over_lambda)*distance/mono_chr_fwhm
         if verbose :
-            print(f"FWHM monochromatique : {mono_chr_fwhm[0]*1e6:.2f} µm")
+            print(f"FWHM monochromatique : {mono_chr_fwhm*1e6:.2f} µm")
             print(f"dispersion dans le plan (m) : {distance*1e6:.2f} µm")
             print(f"Lambda = {wavelength*1e9:.5f} nm")
             print("lambda_over_dlambda for calculation :", 1/dlambda_over_lambda)
