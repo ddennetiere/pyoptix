@@ -307,7 +307,7 @@ class Beamline(object):
                 else:
                     make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side + 15) * pi / 180,
                              fig=p, direction="up", height=10)
-                    total_theta_side = 30
+                    total_theta_side += 30
                 make_box(oe_type="mirror", center=top_points[-1], angle=-total_theta_top * pi / 180, fig=p,
                          direction="straight", height=10)
             elif abs(abs(total_phi) % (pi / 2)) < 1e-5:
@@ -1474,7 +1474,7 @@ class PlaneGrating(PlaneHoloGrating):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the ToroidalHoloGrating class.
+        Constructor of the PlaneGrating class.
 
         :param kwargs: See PlaneHoloGrating doc for the parameters
         """
