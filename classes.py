@@ -822,7 +822,7 @@ class OpticalElement(object):
                                 "input": RecordingMode.recording_input,
                                 "not_recording": RecordingMode.recording_none}[recording_mode]
 
-    def dump_properties(self):
+    def dump_properties(self, verbose=1):
         """
         Prints all stored optix parameters
         """
@@ -830,13 +830,28 @@ class OpticalElement(object):
         param_name = create_string_buffer(48)
         param = Parameter()
         enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
-        print(f"Dump of all optix parameter for {self.name}")
+        if verbose:
+            print(f"Dump of all optix parameter for {self.name}")
+        param_dict = {"oe_name":self.name, "oe_params":{}}
         while hparam:
+            if verbose:
+                print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                            f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+            param_dict["oe_params"][param_name.value.decode()] = {"value": param.value,
+                                                                  "bounds": [param.bounds.min, param.bounds.max],
+                                                                  "multiplier": param.multiplier,
+                                                                  "type": param.type, "group": param.group,
+                                                                  "flags": param.flags}
+            enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
+        if verbose:
             print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
                         f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
-            enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
-        print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
-                    f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+        param_dict["oe_params"][param_name.value.decode()] = {"value": param.value,
+                                                              "bounds": [param.bounds.min, param.bounds.max],
+                                                              "multiplier": param.multiplier,
+                                                              "type": param.type, "group": param.group,
+                                                              "flags": param.flags}
+        return param_dict
 
 
 class Source(OpticalElement):
