@@ -859,6 +859,9 @@ class OpticalElement(object):
                                                               "flags": param.flags}
         return param_dict
 
+    def display_properties(self):
+        display_parameter_sheet(self)
+
 
 class Source(OpticalElement):
     """

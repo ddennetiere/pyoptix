@@ -7,6 +7,9 @@ from bokeh.layouts import row, column
 from bokeh.util.hex import hexbin
 from bokeh.transform import linear_cmap
 from bokeh.models import PolyAnnotation, ColumnDataSource, LabelSet
+from ipysheet import sheet, cell, row, column, cell_range
+import ipywidgets
+
 
 
 # Definition des fonctions d'affichage
@@ -44,6 +47,24 @@ def to_jet(grayscale):
 
 
 TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save, box_zoom"
+
+
+def display_parameter_sheet(oe):
+    properties = oe.dump_properties(verbose=0)
+    params = properties["oe_params"]
+    params_sheet = sheet(rows=len(params.keys()), columns=8, column_headers=["parameter", "value", "min", "max",
+                                                                             "multiplier", "type", "group", "flags"])
+    for i, param in enumerate(params.keys()):
+        row(i, [param, params[param]["value"], params[param]["bounds"][0], params[param]["bounds"][1],
+                params[param]["multiplier"], params[param]["type"], params[param]["group"], params[param]["flags"]])
+    params_sheet.column_width = [15, 20, 10, 10, 10, 10, 10, 10]
+    params_sheet.layout = ipywidgets.Layout(width='750px', height='100%')
+    for k, c in enumerate(params_sheet.cells):
+        c.style['textAlign'] = 'center'
+        c.send_state()
+
+    display(params_sheet)
+    return params_sheet
 
 
 def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
