@@ -49,6 +49,12 @@ def to_jet(grayscale):
 TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save, box_zoom"
 
 
+def display_progress_bar(max_count):
+    f = ipywidgets.IntProgress(min=0, max=max_count)  # instantiate the bar
+    display(f)  # display the bar
+    return f
+
+
 def display_parameter_sheet(oe):
     properties = oe.dump_properties(verbose=0)
     params = properties["oe_params"]
