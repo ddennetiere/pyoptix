@@ -1,6 +1,6 @@
 # coding: utf-8
 import numpy as np
-from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_int64, create_string_buffer
+from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_ulong, create_string_buffer
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
 from .exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
                                 get_element_name, set_recording, get_next_element, get_previous_element,
@@ -8,7 +8,7 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
 from scipy.constants import degree
 from lxml import etree
 import pandas as pd
-from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet
+from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet
 from numpy import pi
 from scipy.signal import find_peaks, peak_widths
 
@@ -533,15 +533,21 @@ class OpticalElement(object):
         if isinstance(value, dict):
             for key in value.keys():
                 assert key in ("value", "bounds", "multiplier", "type", "group", "flags")
-                if key in ("value", "multiplier"):
-                    param.__dict__[key] = DOUBLE(value[key])
-                elif key in ("type", "group", "flags"):
-                    param.__dict__[key] = INT(value[key])
+                if key == "value":
+                    param.value = DOUBLE(value[key])
+                elif key == "multiplier":
+                    param.multiplier = DOUBLE(value[key])
+                elif key == "type":
+                    param.type = INT(value[key])
+                elif key == "group":
+                    param.group = INT(value[key])
+                elif key == "flags":
+                    param.flags = c_ulong(value[key])
                 else:
                     bounds = Bounds()
                     bounds.min = DOUBLE(value[key][0])
                     bounds.max = DOUBLE(value[key][1])
-                    param.__dict__[key] = bounds
+                    param.bounds = bounds
         else:
             try:
                 value = float(value)
