@@ -47,7 +47,7 @@ def generate_MC_beamline(beamline, distribution="gauss"):
                 elif distribution == "uniform":
                     new_value = uniform(param["bounds"][0], param["bounds"][1])
                 elif distribution == "extreme":
-                    new_value = choice(param["bounds"][0], param["bounds"][1])
+                    new_value = choice([param["bounds"][0], param["bounds"][1]])
                 else:
                     raise AttributeError('distribution should be either "gauss", "extreme" or "uniform"')
                 oe._set_parameter(param_name, new_value)
