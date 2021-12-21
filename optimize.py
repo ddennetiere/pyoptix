@@ -256,7 +256,7 @@ def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="
     beamline.active_chain[0].nrays = int(old_nrays)
     if solution.success:
         if adjust_distance:
-            screen.distance_from_previous = solution.x[0]
+            screen.distance_from_previous += solution.x[0]
         return solution.x[0]
     else:
         raise RuntimeError("Unable to reach an optimum")
