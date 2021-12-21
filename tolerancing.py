@@ -81,7 +81,7 @@ def apply_tolerance_data(beamline,  tolerance_data):
 
 
 def sensitivity_analysis(beamline, N_stat=100, N_rays=1000, distribution="uniform", quality=lambda bl: None,
-                         tolerance_data=None):
+                         tolerance_data=None, compensator=None):
     """
     Computes and runs N_stat version of the beamline each changed randomly using either the existing parameters
     of the beamline optics either tolerance_data as described in apply_tolerance_data. each version is run with N_rays
@@ -101,12 +101,16 @@ def sensitivity_analysis(beamline, N_stat=100, N_rays=1000, distribution="unifor
     :type quality: callable
     :param tolerance_data: if supplied, sets the optical parameters to these data. See apply_tolerance_data
     :type tolerance_data: list
+    :param compensator: function returning None to be called after each beamline generation to compensate changes.
+        Usually an optimization function. Takes no parameter.
+    :type compensator: callable
     :return: statistical analysis of the values returned by quality function
     :rtype: scipy.describe
     """
     if tolerance_data is not None:
         apply_tolerance_data(beamline, tolerance_data)
     values = []
+    comp_values = []
     bar = display_progress_bar(N_stat)
     for _ in range(N_stat):
         generate_MC_beamline(beamline, distribution=distribution)
@@ -116,8 +120,14 @@ def sensitivity_analysis(beamline, N_stat=100, N_rays=1000, distribution="unifor
         beamline.generate(20e-9)
         beamline.radiate()
         values.append(quality(beamline))
+        if compensator is not None:
+            compensator()
+            comp_values.append(quality(beamline))
         bar.value += 1
-    return describe(values)
+    if compensator is not None:
+        return describe(comp_values), describe(values)
+    else:
+        return describe(values)
 
 
 def inverse_sensitivity_analysis(beamline, quality=lambda bl: None, N_stat=100, N_rays=1000, distribution="uniform",
