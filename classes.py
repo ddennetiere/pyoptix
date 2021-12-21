@@ -150,6 +150,14 @@ class Beamline(object):
         self.name = name
 
     def save_configuration(self, filename=None):
+        """
+        Saves all the parameters of a beamline active chain and returns them as a list of dictionaries.
+        If filename is supplied, saves the configuration object returned in a file using pickle
+        :param filename: name of the file where to save configuration, default: None
+        :type filename: str
+        :return: list of parameters as dict
+        :rtype: list of dict
+        """
         config = []
         for oe in self.active_chain:
             config.append(oe.dump_properties(verbose=0))
@@ -159,6 +167,17 @@ class Beamline(object):
         return config
 
     def load_configuration(self, configuration=None, filename=None):
+        """
+        Loads all the parameters of a beamline active chain as a list of dictionaries.
+        If filename is supplied, loads the configuration object from pickle file and ignores configuration param.
+        :param configuration: list of dictionnaries containing the parameters of the optical element. See output
+            of save_configuration for more details.
+        :type configuration: list of dict
+        :param filename: name of the file from which to load configuration, default: None
+        :type filename: str
+        :return: None
+        :rtype: Nonetype
+        """
         if filename is not None:
             with open(filename, "rb") as filin:
                 configuration = pickle.load(filin)
