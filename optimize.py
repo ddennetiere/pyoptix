@@ -173,3 +173,84 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
         return solution.x[0]
     else:
         raise RuntimeError("Unable to reach an optimum")
+
+
+def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="Nelder-Mead",
+               show_progress=False, tol=1e-3, options=None, adjust_distance=True):
+    """
+    Function to be called for minimizing a focused spot diagram placed at "screen" by varying it distance to the
+    previous oe in the "beamline" beamline. One can either try to focus horizontally, vertically or in both dimension by
+    specifying the "dimension" parameter with respectively "x", "y" or "xy". Number of rays for the computation can be
+    specified or the nrays parameter of the beamline source will be used. Minimization method can be specified, see
+    scipy.optimize.minimize documentation for available algorithms. If adjust_distance is set to True, when convergence
+    is reached, the distance between screen and previous OE is set to the calculated optimal value.
+
+    :param beamline: Beamline along which to propagate rays
+    :type beamline: pyoptix.Beamline
+    :param screen:  recording surface where beam must be focused
+    :type screen: any class inheriting pyoptix.OpticalElement
+    :param wavelength: wavelength at which beamline must be aligned in m.
+    :type wavelength: float
+    :param dimension: dimension along which focusing is desired. Must be "x", "y" or "xy"
+    :type dimension: str
+    :param nrays: Number of rays to propagate
+    :type nrays: int
+    :param method: Method to be used for minimisation, default "Nedler-Mead"
+    :type method: str
+    :param show_progress: If True, each iteration will print the current variable value and value of the function
+        to be minimized
+    :type show_progress: bool
+    :param tol: Tolerance for the optimizer, See scipy.optimize.minimize documentation
+    :type tol: float
+    :param options: Method-specific options, see scipy.optimize.minimize for details
+    :type options: dict
+    :param adjust_distance: if True, sets the screen at the optimal distance
+    :type adjust_distance: bool
+    :return: Optimal distance from the screen to get focus in given dimension
+    :rtype: float
+    :raises RuntimeError: if distance has no effect or minimum cannot be reached with asked tolerance
+    """
+
+    if options is None:
+        options = {}
+    old_nrays = int(beamline.active_chain[0].nrays)
+    if nrays is None:
+        nrays = int(beamline.active_chain[0].nrays)
+    else:
+        beamline.active_chain[0].nrays = int(nrays)
+    bounds = None
+    if screen.get_whole_parameter("distance")["bounds"] != (0, 0):
+        bounds = screen.get_whole_parameter("distance")["bounds"]
+    beamline.clear_impacts(clear_source=True)
+    beamline.generate(wavelength)
+    beamline.align(wavelength)
+    beamline.radiate()
+
+    def correlation(value):
+        spots = screen.get_diagram(nrays, show_first_rays=False, distance_from_oe=value)
+        if dimension.lower() == "xy":
+            ret = np.std(spots["X"]**2 + spots["Y"]**2)
+        elif dimension.lower() == "x":
+            ret = abs(pearsonr(spots["X"], spots["dX"])[0])
+        elif dimension.lower() == "y":
+            ret = abs(pearsonr(spots["Y"], spots["dY"])[0])
+        else:
+            raise AttributeError("Unknown dimension, should be 'x', 'y' or 'xy'")
+        if show_progress:
+            print(value, ret)
+        return ret
+
+    if "fatol" not in options.keys() and method == "Nedler-Mead":
+        options["fatol"] = tol
+    if "xatol" not in options.keys() and method == "Nedler-Mead":
+        options["xatol"] = tol
+    solution = minimize(correlation, 0, method=method, tol=tol, bounds=bounds,
+                        options=options)
+    print(f"Minimization success: {solution.success}, converged to a distance of {solution.x}")
+    beamline.active_chain[0].nrays = int(old_nrays)
+    if solution.success:
+        if adjust_distance:
+            screen.distance_from_previous = solution.x[0]
+        return solution.x[0]
+    else:
+        raise RuntimeError("Unable to reach an optimum")
