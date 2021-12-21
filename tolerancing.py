@@ -85,7 +85,7 @@ def apply_tolerance_data(beamline,  tolerance_data):
 
 
 def sensitivity_analysis(beamline, N_stat=100, N_rays=1000, distribution="uniform", quality=lambda bl: None,
-                         tolerance_data=None, compensator=None):
+                         tolerance_data=None, compensator=None, wavelength=20e-9):
     """
     Computes and runs N_stat version of the beamline each changed randomly using either the existing parameters
     of the beamline optics either tolerance_data as described in apply_tolerance_data. each version is run with N_rays
@@ -108,6 +108,8 @@ def sensitivity_analysis(beamline, N_stat=100, N_rays=1000, distribution="unifor
     :param compensator: function returning None to be called after each beamline generation to compensate changes.
         Usually an optimization function. Takes no parameter.
     :type compensator: callable
+    :param wavelength: Wavelength in m at which the beamline is aligned and radiated
+    :type wavelength: float
     :return: statistical analysis of the values returned by quality function
     :rtype: scipy.describe
     """
@@ -119,13 +121,16 @@ def sensitivity_analysis(beamline, N_stat=100, N_rays=1000, distribution="unifor
     for _ in range(N_stat):
         generate_MC_beamline(beamline, distribution=distribution)
         beamline.clear_impacts(clear_source=True)
-        beamline.align(20e-9)
+        beamline.align(wavelength)
         beamline.active_chain[0].nrays = N_rays
-        beamline.generate(20e-9)
+        beamline.generate(wavelength)
         beamline.radiate()
         values.append(quality(beamline))
         if compensator is not None:
             compensator()
+            beamline.clear_impacts(clear_source=False)
+            beamline.align(wavelength)
+            beamline.radiate()
             comp_values.append(quality(beamline))
         bar.value += 1
     if compensator is not None:
