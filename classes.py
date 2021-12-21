@@ -26,7 +26,7 @@ optix_dictionnary = {
     "sigmaY": "sigma_y",
     "sigmaXdiv": "sigma_x_div",
     "sigmaYdiv": "sigma_y_div",
-    "NRays": "nrays",
+    "nRays": "nrays",
     "azimuthAngle1": "azimuth_angle1",
     "azimuthAngle2": "azimuth_angle2",
     "elevationAngle1": "elevation_angle1",
@@ -603,7 +603,12 @@ class OpticalElement(object):
                 param.value = DOUBLE(value)
             except TypeError:
                 raise AttributeError("value of parameter must be castable in a float or a dictionnary")
+        if param_name in optix_dictionnary.keys():
+            pyoptix_param_name = optix_dictionnary[param_name]
+        else:
+            pyoptix_param_name = param_name
         set_parameter(self._element_id, param_name, param)
+        self.__getattribute__(pyoptix_param_name)  # update of internal variable
         return self._get_parameter(param_name)
 
     @property
@@ -887,7 +892,7 @@ class OpticalElement(object):
         enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
         if verbose:
             print(f"Dump of all optix parameter for {self.name}")
-        param_dict = {"oe_name":self.name, "oe_params":{}}
+        param_dict = {"oe_name": self.name, "oe_params": {}, "oe_class": self.__class__}
         while hparam:
             if verbose:
                 print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
