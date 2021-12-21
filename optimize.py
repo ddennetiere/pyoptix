@@ -91,7 +91,7 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
 
 
 def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nrays=None, method="Nelder-Mead",
-          show_progress=False, tol=1e-3, options=None):
+          show_progress=False, tol=1e-3, options=None, verbose=1):
     """
     Function to be called for minimizing a focused spot diagram placed at "screen" by varying the parameter "variable"
     of the optical element "variable_oe" of the "beamline" beamline. Each iteration is realigned at wavelength
@@ -123,6 +123,8 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
     :type tol: float
     :param options: Method-specific options, see scipy.optimize.minimize for details
     :type options: dict
+    :param verbose: Verbose level control. 0 is silent
+    :type verbose: int
     :return: optimal value of the variable to achieve focusing
     :rtype: float
     :raises RuntimeError: if variable has no effect or minimum cannot be reached with asked tolerance
@@ -166,7 +168,8 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
         options["xatol"] = tol
     solution = minimize(correlation, variable_oe.__getattribute__(variable), method=method, tol=tol, bounds=bounds,
                         options=options)
-    print(f"Minimization success: {solution.success}, converged to {variable_oe.name}.{variable} = {solution.x}")
+    if verbose:
+        print(f"Minimization success: {solution.success}, converged to {variable_oe.name}.{variable} = {solution.x}")
     beamline.active_chain[0].nrays = int(old_nrays)
     screen.next = old_link
     if solution.success:
@@ -176,7 +179,7 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
 
 
 def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="Nelder-Mead",
-               show_progress=False, tol=1e-3, options=None, adjust_distance=True):
+               show_progress=False, tol=1e-3, options=None, adjust_distance=True, verbose=1):
     """
     Function to be called for minimizing a focused spot diagram placed at "screen" by varying it distance to the
     previous oe in the "beamline" beamline. One can either try to focus horizontally, vertically or in both dimension by
@@ -206,6 +209,8 @@ def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="
     :type options: dict
     :param adjust_distance: if True, sets the screen at the optimal distance
     :type adjust_distance: bool
+    :param verbose: Verbose level control. 0 is silent
+    :type verbose: int
     :return: Optimal distance from the screen to get focus in given dimension
     :rtype: float
     :raises RuntimeError: if distance has no effect or minimum cannot be reached with asked tolerance
@@ -246,7 +251,8 @@ def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="
         options["xatol"] = tol
     solution = minimize(correlation, 0, method=method, tol=tol, bounds=bounds,
                         options=options)
-    print(f"Minimization success: {solution.success}, converged to a distance of {solution.x}")
+    if verbose:
+        print(f"Minimization success: {solution.success}, converged to a distance of {solution.x}")
     beamline.active_chain[0].nrays = int(old_nrays)
     if solution.success:
         if adjust_distance:
