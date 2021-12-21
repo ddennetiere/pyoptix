@@ -3,19 +3,22 @@ from scipy.stats import describe
 from .ui_objects import display_parameter_sheet, display_progress_bar
 
 
-def display_tolerance_data(beamline):
+def display_tolerance_data(beamline, oe_list=None):
     """
     Displays the parameters of every optics in beamline active chain in a editable format
     :param beamline: beamline to analyze
     :type beamline: pyoptix.Beamline
+    :param oe_list: list of optical element to tolerance. If None, all OE are diplayed
+    :type oe_list: list
     :return: list of ipysheet.sheet objects containing the links to the tables displayed
     :rtype: list
     """
     sheets = {}
     for oe in beamline.active_chain:
-        print(f"properties of {oe.name}")
-        params_sheet = display_parameter_sheet(oe)
-        sheets[oe.name] = params_sheet
+        if oe in oe_list or oe_list is None:
+            print(f"properties of {oe.name}")
+            params_sheet = display_parameter_sheet(oe)
+            sheets[oe.name] = params_sheet
     return sheets
 
 
@@ -65,12 +68,13 @@ def apply_tolerance_data(beamline,  tolerance_data):
     :rtype: Nonetype
     """
     for oe in beamline.active_chain:
-        for cell in tolerance_data[oe.name].cells:
-            param_name, param_val, param_min, param_max, param_mult, param_type, param_group, param_flags = cell.value
-            param = {"value": param_val, "bounds": [float(param_min), float(param_max)],
-                     "multiplier": float(param_mult), "type": int(param_type), "group": int(param_group),
-                     "flags": int(param_flags)}
-            oe._set_parameter(param_name, param)
+        if oe.name in tolerance_data.keys():
+            for cell in tolerance_data[oe.name].cells:
+                param_name, param_val, param_min, param_max, param_mult, param_type, param_group, param_flags = cell.value
+                param = {"value": param_val, "bounds": [float(param_min), float(param_max)],
+                         "multiplier": float(param_mult), "type": int(param_type), "group": int(param_group),
+                         "flags": int(param_flags)}
+                oe._set_parameter(param_name, param)
 
 
 def sensitivity_analysis(beamline, N_stat=100, N_rays=1000, distribution="uniform", quality=lambda bl: None,
