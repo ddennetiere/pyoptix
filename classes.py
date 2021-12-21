@@ -1740,3 +1740,30 @@ def parse_xml(filename):
         for element in chain:
             desc += element.name + " -> "
         print(desc)
+
+
+def load_beamline(filename, glob_dict, verbose=1):
+    with open(filename, "rb") as filein:
+        data = pickle.load(filein)
+    glob_dict[data["beamline"]] = Beamline(name=data["beamline"])
+    if verbose:
+        print("Retrieving beamline", data["beamline"])
+    active_chain = []
+    for item in data["config"]:
+        if item['oe_name'] not in glob_dict.keys():
+            glob_dict[item['oe_name']] = item['oe_class'](name=item['oe_name'])
+        oe = glob_dict[item['oe_name']]
+        active_chain.append(oe)
+        for param_name, param in item['oe_params'].items():
+            oe._set_parameter(param_name, param)
+        if verbose:
+            print("Retrieving and setting element", item['oe_name'])
+    glob_dict[data["beamline"]].chains[data["active_chain"]] = active_chain
+    glob_dict[data["beamline"]].active_chain = data["active_chain"]
+
+
+def save_beamline(beamline, active_chain_name, filename):
+    data = {"beamline": beamline.name, "config": [oe.dump_properties(verbose=0) for oe in beamline.active_chain],
+            "active_chain": active_chain_name}
+    with open(filename, "wb") as fileout:
+        pickle.dump(data, fileout)
