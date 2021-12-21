@@ -7,10 +7,9 @@ from bokeh.layouts import row, column
 from bokeh.util.hex import hexbin
 from bokeh.transform import linear_cmap
 from bokeh.models import PolyAnnotation, ColumnDataSource, LabelSet
-from ipysheet import sheet, cell, row, column, cell_range
+import ipysheet as ipys  # sheet, cell, s_row, s_column, cell_range
 import ipywidgets
 from IPython.display import display
-
 
 
 # Definition des fonctions d'affichage
@@ -75,11 +74,13 @@ def display_parameter_sheet(oe):
     """
     properties = oe.dump_properties(verbose=0)
     params = properties["oe_params"]
-    params_sheet = sheet(rows=len(params.keys()), columns=8, column_headers=["parameter", "value", "min", "max",
-                                                                             "multiplier", "type", "group", "flags"])
+    params_sheet = ipys.sheet(rows=len(params.keys()), columns=8, column_headers=["parameter", "value", "min", "max",
+                                                                                  "multiplier", "type", "group",
+                                                                                  "flags"])
     for i, param in enumerate(params.keys()):
-        row(i, [param, params[param]["value"], params[param]["bounds"][0], params[param]["bounds"][1],
-                params[param]["multiplier"], params[param]["type"], params[param]["group"], params[param]["flags"]])
+        ipys.row(i, [param, params[param]["value"], params[param]["bounds"][0], params[param]["bounds"][1],
+                     params[param]["multiplier"], params[param]["type"], params[param]["group"],
+                     params[param]["flags"]])
     params_sheet.column_width = [15, 20, 10, 10, 10, 10, 10, 10]
     params_sheet.layout = ipywidgets.Layout(width='750px', height='100%')
     for k, c in enumerate(params_sheet.cells):
@@ -130,8 +131,8 @@ def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
     return layout
 
 
-def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=False, light_plot=False, orthonorm=False, radius=5,
-                    x_label="", y_label="", save_in_file="", return_fwhm=False, color_scale="density"):
+def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=False, light_plot=False, orthonorm=False,
+                    radius=5, x_label="", y_label="", save_in_file="", return_fwhm=False, color_scale="density"):
     """
     Function that draws a scatter plot using bokeh. Scatter points are colored as a function of local density so as
     to better grip spot shape when density gets high.
@@ -180,12 +181,12 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
             z = gaussian_kde(xy)(xy)
             z = z / z.max()
         elif color_scale in cds.data.keys():
-            z = (cds.data[color_scale] - cds.data[color_scale].min())/cds.data[color_scale].ptp()
+            z = (cds.data[color_scale] - cds.data[color_scale].min()) / cds.data[color_scale].ptp()
         else:
             raise AttributeError("Unknown color scale")
         colors_jet = ["#%02x%02x%02x" % (to_jet(grayscale)) for grayscale in z]
     else:
-        colors_jet = ["blue"]*x.shape[0]
+        colors_jet = ["blue"] * x.shape[0]
     cds.data[f"color{xkey}{ykey}"] = colors_jet
     # create the scatter plot
 
@@ -206,12 +207,12 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     p.select(LassoSelectTool).select_every_mousemove = False
 
     if show_map:
-        bins = hexbin(x, y, min(np.ptp(x), np.ptp(y))/100)
+        bins = hexbin(x, y, min(np.ptp(x), np.ptp(y)) / 100)
 
         p = figure(tools="wheel_zoom,reset", match_aspect=True, background_fill_color='#440154')
         p.grid.visible = False
 
-        p.hex_tile(q="q", r="r", size=min(np.ptp(x), np.ptp(y))/100, line_color=None, source=bins,
+        p.hex_tile(q="q", r="r", size=min(np.ptp(x), np.ptp(y)) / 100, line_color=None, source=bins,
                    fill_color=linear_cmap('counts', 'Viridis256', 0, max(bins.counts)), alpha=1)
     else:
         p.circle(x=xkey, y=ykey, source=cds, size=radius, color=f"color{xkey}{ykey}", alpha=0.1)
@@ -237,12 +238,13 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     x_dist = x - x.mean()
     x_dist = np.sort(x_dist)
     x_integral_dist_pos = np.cumsum(np.where(x_dist > 0, 1, 0))
-    x_fwhm_pos = x_dist[x_integral_dist_pos > 0.87*x_integral_dist_pos.max()][0]
+    x_fwhm_pos = x_dist[x_integral_dist_pos > 0.87 * x_integral_dist_pos.max()][0]
     x_integral_dist_neg = np.cumsum(np.where(x_dist[::-1] < 0, 1, 0))
-    x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87*x_integral_dist_neg.max()][0]
+    x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87 * x_integral_dist_neg.max()][0]
 
     # mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (x_fwhm_pos - x_fwhm_neg, x_unit))
-    mytext = Label(x=3*x.min()/4, y=-hhist.max() / 2, text=f'{x_fwhm_pos - x_fwhm_neg:.2e} {x_unit} FWHM, {x.std():.2e} {x_unit} RMS')
+    mytext = Label(x=3 * x.min() / 4, y=-hhist.max() / 2,
+                   text=f'{x_fwhm_pos - x_fwhm_neg:.2e} {x_unit} FWHM, {x.std():.2e} {x_unit} RMS')
     ph.add_layout(mytext)
 
     # create the vertical histogram
@@ -260,15 +262,15 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **line_args)
     pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **line_args)
 
-
     y_dist = y - y.mean()
     y_dist = np.sort(y_dist)
     y_integral_dist_pos = np.cumsum(np.where(y_dist > 0, 1, 0))
-    y_fwhm_pos = y_dist[y_integral_dist_pos > 0.87*y_integral_dist_pos.max()][0]
+    y_fwhm_pos = y_dist[y_integral_dist_pos > 0.87 * y_integral_dist_pos.max()][0]
     y_integral_dist_neg = np.cumsum(np.where(y_dist[::-1] < 0, 1, 0))
-    y_fwhm_neg = y_dist[::-1][y_integral_dist_neg > 0.87*y_integral_dist_neg.max()][0]
+    y_fwhm_neg = y_dist[::-1][y_integral_dist_neg > 0.87 * y_integral_dist_neg.max()][0]
 
-    mytext = Label(x=-vhist.max() / 2, y=3*y.max()/4, text=f'{y_fwhm_pos - y_fwhm_neg:.2e} {y_unit} FWHM, {y.std():.2e} {y_unit} RMS',
+    mytext = Label(x=-vhist.max() / 2, y=3 * y.max() / 4,
+                   text=f'{y_fwhm_pos - y_fwhm_neg:.2e} {y_unit} FWHM, {y.std():.2e} {y_unit} RMS',
                    angle=-np.pi / 2)
     pv.add_layout(mytext)
 
