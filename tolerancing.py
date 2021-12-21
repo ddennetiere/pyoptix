@@ -16,7 +16,11 @@ def display_tolerance_data(beamline, oe_list=None):
     """
     sheets = {}
     for oe in beamline.active_chain:
-        if oe in oe_list or oe_list is None:
+        if oe_list is None:
+            print(f"properties of {oe.name}")
+            params_sheet = display_parameter_sheet(oe)
+            sheets[oe.name] = params_sheet
+        elif oe in oe_list:
             print(f"properties of {oe.name}")
             params_sheet = display_parameter_sheet(oe)
             sheets[oe.name] = params_sheet
