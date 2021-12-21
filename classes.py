@@ -11,6 +11,7 @@ import pandas as pd
 from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet
 from numpy import pi
 from scipy.signal import find_peaks, peak_widths
+import pickle
 
 # dictionnary for optix to pyoptix attribute import
 optix_dictionnary = {
@@ -147,6 +148,33 @@ class Beamline(object):
         self._chains = BeamlineChainDict({})
         self._active_chain = None
         self.name = name
+
+    def save_configuration(self, filename=None):
+        config = []
+        for oe in self.active_chain:
+            config.append(oe.dump_properties(verbose=0))
+        if filename is not None:
+            with open(filename, "wb") as filout:
+                pickle.dump(config, filout)
+        return config
+
+    def load_configuration(self, configuration=None, filename=None):
+        if filename is not None:
+            with open(filename, "rb") as filin:
+                configuration = pickle.load(filin)
+        for oe in self.active_chain:
+            for description in configuration:
+                if oe.name == description["oe_name"]:
+                    params = description["oe_params"]
+                    for param in params.keys():
+                        oe._set_parameter(param, params[param])
+
+    def save_beamline(self, filename=None):
+        raise NotImplementedError()
+
+    def load_beamline(self, filename=None):
+        raise NotImplementedError()
+
 
     @property
     def chains(self):
