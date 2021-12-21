@@ -50,12 +50,28 @@ TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save, box_zoom"
 
 
 def display_progress_bar(max_count):
+    """
+    Displays and a progressbar jupyterlab widget for long calculations. To update, add 1 to the returned object.value.
+
+    :param max_count: maximum expected value for progressbar
+    :type max_count: int
+    :return: progress bar widget
+    :rtype: ipywidgets.IntProgress
+    """
     f = ipywidgets.IntProgress(min=0, max=max_count)  # instantiate the bar
     display(f)  # display the bar
     return f
 
 
 def display_parameter_sheet(oe):
+    """
+    Displays the parameters of an optical element in a table jupyterlab widget
+
+    :param oe: optical element the parameters of which to display
+    :type oe: pyoptix.OpticalElement or inherited
+    :return: table widget
+    :rtype: ipysheet.sheet
+    """
     properties = oe.dump_properties(verbose=0)
     params = properties["oe_params"]
     params_sheet = sheet(rows=len(params.keys()), columns=8, column_headers=["parameter", "value", "min", "max",

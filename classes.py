@@ -153,6 +153,7 @@ class Beamline(object):
         """
         Saves all the parameters of a beamline active chain and returns them as a list of dictionaries.
         If filename is supplied, saves the configuration object returned in a file using pickle
+
         :param filename: name of the file where to save configuration, default: None
         :type filename: str
         :return: list of parameters as dict
@@ -170,6 +171,7 @@ class Beamline(object):
         """
         Loads all the parameters of a beamline active chain as a list of dictionaries.
         If filename is supplied, loads the configuration object from pickle file and ignores configuration param.
+
         :param configuration: list of dictionnaries containing the parameters of the optical element. See output
             of save_configuration for more details.
         :type configuration: list of dict
