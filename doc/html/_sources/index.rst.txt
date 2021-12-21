@@ -22,6 +22,66 @@ Indices and tables
 
 
 
+Installing PyOptiX
+------------------
+
+#. Installer miniconda
+
+   Page d'installation de miniconda: https://docs.conda.io/en/latest/miniconda.html
+
+#. Créer un environnement dédié python 3.8.10 et y installer les paquets nécessaires
+
+   ```bash
+   conda create PyOptiX python=3.8.10
+   conda activate PyOptiX
+   conda install lxml
+   ```
+
+#. Installer Jupyter (environnement de script recommandé)
+
+   ```bash
+   conda install jupyterlab bokeh pandas
+   ```
+
+   Créer le fichier de configuration de jupyter
+
+   ```bash
+   jupyter notebook --generate-config
+   ```
+
+   Cela crée un fichier dans `C:\Users\<username>\.jupyter\jupyter_notebook_config.py`
+
+   Trouver la ligne : `#c.NotebookApp.notebook_dir = ''`
+
+   Remplacer par `c.NotebookApp.notebook_dir = '/the/path/to/home/folder/'`
+
+   Ne pas oublier d'effacer le `#` en début de ligne
+
+#. Télécharger la bibliothèque optix avec git :
+
+   ```bash
+   git clone ssh://https://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/optix
+   ```
+
+   La compiler en version release avec msys2 cf. https://www.msys2.org/ et codeblocks.
+
+   Télécharger la librairie libxml2-2 et linker libxml2.a dans le linker (sans chemin) et libxml/bin et libxml/lib dans les search directories du projet.
+#. Télécharger PyOptiX
+
+   ```bash
+   git clone ssh://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/PyOptiX
+   ```
+
+#. Installer ipysheet
+
+   ```bash
+   conda install -c conda-forge ipysheet
+   pip install -U "nbclassic>=0.2.8"
+   jupyter nbextension enable --py --sys-prefix widgetsnbextension
+   ```
+
+
+
 PyOptiX classes
 ---------------
 
@@ -50,6 +110,19 @@ These functions are those called by OpticalElement.show_diagram, they are
 given here in case a user would want to plot something unforseen.
 
 .. automodule:: pyoptix.ui_objects
+   :members:
+   :special-members:
+   :inherited-members:
+
+
+
+
+PyOptiX tolerancing
+----------------------
+These functions aim at providing easy tolerancing of beamline using Monte-Carlo
+generated version of a beamline.
+
+.. automodule:: pyoptix.tolerancing
    :members:
    :special-members:
    :inherited-members:
