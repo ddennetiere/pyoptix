@@ -9,6 +9,7 @@ from bokeh.transform import linear_cmap
 from bokeh.models import PolyAnnotation, ColumnDataSource, LabelSet
 from ipysheet import sheet, cell, row, column, cell_range
 import ipywidgets
+from IPython.display import display
 
 
 
