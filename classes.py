@@ -36,6 +36,9 @@ optix_dictionnary = {
     "lineDensity": "line_density",
     "invp": "inverse_p",
     "invq": "inverse_q",
+    "waistX": "waist_x",
+    "waistY": "waist_y",
+
 }
 
 
