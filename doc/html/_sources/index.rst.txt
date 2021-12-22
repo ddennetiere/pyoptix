@@ -5,6 +5,8 @@
 
 Welcome to PyOptiX's documentation!
 ===================================
+This library codes for a simulation tool for designing X-ray beamline. It has specifically
+been designed for the SOLEIL Synchrotron, but can be used for any X-ray optical design as shown in examples.
 
 
 .. toctree::
@@ -27,58 +29,61 @@ Installing PyOptiX
 
 #. Installer miniconda
 
-   Page d'installation de miniconda: https://docs.conda.io/en/latest/miniconda.html
+   Installation page pf miniconda: https://docs.conda.io/en/latest/miniconda.html
 
-#. Créer un environnement dédié python 3.8.10 et y installer les paquets nécessaires
+#. Create a python 3.8.10 dedicated environment and install required packages
 
-   ```bash
-   conda create PyOptiX python=3.8.10
-   conda activate PyOptiX
-   conda install lxml
-   ```
+   .. code-block:: Python
 
-#. Installer Jupyter (environnement de script recommandé)
+      conda create PyOptiX python=3.8.10
+      conda activate PyOptiX
+      conda install lxml
 
-   ```bash
-   conda install jupyterlab bokeh pandas
-   ```
+#. Install Jupyterlab (recommended scripting environment )
 
-   Créer le fichier de configuration de jupyter
+   .. code-block:: Python
 
-   ```bash
-   jupyter notebook --generate-config
-   ```
+      conda install jupyterlab bokeh pandas
 
-   Cela crée un fichier dans `C:\Users\<username>\.jupyter\jupyter_notebook_config.py`
+   Create jupyter configuration file
 
-   Trouver la ligne : `#c.NotebookApp.notebook_dir = ''`
+   .. code-block:: Python
 
-   Remplacer par `c.NotebookApp.notebook_dir = '/the/path/to/home/folder/'`
+      jupyter notebook --generate-config
 
-   Ne pas oublier d'effacer le `#` en début de ligne
+   There is now a file at ``C:\Users\<username>\.jupyter\jupyter_notebook_config.py``
 
-#. Télécharger la bibliothèque optix avec git :
+   Find the line : ``#c.NotebookApp.notebook_dir = ''``
 
-   ```bash
-   git clone ssh://https://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/optix
-   ```
+   Replace by ``c.NotebookApp.notebook_dir = '/the/path/to/home/folder/'``
 
-   La compiler en version release avec msys2 cf. https://www.msys2.org/ et codeblocks.
+   Do not forget to delete the ``#`` at line start
 
-   Télécharger la librairie libxml2-2 et linker libxml2.a dans le linker (sans chemin) et libxml/bin et libxml/lib dans les search directories du projet.
-#. Télécharger PyOptiX
+#. Download optix using git:
 
-   ```bash
-   git clone ssh://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/PyOptiX
-   ```
+   .. code-block:: Python
 
-#. Installer ipysheet
+      git clone ssh://https://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/optix
 
-   ```bash
-   conda install -c conda-forge ipysheet
-   pip install -U "nbclassic>=0.2.8"
-   jupyter nbextension enable --py --sys-prefix widgetsnbextension
-   ```
+
+   Compile its release version using msys2 cf. https://www.msys2.org/ and codeblocks.
+
+   Download libxml2-2 library and link libxml2.a in the codeblocks linker (without its path) and libxml/bin and libxml/lib in the search directories of the project.
+
+#. Download PyOptiX
+
+   .. code-block:: Python
+
+      git clone ssh://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/PyOptiX
+
+#. Install ipysheet
+
+   .. code-block:: Python
+
+      conda install -c conda-forge ipysheet
+      pip install -U "nbclassic>=0.2.8"
+      jupyter nbextension enable --py --sys-prefix widgetsnbextension
+
 
 
 
