@@ -8,7 +8,7 @@ from bokeh.models.widgets import Slider, TextInput
 from bokeh.application import Application
 from bokeh.application.handlers import FunctionHandler
 from bokeh.layouts import row, column
-from bokeh.io import  show
+from bokeh.io import show
 from bokeh.io import push_notebook
 
 
@@ -66,23 +66,18 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
         datasource[display].data.update(spd)
         # push_notebook(handle=handles[0])
 
-    def update_title(attrname, old, new):
-        handles[0][0].title.text = text.value
-
     # interact(f, x=widgets.FloatSlider(min=variable_bounds[0], max=variable_bounds[1], step=variable_step,
     #                                   value=v0, continuous_update=False, layout=Layout(width='90%'),
     #                                   description=f"{variable}", readout_format='.3e'))
     value_slider = Slider(start=variable_bounds[0], end=variable_bounds[1], step=variable_step,
                           value=v0, sizing_mode="stretch_width")
-    text = TextInput(title="title", value='my sine wave')
 
     value_slider.on_change('value_throttled', update_data)
-    layout = column(handles[0], value_slider, text)
+    layout = column(handles[0], value_slider)
 
     def modify_doc(doc):
         doc.add_root(row(layout, width=800))
         doc.title = "Sliders"
-        text.on_change('value', update_title)
 
     handler = FunctionHandler(modify_doc)
     app = Application(handler)
