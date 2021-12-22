@@ -1,73 +1,88 @@
 Bibliothèque de simulation optique X pour le synchrotron SOLEIL
 ===============================================================
+This library codes for a simulation tool for designing X-ray beamline. It has specifically
+been designed for the SOLEIL Synchrotron, but can be used for any X-ray optical design as shown in examples.
+ 
 
-Install
--------
+Installing
+----------
 
-1. Installer miniconda
-2. Créer un environnement dédié python 3.8.10 et y installer les paquets nécessaires
+1. Install miniconda
 
-```bash
-conda create PyOptiX python=3.8.10
-conda activate PyOptiX
-conda install lxml
-```
-3.1 Installer orange 
+   Installation page pf miniconda: https://docs.conda.io/en/latest/miniconda.html
 
-```bash
-conda install orange3
-```
+2. Create a python 3.8.10 dedicated environment and install required packages
 
-Vérifier que l'installation s'est bien déroulée
+   ```bash
+   conda create PyOptiX python=3.8.10
+   conda activate PyOptiX
+   conda install lxml
+   ```
 
-```bash
-python -m Orange.canvas
-```
+3. Install Jupyterlab (recommended scripting environment )
 
-3.2 Installer Jupyter (environnement de script recommandé)
+   ```bash
+   conda install jupyterlab bokeh pandas
+   ```
 
-```bash
-conda install jupyter
-```
+   Create jupyter configuration file
 
-Créer le fichier de configuration de jupyter
+   ```bash
+   jupyter notebook --generate-config
+   ```
 
-```bash
-jupyter notebook --generate-config
-```
-Cela crée un fichier dans `C:\Users\<username>\.jupyter\jupyter_notebook_config.py`
+   There is now a file at `C:\Users\<username>\.jupyter\jupyter_notebook_config.py`
 
-Trouver la ligne : `#c.NotebookApp.notebook_dir = ''`
+   Find the line : `#c.NotebookApp.notebook_dir = ''`
 
-Remplacer par `c.NotebookApp.notebook_dir = '/the/path/to/home/folder/'`
+   Replace by `c.NotebookApp.notebook_dir = '/the/path/to/home/folder/'`
 
-Ne pas oublier d'effacer le `#` en début de ligne
+   Do not forget to delete the `#` at line start
 
-4. Télécharger la bibliothèque optix avec git :
+4. Download optix using git :
 
-```bash
-git clone ssh://https://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/optix
-```
+   ```bash
+   git clone ssh://https://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/optix
+   ```
 
-La compiler en version release avec msys2 cf. <https://www.msys2.org/> et codeblocks.
+   Compile its release version using msys2 cf. https://www.msys2.org/ and codeblocks.
 
-Télécharger la librairie libxml2-2 et linker libxml2.a dans le linker (sans chemin) et libxml/bin et libxml/lib dans les search directories du projet.
-5. Télécharger PyOptiX
+   Download libxml2-2 library and link libxml2.a in the codeblocks linker (without its path) and libxml/bin and libxml/lib in the search directories of the project.
 
-```bash
-git clone ssh://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/PyOptiX
-```
+5. Download PyOptiX
 
-6. Installer bokeh
+   ```bash
+   git clone ssh://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/PyOptiX
+   ```
 
-```bash
-conda install bokeh
-```
+6. Install ipysheet
 
-7. Installer pandas
+   ```bash
+   conda install -c conda-forge ipysheet
+   pip install -U "nbclassic>=0.2.8"
+   jupyter nbextension enable --py --sys-prefix widgetsnbextension
+   ```
 
-```bash
-conda install pandas
-```
+Examples
+--------
+Run README.ipynb in jupyterlab to access the following example notebooks
+
+### Design and simulation
+- **[Herm1](Hermes%20notebook.ipynb)** - [Hermes beamline](Hermes%20notebook.ipynb)  
+Definition and simulation of the HERMES beamline at SOLEIL
+- **[Atto1](Ellipse%20Helimag.ipynb)** - [Helimag beamline V1](Ellipse%20Helimag.ipynb)  
+Definition and simulation of a beamline for the Attolab facility using revolution conics mirrors
+- **[Atto2](Wolter%20Helimag.ipynb)** - [Helimag beamline V2](Wolter%20Helimag.ipynb)  
+Definition and simulation of a beamline for the Attolab facility using toroidal mirrors 
+- **[Atto3](KB_HELIMAG.ipynb)** - [Helimag beamline V3](KB_HELIMAG.ipynb)  
+Definition and simulation of a beamline for the Attolab facility using conical mirrors in a Kirkpatrick-Baez configuration 
 
 
+### Tolerancing systems
+- **[Atto3b](KB_HELIMAG_tolerancing.ipynb)** - [Helimag beamline V3](KB_HELIMAG_tolerancing.ipynb)  
+	Import of a beamline for the Attolab facility using conical mirrors in a Kirkpatrick-Baez configuration defined in
+	**[Atto3](KB_HELIMAG.ipynb)** et tolerancing of the beamline
+
+### Optimization
+- **[HERM1](Hermes%20notebook.ipynb)** - [Hermes beamline](Hermes%20notebook.ipynb)  
+Definition and simulation of the HERMES beamline at SOLEIL

@@ -1,6 +1,6 @@
 # coding: utf-8
 import numpy as np
-from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_int64, create_string_buffer
+from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_ulong, create_string_buffer
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
 from .exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
                                 get_element_name, set_recording, get_next_element, get_previous_element,
@@ -8,9 +8,10 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
 from scipy.constants import degree
 from lxml import etree
 import pandas as pd
-from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet
+from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet
 from numpy import pi
 from scipy.signal import find_peaks, peak_widths
+import pickle
 
 # dictionnary for optix to pyoptix attribute import
 optix_dictionnary = {
@@ -25,7 +26,7 @@ optix_dictionnary = {
     "sigmaY": "sigma_y",
     "sigmaXdiv": "sigma_x_div",
     "sigmaYdiv": "sigma_y_div",
-    "NRays": "nrays",
+    "nRays": "nrays",
     "azimuthAngle1": "azimuth_angle1",
     "azimuthAngle2": "azimuth_angle2",
     "elevationAngle1": "elevation_angle1",
@@ -35,6 +36,9 @@ optix_dictionnary = {
     "lineDensity": "line_density",
     "invp": "inverse_p",
     "invq": "inverse_q",
+    "waistX": "waist_x",
+    "waistY": "waist_y",
+
 }
 
 
@@ -147,6 +151,54 @@ class Beamline(object):
         self._chains = BeamlineChainDict({})
         self._active_chain = None
         self.name = name
+
+    def save_configuration(self, filename=None):
+        """
+        Saves all the parameters of a beamline active chain and returns them as a list of dictionaries.
+        If filename is supplied, saves the configuration object returned in a file using pickle
+
+        :param filename: name of the file where to save configuration, default: None
+        :type filename: str
+        :return: list of parameters as dict
+        :rtype: list of dict
+        """
+        config = []
+        for oe in self.active_chain:
+            config.append(oe.dump_properties(verbose=0))
+        if filename is not None:
+            with open(filename, "wb") as filout:
+                pickle.dump(config, filout)
+        return config
+
+    def load_configuration(self, configuration=None, filename=None):
+        """
+        Loads all the parameters of a beamline active chain as a list of dictionaries.
+        If filename is supplied, loads the configuration object from pickle file and ignores configuration param.
+
+        :param configuration: list of dictionnaries containing the parameters of the optical element. See output
+            of save_configuration for more details.
+        :type configuration: list of dict
+        :param filename: name of the file from which to load configuration, default: None
+        :type filename: str
+        :return: None
+        :rtype: Nonetype
+        """
+        if filename is not None:
+            with open(filename, "rb") as filin:
+                configuration = pickle.load(filin)
+        for oe in self.active_chain:
+            for description in configuration:
+                if oe.name == description["oe_name"]:
+                    params = description["oe_params"]
+                    for param in params.keys():
+                        oe._set_parameter(param, params[param])
+
+    def save_beamline(self, filename=None):
+        raise NotImplementedError()
+
+    def load_beamline(self, filename=None):
+        raise NotImplementedError()
+
 
     @property
     def chains(self):
@@ -307,7 +359,7 @@ class Beamline(object):
                 else:
                     make_box(oe_type="mirror", center=side_points[-1], angle=-(total_theta_side + 15) * pi / 180,
                              fig=p, direction="up", height=10)
-                    total_theta_side = 30
+                    total_theta_side += 30
                 make_box(oe_type="mirror", center=top_points[-1], angle=-total_theta_top * pi / 180, fig=p,
                          direction="straight", height=10)
             elif abs(abs(total_phi) % (pi / 2)) < 1e-5:
@@ -533,22 +585,33 @@ class OpticalElement(object):
         if isinstance(value, dict):
             for key in value.keys():
                 assert key in ("value", "bounds", "multiplier", "type", "group", "flags")
-                if key in ("value", "multiplier"):
-                    param.__dict__[key] = DOUBLE(value[key])
-                elif key in ("type", "group", "flags"):
-                    param.__dict__[key] = INT(value[key])
+                if key == "value":
+                    param.value = DOUBLE(value[key])
+                elif key == "multiplier":
+                    param.multiplier = DOUBLE(value[key])
+                elif key == "type":
+                    param.type = INT(value[key])
+                elif key == "group":
+                    param.group = INT(value[key])
+                elif key == "flags":
+                    param.flags = c_ulong(value[key])
                 else:
                     bounds = Bounds()
                     bounds.min = DOUBLE(value[key][0])
                     bounds.max = DOUBLE(value[key][1])
-                    param.__dict__[key] = bounds
+                    param.bounds = bounds
         else:
             try:
                 value = float(value)
                 param.value = DOUBLE(value)
             except TypeError:
                 raise AttributeError("value of parameter must be castable in a float or a dictionnary")
+        if param_name in optix_dictionnary.keys():
+            pyoptix_param_name = optix_dictionnary[param_name]
+        else:
+            pyoptix_param_name = param_name
         set_parameter(self._element_id, param_name, param)
+        self.__getattribute__(pyoptix_param_name)  # update of internal variable
         return self._get_parameter(param_name)
 
     @property
@@ -617,6 +680,33 @@ class OpticalElement(object):
         self._d_theta = self._set_parameter("Dtheta", value)
 
     @property
+    def d_x(self):
+        self._d_x = self._get_parameter("DX")
+        return self._d_x
+
+    @d_x.setter
+    def d_x(self, value):
+        self._d_x = self._set_parameter("DX", value)
+
+    @property
+    def d_y(self):
+        self._d_y = self._get_parameter("DY")
+        return self._d_y
+
+    @d_y.setter
+    def d_y(self, value):
+        self._d_y = self._set_parameter("DY", value)
+
+    @property
+    def d_z(self):
+        self._d_z = self._get_parameter("DZ")
+        return self._d_z
+
+    @d_z.setter
+    def d_z(self, value):
+        self._d_z = self._set_parameter("DZ", value)
+
+    @property
     def distance_from_previous(self):
         self._distance_from_previous = self._get_parameter("distance")
         return self._distance_from_previous
@@ -678,7 +768,7 @@ class OpticalElement(object):
         return description
 
     def show_diagram(self, nrays=None, distance_from_oe=0, map_xy=False, light_xy=False,
-                     light_xxp=False, light_yyp=False, show_first_rays=False, display="all", **kwargs):
+                     light_xxp=False, light_yyp=False, show_first_rays=False, display="all", show_spd=True, **kwargs):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
@@ -715,23 +805,24 @@ class OpticalElement(object):
         if nrays is None:
             nrays = self.beamline.active_chain[0].nrays
         spots = self.get_diagram(nrays=nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
-        datasource = ColumnDataSource(spots)
+        datasources = {"xy": ColumnDataSource(spots), "xxp": ColumnDataSource(spots), "yyp": ColumnDataSource(spots)}
         figs = []
         if display == "all":
             display = "xy, xxp, yyp"
         if "xy" in display:
-            figs.append(plot_spd(ColumnDataSource(spots), x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
+            figs.append(plot_spd(datasources["xy"], x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
                                  beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name, **kwargs))
         if "xxp" in display:
-            figs.append(plot_spd(ColumnDataSource(spots), x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
+            figs.append(plot_spd(datasources["xxp"], x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
                                  chain_name=chain_name, oe_name=self._name, **kwargs))
         if "yyp" in display:
-            figs.append(plot_spd(ColumnDataSource(spots), x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
+            figs.append(plot_spd(datasources["yyp"], x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
                                  chain_name=chain_name, oe_name=self._name, **kwargs))
         handles = []
-        for fig in figs:
-            handles.append(show(fig, notebook_handle=True))
-        return datasource, handles
+        if show_spd:
+            for fig in figs:
+                handles.append(show(fig, notebook_handle=True))
+        return datasources, figs
 
     def get_diagram(self, nrays=None, distance_from_oe=0, show_first_rays=False):
         """
@@ -821,7 +912,7 @@ class OpticalElement(object):
                                 "input": RecordingMode.recording_input,
                                 "not_recording": RecordingMode.recording_none}[recording_mode]
 
-    def dump_properties(self):
+    def dump_properties(self, verbose=1):
         """
         Prints all stored optix parameters
         """
@@ -829,13 +920,31 @@ class OpticalElement(object):
         param_name = create_string_buffer(48)
         param = Parameter()
         enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
-        print(f"Dump of all optix parameter for {self.name}")
+        if verbose:
+            print(f"Dump of all optix parameter for {self.name}")
+        param_dict = {"oe_name": self.name, "oe_params": {}, "oe_class": self.__class__}
         while hparam:
+            if verbose:
+                print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                            f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+            param_dict["oe_params"][param_name.value.decode()] = {"value": param.value,
+                                                                  "bounds": [param.bounds.min, param.bounds.max],
+                                                                  "multiplier": param.multiplier,
+                                                                  "type": param.type, "group": param.group,
+                                                                  "flags": param.flags}
+            enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
+        if verbose:
             print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
                         f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
-            enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
-        print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
-                    f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
+        param_dict["oe_params"][param_name.value.decode()] = {"value": param.value,
+                                                              "bounds": [param.bounds.min, param.bounds.max],
+                                                              "multiplier": param.multiplier,
+                                                              "type": param.type, "group": param.group,
+                                                              "flags": param.flags}
+        return param_dict
+
+    def display_properties(self):
+        display_parameter_sheet(self)
 
 
 class Source(OpticalElement):
@@ -1473,7 +1582,7 @@ class PlaneGrating(PlaneHoloGrating):
     """
     def __init__(self, **kwargs):
         """
-        Constructor of the ToroidalHoloGrating class.
+        Constructor of the PlaneGrating class.
 
         :param kwargs: See PlaneHoloGrating doc for the parameters
         """
@@ -1661,3 +1770,30 @@ def parse_xml(filename):
         for element in chain:
             desc += element.name + " -> "
         print(desc)
+
+
+def load_beamline(filename, glob_dict, verbose=1):
+    with open(filename, "rb") as filein:
+        data = pickle.load(filein)
+    glob_dict[data["beamline"]] = Beamline(name=data["beamline"])
+    if verbose:
+        print("Retrieving beamline", data["beamline"])
+    active_chain = []
+    for item in data["config"]:
+        if item['oe_name'] not in glob_dict.keys():
+            glob_dict[item['oe_name']] = item['oe_class'](name=item['oe_name'])
+        oe = glob_dict[item['oe_name']]
+        active_chain.append(oe)
+        for param_name, param in item['oe_params'].items():
+            oe._set_parameter(param_name, param)
+        if verbose:
+            print("Retrieving and setting element", item['oe_name'])
+    glob_dict[data["beamline"]].chains[data["active_chain"]] = active_chain
+    glob_dict[data["beamline"]].active_chain = data["active_chain"]
+
+
+def save_beamline(beamline, active_chain_name, filename):
+    data = {"beamline": beamline.name, "config": [oe.dump_properties(verbose=0) for oe in beamline.active_chain],
+            "active_chain": active_chain_name}
+    with open(filename, "wb") as fileout:
+        pickle.dump(data, fileout)

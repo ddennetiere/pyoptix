@@ -1,6 +1,7 @@
 # coding: utf-8
 from .exposed_functions import load_optix
 from bokeh.io import output_notebook as bok_on
+from .classes import save_beamline, load_beamline
 
 global optix
 try:
