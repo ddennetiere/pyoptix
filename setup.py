@@ -7,7 +7,7 @@ shortcut_filename = "PyOptiX launcher.lnk"
 with open(os.path.join(path, "PyOptiX.bat"), "w") as batfile:
     batfile.write(f'start chrome --new-window "{path}\doc\html\index.html"\n')
     batfile.write(r'call C:\Miniconda3\Scripts\activate.bat pyoptix'+'\n')
-    batfile.write('start jupyter notebook\n')
+    batfile.write('start jupyter lab\n')
 
 shell = Dispatch('WScript.Shell')
 shortcut = shell.CreateShortCut(os.path.join(path, shortcut_filename))
