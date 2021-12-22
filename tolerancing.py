@@ -75,7 +75,7 @@ def apply_tolerance_data(beamline,  tolerance_data):
     :rtype: Nonetype
     """
     for oe in beamline.active_chain:
-        if oe.name in tolerance_data.keys():
+        if oe.name in tolerance_data:
             for cell in tolerance_data[oe.name].cells:
                 param_name, param_val, param_min, param_max, param_mult, param_type, param_group, param_flags = cell.value
                 param = {"value": param_val, "bounds": [float(param_min), float(param_max)],

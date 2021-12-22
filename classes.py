@@ -190,7 +190,7 @@ class Beamline(object):
             for description in configuration:
                 if oe.name == description["oe_name"]:
                     params = description["oe_params"]
-                    for param in params.keys():
+                    for param in params:
                         oe._set_parameter(param, params[param])
 
     def save_beamline(self, filename=None):
@@ -223,7 +223,7 @@ class Beamline(object):
         :type chain_name: str
         :return: None
         """
-        assert chain_name in self._chains.keys()
+        assert chain_name in self._chains
         self._active_chain = self.chains[chain_name]
         for i, oe in enumerate(self._active_chain):
             oe.beamline = self
@@ -568,7 +568,7 @@ class OpticalElement(object):
     def get_whole_parameter(self, param_name):
         param = Parameter()
         inv_dict_optix = {v: k for k, v in optix_dictionnary.items()}
-        if param_name in inv_dict_optix.keys():
+        if param_name in inv_dict_optix:
             param_name = inv_dict_optix[param_name]
         get_parameter(self._element_id, param_name, param)
         return {"value": param.value, "bounds": (param.bounds.min, param.bounds.max),
@@ -583,7 +583,7 @@ class OpticalElement(object):
         param = Parameter()
         get_parameter(self._element_id, param_name, param)
         if isinstance(value, dict):
-            for key in value.keys():
+            for key in value:
                 assert key in ("value", "bounds", "multiplier", "type", "group", "flags")
                 if key == "value":
                     param.value = DOUBLE(value[key])
@@ -606,7 +606,7 @@ class OpticalElement(object):
                 param.value = DOUBLE(value)
             except TypeError:
                 raise AttributeError("value of parameter must be castable in a float or a dictionnary")
-        if param_name in optix_dictionnary.keys():
+        if param_name in optix_dictionnary:
             pyoptix_param_name = optix_dictionnary[param_name]
         else:
             pyoptix_param_name = param_name
@@ -870,7 +870,7 @@ class OpticalElement(object):
             if print_all:
                 print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
                             f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
-            if param_name.value.decode() in optix_dictionnary.keys():
+            if param_name.value.decode() in optix_dictionnary:
                 self.__dict__["_" + optix_dictionnary[param_name.value.decode()]] = param.value
             else:
                 self.__dict__["_" + param_name.value.decode()] = param.value
@@ -878,7 +878,7 @@ class OpticalElement(object):
         if print_all:
             print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
                         f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
-        if param_name.value.decode() in optix_dictionnary.keys():
+        if param_name.value.decode() in optix_dictionnary:
             self.__dict__["_" + optix_dictionnary[param_name.value.decode()]] = param.value
         else:
             self.__dict__["_" + param_name.value.decode()] = param.value
@@ -1780,7 +1780,7 @@ def load_beamline(filename, glob_dict, verbose=1):
         print("Retrieving beamline", data["beamline"])
     active_chain = []
     for item in data["config"]:
-        if item['oe_name'] not in glob_dict.keys():
+        if item['oe_name'] not in glob_dict:
             glob_dict[item['oe_name']] = item['oe_class'](name=item['oe_name'])
         oe = glob_dict[item['oe_name']]
         active_chain.append(oe)

@@ -77,7 +77,7 @@ def display_parameter_sheet(oe):
     params_sheet = ipys.sheet(rows=len(params.keys()), columns=8, column_headers=["parameter", "value", "min", "max",
                                                                                   "multiplier", "type", "group",
                                                                                   "flags"])
-    for i, param in enumerate(params.keys()):
+    for i, param in enumerate(params):
         ipys.row(i, [param, params[param]["value"], params[param]["bounds"][0], params[param]["bounds"][1],
                      params[param]["multiplier"], params[param]["type"], params[param]["group"],
                      params[param]["flags"]])
@@ -119,7 +119,7 @@ def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
     title = f"{y_key} vs {x_key}"
     if oe_name != "":
         title += f" on {oe_name}"
-    if "beamline_name" in kwargs.keys() and "chain_name" in kwargs.keys():
+    if "beamline_name" in kwargs and "chain_name" in kwargs:
         beamline_name = kwargs.pop("beamline_name")
         chain_name = kwargs.pop("chain_name")
         if beamline_name is not None:
@@ -180,7 +180,7 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
             xy = np.vstack([x, y])
             z = gaussian_kde(xy)(xy)
             z = z / z.max()
-        elif color_scale in cds.data.keys():
+        elif color_scale in cds.data:
             z = (cds.data[color_scale] - cds.data[color_scale].min()) / cds.data[color_scale].ptp()
         else:
             raise AttributeError("Unknown color scale")

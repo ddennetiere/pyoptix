@@ -21,11 +21,11 @@ def catch_c_error(function):
         confirm = True
         confirm_ok = False
         show_return = False
-        if "confirm" in kwargs.keys():
+        if "confirm" in kwargs:
             confirm = kwargs["confirm"]
-        if "confirm_ok" in kwargs.keys():
+        if "confirm_ok" in kwargs:
             confirm_ok = kwargs["confirm_ok"]
-        if "show_return" in kwargs.keys():
+        if "show_return" in kwargs:
             show_return = kwargs["show_return"]
         ret = function(*args)
         if show_return:

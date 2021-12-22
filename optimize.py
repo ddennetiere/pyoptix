@@ -162,9 +162,9 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
             print(value, ret)
         return ret
 
-    if "fatol" not in options.keys() and method == "Nedler-Mead":
+    if "fatol" not in options and method == "Nedler-Mead":
         options["fatol"] = tol
-    if "xatol" not in options.keys() and method == "Nedler-Mead":
+    if "xatol" not in options and method == "Nedler-Mead":
         options["xatol"] = tol
     solution = minimize(correlation, variable_oe.__getattribute__(variable), method=method, tol=tol, bounds=bounds,
                         options=options)
@@ -245,9 +245,9 @@ def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="
             print(value, ret)
         return ret
 
-    if "fatol" not in options.keys() and method == "Nedler-Mead":
+    if "fatol" not in options and method == "Nedler-Mead":
         options["fatol"] = tol
-    if "xatol" not in options.keys() and method == "Nedler-Mead":
+    if "xatol" not in options and method == "Nedler-Mead":
         options["xatol"] = tol
     solution = minimize(correlation, 0, method=method, tol=tol, bounds=bounds,
                         options=options)
