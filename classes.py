@@ -680,6 +680,33 @@ class OpticalElement(object):
         self._d_theta = self._set_parameter("Dtheta", value)
 
     @property
+    def d_x(self):
+        self._d_x = self._get_parameter("DX")
+        return self._d_x
+
+    @d_x.setter
+    def d_x(self, value):
+        self._d_x = self._set_parameter("DX", value)
+
+    @property
+    def d_y(self):
+        self._d_y = self._get_parameter("DY")
+        return self._d_y
+
+    @d_y.setter
+    def d_y(self, value):
+        self._d_y = self._set_parameter("DY", value)
+
+    @property
+    def d_z(self):
+        self._d_z = self._get_parameter("DZ")
+        return self._d_z
+
+    @d_z.setter
+    def d_z(self, value):
+        self._d_z = self._set_parameter("DZ", value)
+
+    @property
     def distance_from_previous(self):
         self._distance_from_previous = self._get_parameter("distance")
         return self._distance_from_previous
