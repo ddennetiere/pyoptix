@@ -64,6 +64,13 @@ class Parameter(Structure):
                 ]
 
 
+class FrameID(object):
+    general_frame = c_int32(0)
+    local_absolute_frame = c_int32(1)
+    aligned_local_frame = c_int32(2)
+    surface_frame = c_int32(3)
+
+
 class RecordingMode(object):
     recording_output = c_int32(2)
     recording_input = c_int32(1)
@@ -826,10 +833,8 @@ class OpticalElement(object):
 
     def get_diagram(self, nrays=None, distance_from_oe=0, show_first_rays=False):
         """
-        If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
-        X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
-        For quick display, light_xy, light_xxp and light_yyp can be set to True.
-        For more realistic rendering, map_xy can be set to True.
+        If recording_mode is set to any other value than RecordingMode.recording_none, returns a
+        (X, Y, dX, dY, Lambda) pandas dataframe where each row is a computed ray
 
         :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
         :type nrays: int
@@ -846,6 +851,42 @@ class OpticalElement(object):
         get_spot_diagram(self.element_id, diagram, distance_from_oe)
         spots = pd.DataFrame(np.copy(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim))),
                              columns=("X", "Y", "dX", "dY", "Lambda"))
+        if show_first_rays:
+            print(spots.head())
+        return spots
+
+    def get_impacts_data(self, nrays=None, reference_frame=None, show_first_rays=False):
+        """
+        If recording_mode is set to any other value than RecordingMode.recording_none, returns a
+        (X, Y, Z, dX, dY, dZ, Lambda) pandas dataframe where each row is a computed ray in the frame
+        of reference given in parameter reference_frame either :
+            - "general_frame" : Absolute laboratory frame
+            - "local_absolute_frame" : Absolute frame with origin on the surface
+            - "aligned_local_frame" : Local frame, with origin on the surface, axe OZ is along the chief ray and OY is in
+                the deviation plane of the last preceding reflective element. Transmissive elements do not change the
+                AlignedLocalFrame
+            - "surface_frame" : Local frame used to describe a surface. Origin is at surface intercept wit the chief ray.
+                Oz is along the surface normal (at origin). OX is the tangential axis for reflective elements.
+
+        :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
+        :type nrays: int
+        :param reference_frame: reference frame for coordinates see above
+        :type reference_frame: str
+        :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
+        :type show_first_rays: bool
+        :return: pandas.Dataframe containing all rays intercept on the optics surface
+        """
+        assert self.recording_mode != RecordingMode.recording_none
+        if nrays is None:
+            nrays = self.beamline.active_chain[0].nrays
+        diagram = Diagram(ndim=7, nreserved=int(nrays))
+        frame = {"general_frame": FrameID.general_frame,
+                 "local_absolute_frame": FrameID.local_absolute_frame,
+                 "aligned_local_frame": FrameID.aligned_local_frame,
+                 "surface_frame": FrameID.surface_frame}
+        get_spot_diagram(self.element_id, diagram, frame[reference_frame])
+        spots = pd.DataFrame(np.copy(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim))),
+                             columns=("X", "Y", "Z", "dX", "dY", "dZ", "Lambda"))
         if show_first_rays:
             print(spots.head())
         return spots
