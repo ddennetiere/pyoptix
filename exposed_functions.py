@@ -221,7 +221,7 @@ def get_spot_diagram(element_id, diagram, distance):
 
 @catch_c_error
 def get_impacts_data(element_id, diagram, frame_id):
-    optix.GetImpactsData.argtypes = (HANDLE, HANDLE, HANDLE)
+    optix.GetImpactsData.argtypes = (HANDLE, HANDLE, INT)
     optix.GetImpactsData.restype = INT
     ret = optix.GetImpactsData(element_id, ctypes.byref(diagram), frame_id)
     return ret

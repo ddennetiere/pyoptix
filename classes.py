@@ -4,7 +4,7 @@ from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_voi
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
 from .exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
                                 get_element_name, set_recording, get_next_element, get_previous_element,
-                                get_spot_diagram, chain_element_by_id, create_element, clear_impacts)
+                                get_spot_diagram, chain_element_by_id, create_element, clear_impacts, get_impacts_data)
 from scipy.constants import degree
 from lxml import etree
 import pandas as pd
@@ -884,7 +884,7 @@ class OpticalElement(object):
                  "local_absolute_frame": FrameID.local_absolute_frame,
                  "aligned_local_frame": FrameID.aligned_local_frame,
                  "surface_frame": FrameID.surface_frame}
-        get_spot_diagram(self.element_id, diagram, frame[reference_frame])
+        get_impacts_data(self.element_id, diagram, frame[reference_frame])
         spots = pd.DataFrame(np.copy(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim))),
                              columns=("X", "Y", "Z", "dX", "dY", "dZ", "Lambda"))
         if show_first_rays:
