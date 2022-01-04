@@ -2,6 +2,7 @@
 import numpy as np
 from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_ulong, create_string_buffer
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
+from .mcpl import PyOptixMCPLWriter
 from .exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
                                 get_element_name, set_recording, get_next_element, get_previous_element,
                                 get_spot_diagram, chain_element_by_id, create_element, clear_impacts, get_impacts_data)
@@ -890,6 +891,23 @@ class OpticalElement(object):
         if show_first_rays:
             print(spots.head())
         return spots
+
+    def export_beam_mcpl(self, reference_frame):
+        """
+        If recording_mode is set to any other value than RecordingMode.recording_none, exports a
+        MCPL (see https://mctools.github.io/mcpl/) in the frame
+        of reference given in parameter reference_frame (see doc of OpticalElement.get_impacts_data)
+
+        :param reference_frame:reference frame for coordinates see  OpticalElement.get_impacts_data
+        :type reference_frame: str
+        :return: None
+        :rtype: Nonetype
+        """
+        mcpl_file_out = PyOptixMCPLWriter("my_mcpl_file.mcpl")
+        mcpl_file_out.add_comment(f"File generated with beamline {self.beamline.name}")
+        mcpl_file_out.add_comment(f"Test MCPL file from MCPL_interfacing.ipynb")
+        mcpl_file_out.dump_diagram(self.get_impacts_data(reference_frame=reference_frame))
+        mcpl_file_out.write_to_file()
 
     def from_element_id(self, element_id, print_all=False):
         """
