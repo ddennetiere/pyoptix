@@ -1136,7 +1136,6 @@ class PyOptixMCPLReader:
         beamline_name = os.path.basename(self.filename)
         chain_name = None
         diag = self.get_diagram()
-        print("diagram:\n", diag)
         datasources = {"xy": ColumnDataSource(diag), "xxp": ColumnDataSource(diag), "yyp": ColumnDataSource(diag)}
         figs = []
         if display == "all":
