@@ -131,4 +131,12 @@ generated version of a beamline.
    :members:
    :special-members:
    :inherited-members:
-   
+
+PyOptiX MCPL interface
+----------------------
+This module provides read write functions for MonteCarloParticleList input/output.
+Using methods from pyoptix.classes should be used instead of direct call to these functions.
+
+.. automodule:: pyoptix.mcpl
+   :members:
+   :special-members:

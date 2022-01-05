@@ -861,13 +861,14 @@ class OpticalElement(object):
         If recording_mode is set to any other value than RecordingMode.recording_none, returns a
         (X, Y, Z, dX, dY, dZ, Lambda) pandas dataframe where each row is a computed ray in the frame
         of reference given in parameter reference_frame either :
-            - "general_frame" : Absolute laboratory frame
-            - "local_absolute_frame" : Absolute frame with origin on the surface
-            - "aligned_local_frame" : Local frame, with origin on the surface, axe OZ is along the chief ray and OY is in
-                the deviation plane of the last preceding reflective element. Transmissive elements do not change the
-                AlignedLocalFrame
-            - "surface_frame" : Local frame used to describe a surface. Origin is at surface intercept wit the chief ray.
-                Oz is along the surface normal (at origin). OX is the tangential axis for reflective elements.
+
+        - "general_frame" : Absolute laboratory frame
+        - "local_absolute_frame" : Absolute frame with origin on the surface
+        - "aligned_local_frame" : Local frame, with origin on the surface, axe OZ is along the chief ray and OY is in
+          the deviation plane of the last preceding reflective element. Transmissive elements do not change the
+          AlignedLocalFrame
+        - "surface_frame" : Local frame used to describe a surface. Origin is at surface intercept wit the chief ray.
+          Oz is along the surface normal (at origin). OX is the tangential axis for reflective elements.
 
         :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
         :type nrays: int

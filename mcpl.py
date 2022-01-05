@@ -24,11 +24,12 @@ would appreciate it if you would use the following reference in your work:
 mcpl.py written by Thomas Kittelmann, 2017-2019. The work was supported by the
 European Union's Horizon 2020 research and innovation programme under grant
 agreement No 676548 (the BrightnESS project)
+
+mcpl.py edited to fit pyoptix interface requirement by David Dennetiere 2022
 """
 
 from __future__ import division, print_function, absolute_import, unicode_literals  # enable py3 behaviour in py2.6+
 from .ui_objects import plot_spd, show, ColumnDataSource
-from .classes import Diagram
 import pandas as pd
 from scipy.constants import h, c, eV
 import struct
@@ -51,9 +52,9 @@ __license__ = _str('CC0 1.0 Universal')
 __copyright__ = _str('Copyright 2017-2019')
 __version__ = _str('1.3.2')
 __status__ = _str('Production')
-__author__ = _str('Thomas Kittelmann')
-__maintainer__ = _str('Thomas Kittelmann')
-__email__ = _str('thomas.kittelmann@esss.se')
+__author__ = _str('Thomas Kittelmann, David Dennetiere')
+__maintainer__ = _str('Thomas Kittelmann, David Dennetiere')
+__email__ = _str('thomas.kittelmann@esss.se, david.dennetiere@synchrotron-soleil.fr')
 __all__ = [_str('MCPLFile'),
            _str('MCPLParticle'),
            _str('MCPLParticleBlock'),
@@ -64,7 +65,9 @@ __all__ = [_str('MCPLFile'),
            _str('collect_stats'),
            _str('dump_stats'),
            _str('plot_stats'),
-           _str('main')]
+           _str('main'),
+           _str('PyOptixMCPLWriter'),
+           _str('PyOptixMCPLReader')]
 
 # Python version checks and workarounds:
 
@@ -724,12 +727,14 @@ class MCPLFile:
         with particle state information available on fields as seen in the following
         example:
 
-          p = mcplfile.read()
-          if p is not None:
-               print p.x,p.y,p.z
-               print p.ux,p.uy,p.uz
-               print p.polx,p.poly,p.polz
-               print p.ekin,p.time,p.weight,p.userflags
+        .. code-block:: python
+
+              p = mcplfile.read()
+              if p is not None:
+                   print p.x,p.y,p.z
+                   print p.ux,p.uy,p.uz
+                   print p.polx,p.poly,p.polz
+                   print p.ekin,p.time,p.weight,p.userflags
 
         See also the particles property for an iterator-based access to
         particles. Furthermore, note that the read_blocks() function and
@@ -1160,6 +1165,7 @@ class PyOptixMCPLWriter:
 
     Use dump_diagram to register a pyoptix Diagram usable as MCPL file, add_comment if need be then write_to_file
     """
+
     def __init__(self, filename):
         self.filename = filename
         self.global_pdgcode = None
