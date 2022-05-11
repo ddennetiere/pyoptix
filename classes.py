@@ -241,6 +241,7 @@ class Beamline(object):
                 pass
             if i:
                 oe.previous = self._active_chain[i - 1]
+        self._active_chain[-1].next = None
         ret_str = f"Chaîne {chain_name}:\n\t"
         ret_str += self._active_chain.__repr__()
         print(ret_str)
