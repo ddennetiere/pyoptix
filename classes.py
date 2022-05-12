@@ -620,7 +620,14 @@ class OpticalElement(object):
         else:
             pyoptix_param_name = param_name
         set_parameter(self._element_id, param_name, param)
-        self.__getattribute__(pyoptix_param_name)  # update of internal variable
+        if "lineDensityCoeff_" in pyoptix_param_name:  # cas particulier des classes filles de Poly1D
+            deg = int(pyoptix_param_name.split("_")[-1])
+            max_deg = max(len(self._line_density_coeffs), deg)
+            if max_deg > self.degree:
+                self.degree = max_deg
+            get_parameter(self._element_id, param_name, param)
+        else:
+            self.__getattribute__(pyoptix_param_name)  # update of internal variable
         return self._get_parameter(param_name)
 
     @property
@@ -1695,7 +1702,7 @@ class PlanePoly1DGrating(OpticalElement):
     Inherits OpticalElement. Inherited by SphericalPoly1DGrating, CylindricalPoly1DGrating and
     ToroidalPoly1DGrating.
     """
-    def __init__(self, polynomial_degree=1, line_density=1e6, line_density_coeffs=None, **kwargs):
+    def __init__(self, polynomial_degree=0, line_density=1e6, line_density_coeffs=[], **kwargs):
         """
         Constructor method for the class PlanePoly1DGrating.
 
@@ -1743,7 +1750,7 @@ class PlanePoly1DGrating(OpticalElement):
     @property
     def line_density_coeffs(self):
         self._line_density_coeffs = []
-        for i in range(1, self.degree - 1):
+        for i in range(1, self.degree + 1):
             self._line_density_coeffs.append(self._get_parameter(f"lineDensityCoeff_{i}"))
         return self._line_density_coeffs
 
@@ -1751,8 +1758,8 @@ class PlanePoly1DGrating(OpticalElement):
     def line_density_coeffs(self, value):
         self._line_density_coeffs = []
         assert isinstance(value, list)
-        for i in range(1, self.degree - 1):
-            self._line_density_coeffs.append(self._set_parameter(f"lineDensityCoeff_{i}", value[i]))
+        for i in range(1, self.degree + 1):
+            self._line_density_coeffs.append(self._set_parameter(f"lineDensityCoeff_{i}", value[i-1]))
 
 
 class SphericalPoly1DGrating(SphericalMirror, PlanePoly1DGrating):
