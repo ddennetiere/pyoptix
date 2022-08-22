@@ -5,7 +5,8 @@ from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
 from .mcpl import PyOptixMCPLWriter
 from .exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
                                 get_element_name, set_recording, get_next_element, get_previous_element,
-                                get_spot_diagram, chain_element_by_id, create_element, clear_impacts, get_impacts_data)
+                                get_spot_diagram, chain_element_by_id, create_element, clear_impacts, get_impacts_data,
+                                set_transmissive, get_transmissive)
 from scipy.constants import degree
 from lxml import etree
 import pandas as pd
@@ -979,6 +980,30 @@ class OpticalElement(object):
         self._recording_mode = {"output": RecordingMode.recording_output,
                                 "input": RecordingMode.recording_input,
                                 "not_recording": RecordingMode.recording_none}[recording_mode]
+
+    def set_transmissive(self, is_transmissive):
+        """
+        Sets a grating as transmissive or reflective depending on the value of is_transmissive.
+        Only works for gratings.
+
+        :param is_transmissive: if True, makes the grating transmissive, if False, reflective
+        :type is_transmissive: bool
+        :return: None
+        :rtype: Nonetype
+        """
+        assert "grating" in self._element_type.lower()
+        set_transmissive(self, is_transmissive)
+
+    def get_transmissive(self):
+        """
+        Returns True if grating is transmissive, False if reflective.
+        Only works for gratings.
+
+        :return: True if grating is transmissive, False if reflective
+        :rtype: bool
+        """
+        assert "grating" in self._element_type.lower()
+        return get_transmissive(self)
 
     def dump_properties(self, verbose=1):
         """

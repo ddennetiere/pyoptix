@@ -228,5 +228,20 @@ def get_impacts_data(element_id, diagram, frame_id):
 
 
 @catch_c_error
+def set_transmissive(element_id, is_transmissive):
+    optix.GetImpactsData.argtypes = (HANDLE,  BOOLEAN)
+    optix.GetImpactsData.restype = INT
+    ret = optix.SetTransmissive(element_id, is_transmissive)
+    return ret
+
+
+@catch_c_error
+def get_transmissive(element_id):
+    optix.GetImpactsData.argtypes = HANDLE
+    optix.GetImpactsData.restype = BOOLEAN
+    ret = optix.GetTransmissive(element_id)
+    return ret
+
+@catch_c_error
 def version():
     optix.Version()
