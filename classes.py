@@ -13,6 +13,7 @@ import pandas as pd
 from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet
 from numpy import pi
 from scipy.signal import find_peaks, peak_widths
+from scipy.optimize import minimize
 import pickle
 
 # dictionnary for optix to pyoptix attribute import
@@ -862,9 +863,25 @@ class OpticalElement(object):
         if "xxp" in display:
             figs.append(plot_spd(datasources["xxp"], x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
                                  chain_name=chain_name, oe_name=self._name, **kwargs))
+
+            def fun(x):
+                return (spots["X"] + x * spots["dX"]).std()
+            try:
+                res = minimize(fun, 0)
+                print(f"Optimal focalisation along X at {res.x[0]} m from this plane")
+            except RuntimeError:
+                print("Unable to find the optimal focalisation along X automatically")
         if "yyp" in display:
             figs.append(plot_spd(datasources["yyp"], x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
                                  chain_name=chain_name, oe_name=self._name, **kwargs))
+
+            def fun(x):
+                return (spots["Y"] + x * spots["dY"]).std()
+            try:
+                res = minimize(fun, 0)
+                print(f"Optimal focalisation along Y at {res.x[0]} m from this plane")
+            except RuntimeError:
+                print("Unable to find the optimal focalisation along Y automatically")
         handles = []
         if show_spd:
             for fig in figs:
