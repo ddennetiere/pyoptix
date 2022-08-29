@@ -303,6 +303,36 @@ class Beamline(object):
         if new_element not in self._elements:
             self._elements.append(new_element)
 
+    def show_active_chain_orientation(self):
+        """
+        Prints the optical element in the active chain with the orientation of their local vertical axis.
+        For example :
+            - a vertical deflecting mirror with a reflective surface pointed up (deflection towards +Z) will
+            appear will an "up" arrow,
+            - a screen should appear with an "up" arrow, meaning that its "y" axis is vertical and pointed upwards,
+            - an horizontal deflecting mirror with a reflective surface on the left side (deflection towards +X) will
+            appear with a "left" arrow.
+
+        :return: None
+        :rtype: Nonetype
+        """
+        phi = 0
+        arrows = {"up": "\u2191", "left": "\u2190", "right": "\u2192", "down": "\u2193"}
+        for oe in self.active_chain:
+            phi += oe.phi
+            local_phi = (phi + 2*pi) % (2*pi)
+            if local_phi < pi/4:
+                arrow = arrows["up"]
+            elif local_phi < 3*pi/4:
+                arrow = arrows["left"]
+            elif local_phi < 5*pi/4:
+                arrow = arrows["down"]
+            elif local_phi < 7*pi/4:
+                arrow = arrows["right"]
+            else:
+                arrow = arrows["up"]
+            print(oe.name, arrow)
+
     def draw_active_chain(self, top_only=False, side_only=False):
         """
         Draws a *not to scale* diagram of the beamline top and side views for debug purposes.
