@@ -45,6 +45,16 @@ optix_dictionnary = {
 }
 
 
+class PostInitMeta(type):
+    """
+    Metaclass for freezing definition of attributes outside init
+    """
+    def __call__(cls, *args, **kw):
+        instance = super().__call__(*args, **kw)  # < runs __new__ and __init__
+        instance.__post_init__()
+        return instance
+
+
 class Bounds(Structure):
     """
     C structure to be used in optix parameters
@@ -553,10 +563,12 @@ class Beamline(object):
         return resolution
 
 
-class OpticalElement(object):
+class OpticalElement(metaclass=PostInitMeta):
     """
     Base class for all pyoptix optical element
     """
+    _frozen = False
+
     def __init__(self, name="", phi=0, psi=0, theta=0, d_phi=0, d_psi=0, d_theta=0,
                  d_x=0, d_y=0, d_z=0, next_element=None, previous=None, distance_from_previous=0, element_id=None,
                  element_type="", beamline=None):
@@ -638,6 +650,15 @@ class OpticalElement(object):
         self.previous = previous
         self.distance_from_previous = distance_from_previous
         self.beamline = beamline
+
+    def __setattr__(self, name, value):  # enable the frozen decorator for child classes
+        if not self._frozen or hasattr(self, name):
+            super().__setattr__(name, value)
+        else:
+            raise AttributeError(f"Forbidden attempt to define new attribute {name} of a frozen object")
+
+    def __post_init__(self):
+        self._frozen = True
 
     def get_whole_parameter(self, param_name):
         param = Parameter()
