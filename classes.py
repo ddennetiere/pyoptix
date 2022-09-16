@@ -6,12 +6,12 @@ from .mcpl import PyOptixMCPLWriter
 from .exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
                                 get_element_name, set_recording, get_next_element, get_previous_element,
                                 get_spot_diagram, chain_element_by_id, create_element, clear_impacts, get_impacts_data,
-                                set_transmissive, get_transmissive)
-from scipy.constants import degree
+                                set_transmissive, get_transmissive, get_hologram_pattern)
+from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
 from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet
-from numpy import pi
+from numpy import pi, cos, sin, tan, arccos, arcsin, arctan
 from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import minimize
 import pickle
@@ -49,6 +49,7 @@ class PostInitMeta(type):
     """
     Metaclass for freezing definition of attributes outside init
     """
+
     def __call__(cls, *args, **kw):
         instance = super().__call__(*args, **kw)  # < runs __new__ and __init__
         instance.__post_init__()
@@ -74,6 +75,33 @@ class Parameter(Structure):
                 ("type", c_int32),
                 ("group", c_int32),
                 ("flags", c_uint32),
+                ]
+
+
+class PolynomialExpansion(Structure):
+    """
+    C structure to be used in optix parameters
+    """
+    _fields_ = [("a0", c_double),
+                ("a1", c_double),
+                ("a2", c_double),
+                ("a3", c_double),
+                ]
+
+
+class GratingPatternInformation(Structure):
+    """
+    C structure defining the pattern parameters of an hologram used for holographic grating.
+    Fields are the polynomial expansion of the line density, and the central line tilt and curvature of an holographic
+    grating, where :
+    - axial_line_density is an array which will receive the coefficients of the line density approximation by a
+      third degree polynomial. The term of degree 0 is the nominal line density at grating center (in lines/m)
+    - line_curvature is the angle of the angle of the central line of the grating line with the Y axis (in rad)
+    - line_tilt is the angle of the angle of the central line of the grating line with the Y axis (in rad)
+    """
+    _fields_ = [("axial_line_density", PolynomialExpansion),
+                ("line_tilt", c_double),
+                ("line_curvature", c_double),
                 ]
 
 
@@ -132,6 +160,56 @@ class ChainList(list):
             ret_str += f"{oe.name} -> "
         ret_str += "\n"
         return ret_str[:-4]
+
+
+class Point(object):
+    def __init__(self, x=None, y=None, z=None):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __repr__(self):
+        return f"\t{self.x}\n\t{self.y}\n\t{self.z}"
+
+    def get_spherical_coord(self):
+        r = np.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+        theta = arccos(self.z / r)
+        if self.y >= 0:
+            phi = arccos(self.x / np.sqrt(self.x ** 2 + self.y ** 2))
+        else:
+            phi = 2 * pi - arccos(self.x / np.sqrt(self.x ** 2 + self.y ** 2))
+        return r, theta, phi
+
+    def __add__(self, point2):
+        return Point(self.x + point2.x, self.y + point2.y, self.z + point2.z)
+
+    def __sub__(self, point2):
+        return Point(self.x - point2.x, self.y - point2.y, self.z - point2.z)
+
+    def get_coord_horiba(self):
+        r, theta, phi = self.get_spherical_coord()
+        return r, theta / degree, phi / degree
+
+    def get_coord_solemio(self, point1=None):
+        r, theta, phi = self.get_spherical_coord()
+        if point1:
+            r1, theta1, phi1 = point1.get_spherical_coord()
+            return 1 / r, cos(pi / 2 - theta) - cos(pi / 2 - theta1), phi
+        else:
+            return 1 / r, cos(pi / 2 - theta), phi
+
+    def get_coord_pyoptix(self):
+        r, theta, phi = self.get_spherical_coord()
+        return 1 / r, pi / 2 - theta, phi
+
+
+class SphericalPoint(Point):
+    def __init__(self, r, elevation, azimuth):
+        super().__init__()
+        # from convention elevation is 90-\theta and azimuth is \phi
+        self.x = np.longdouble(r * cos(azimuth) * sin(90 * degree - elevation))
+        self.y = np.longdouble(r * sin(azimuth) * sin(90 * degree - elevation))
+        self.z = np.longdouble(r * cos(90 * degree - elevation))
 
 
 class BeamlineChainDict(dict):
@@ -219,7 +297,6 @@ class Beamline(object):
 
     def load_beamline(self, filename=None):
         raise NotImplementedError()
-
 
     @property
     def chains(self):
@@ -364,14 +441,14 @@ class Beamline(object):
         arrows = {"up": "\u2191", "left": "\u2190", "right": "\u2192", "down": "\u2193"}
         for oe in self.active_chain:
             phi += oe.phi
-            local_phi = (phi + 2*pi) % (2*pi)
-            if local_phi < pi/4:
+            local_phi = (phi + 2 * pi) % (2 * pi)
+            if local_phi < pi / 4:
                 arrow = arrows["up"]
-            elif local_phi < 3*pi/4:
+            elif local_phi < 3 * pi / 4:
                 arrow = arrows["left"]
-            elif local_phi < 5*pi/4:
+            elif local_phi < 5 * pi / 4:
                 arrow = arrows["down"]
-            elif local_phi < 7*pi/4:
+            elif local_phi < 7 * pi / 4:
                 arrow = arrows["right"]
             else:
                 arrow = arrows["up"]
@@ -387,6 +464,7 @@ class Beamline(object):
         :type side_only: bool
         :return: None
         """
+
         def rotate(x, y, theta=0):
             xp = x * np.cos(theta) + y * np.sin(theta)
             yp = -x * np.sin(theta) + y * np.cos(theta)
@@ -483,7 +561,7 @@ class Beamline(object):
             p.add_layout(labels_side)
         show(p)
 
-    def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1/5000,
+    def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1 / 5000,
                        show_spd=False, verbose=0, nrays=5000, criterion="fwhm"):
         """
         Computes the resolution of a beamline in its `mono_slit` plane at a given `wavelength`. An a priori resolution
@@ -520,7 +598,7 @@ class Beamline(object):
         self.active_chain[0].nrays = nrays
         self.align(wavelength)
         self.generate(wavelength)
-        self.generate(wavelength+wavelength*dlambda_over_lambda)
+        self.generate(wavelength + wavelength * dlambda_over_lambda)
         self.radiate()
         if orientation == "vertical":
             dim = "Y"
@@ -528,19 +606,20 @@ class Beamline(object):
             dim = "X"
         else:
             raise AttributeError("Unknown orientation")
-        spd = mono_slit.get_diagram(self.active_chain[0].nrays*2)
+        spd = mono_slit.get_diagram(self.active_chain[0].nrays * 2)
         if show_spd:
             print(spd)
             mono_slit.show_diagram(self.active_chain[0].nrays * 2)
         projection = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim])
-        projection_dl = np.array(spd.where(spd["Lambda"] == (wavelength+wavelength*dlambda_over_lambda)).dropna()[dim])
+        projection_dl = np.array(
+            spd.where(spd["Lambda"] == (wavelength + wavelength * dlambda_over_lambda)).dropna()[dim])
         if criterion == "fwhm":
             vhist, vedges = np.histogram(spd.where(spd["Lambda"] == wavelength).dropna()[dim], bins=100)
             peaks, _ = find_peaks(vhist, height=vhist.max())
             res_half = peak_widths(vhist, peaks, rel_height=0.5)
             mono_chr_fwhm = (res_half[0] * (vedges[1] - vedges[0]))[0]
         else:
-            mono_chr_fwhm = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim]).std()*2.35
+            mono_chr_fwhm = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim]).std() * 2.35
         if show_spd and criterion == "fwhm":
             import matplotlib.pyplot as plt
             plt.plot(vedges[1:], vhist)
@@ -550,12 +629,12 @@ class Beamline(object):
             plt.hlines(*widths, color="C2")
             plt.show()
         distance = abs(np.mean(projection) - np.mean(projection_dl))
-        resolution = (1/dlambda_over_lambda)*distance/mono_chr_fwhm
-        if verbose :
-            print(f"FWHM monochromatique : {mono_chr_fwhm*1e6:.2f} µm")
-            print(f"dispersion dans le plan (m) : {distance*1e6:.2f} µm")
-            print(f"Lambda = {wavelength*1e9:.5f} nm")
-            print("lambda_over_dlambda for calculation :", 1/dlambda_over_lambda)
+        resolution = (1 / dlambda_over_lambda) * distance / mono_chr_fwhm
+        if verbose:
+            print(f"FWHM monochromatique : {mono_chr_fwhm * 1e6:.2f} µm")
+            print(f"dispersion dans le plan (m) : {distance * 1e6:.2f} µm")
+            print(f"Lambda = {wavelength * 1e9:.5f} nm")
+            print("lambda_over_dlambda for calculation :", 1 / dlambda_over_lambda)
             print("calculated resolution :", resolution)
         self.active_chain[0].nrays = stored_nrays
         mono_slit.next = slit_next_OE
@@ -915,22 +994,26 @@ class OpticalElement(metaclass=PostInitMeta):
             figs.append(plot_spd(datasources["xy"], x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
                                  beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name, **kwargs))
         if "xxp" in display:
-            figs.append(plot_spd(datasources["xxp"], x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
-                                 chain_name=chain_name, oe_name=self._name, **kwargs))
+            figs.append(
+                plot_spd(datasources["xxp"], x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
+                         chain_name=chain_name, oe_name=self._name, **kwargs))
 
             def fun(x):
                 return (spots["X"] + x * spots["dX"]).std()
+
             try:
                 res = minimize(fun, 0)
                 print(f"Optimal focalisation along X at {res.x[0]} m from this plane")
             except RuntimeError:
                 print("Unable to find the optimal focalisation along X automatically")
         if "yyp" in display:
-            figs.append(plot_spd(datasources["yyp"], x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
-                                 chain_name=chain_name, oe_name=self._name, **kwargs))
+            figs.append(
+                plot_spd(datasources["yyp"], x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
+                         chain_name=chain_name, oe_name=self._name, **kwargs))
 
             def fun(x):
                 return (spots["Y"] + x * spots["dY"]).std()
+
             try:
                 res = minimize(fun, 0)
                 print(f"Optimal focalisation along Y at {res.x[0]} m from this plane")
@@ -1146,6 +1229,7 @@ class Source(OpticalElement):
     Base class for all Sources elements. Can be used as is with the correct element type or using the inherited
     classes
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of a Source type element. Inherits OpticalElement class.
@@ -1164,6 +1248,7 @@ class GaussianSource(Source):
     Base class for all Sources elements. Can be used as is with the correct element type or using the inherited
     classes
     """
+
     def __init__(self, sigma_x=0, sigma_y=0, sigma_x_div=0, sigma_y_div=0, nrays=0, **kwargs):
         """
         Constructor of a gaussian source type element of size sigma_x*sigma_y and divergence sigma_x_div*sigma_y_div.
@@ -1243,6 +1328,7 @@ class AstigmaticGaussianSource(GaussianSource):
     Base class for all Sources elements. Can be used as is with the correct element type or using the inherited
     classes
     """
+
     def __init__(self, waist_x=0, waist_y=0, **kwargs):
         """
         Constructor of a gaussian source type element of size sigma_x*sigma_y and divergence sigma_x_div*sigma_y_div.
@@ -1285,6 +1371,7 @@ class PlaneMirror(OpticalElement):
     """
     Class for plane mirrors. Inherits OpticalElement
     """
+
     def __init__(self, **kwargs):
         """
         Constructor for the PlaneMirror class
@@ -1394,6 +1481,7 @@ class SphericalMirror(OpticalElement):
 
     Defines a 2d spherical mirror of radius 1/curvature.
     """
+
     def __init__(self, curvature=0, **kwargs):
         """
         Constructor for the SphericalMirror class. Radius of curvature of the surface is defined as 1/curvature.
@@ -1428,6 +1516,7 @@ class CylindricalMirror(OpticalElement):
     Defines a 1d spherical mirror of radius 1/curvature invariant along an axes at axis_angle from the X axes of
     the mirror.
     """
+
     def __init__(self, curvature=0, axis_angle=0, **kwargs):
         """
         Constructor for the CylindricalMirror class. curvature is the inverse of the base circle radius,
@@ -1475,6 +1564,7 @@ class ToroidalMirror(OpticalElement):
     Defines a toroidal mirror of major radius 1/major_curvature along its length and minor radius 1/minor_curvature
     along its width.
     """
+
     def __init__(self, minor_curvature=0, major_curvature=0, **kwargs):
         """
         Constructor for the ToroidalMirror class.
@@ -1517,6 +1607,7 @@ class PlaneFilm(OpticalElement):
     """
     Class for plane films. Inherits OpticalElement
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the PlaneFilm class
@@ -1533,6 +1624,7 @@ class SphericalFilm(SphericalMirror):
     """
     Class for spherical films. Inherits SphericalMirror
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the SphericalFilm class.
@@ -1550,6 +1642,7 @@ class CylindricalFilm(CylindricalMirror):
     """
     Class for cylindrical films. Inherits CylindricalMirror
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the CylindricalFilm class.
@@ -1567,6 +1660,7 @@ class ToroidalFilm(ToroidalMirror):
     """
     Class for toroidal films. Inherits ToroidalMirror
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the ToroidalFilm class
@@ -1579,7 +1673,43 @@ class ToroidalFilm(ToroidalMirror):
         super().__init__(**kwargs)
 
 
-class PlaneHoloGrating(OpticalElement):
+class Grating(OpticalElement):
+    # TODO: doc
+    def __init__(self, line_density=1e6, order_use=1, order_align=1, **kwargs):
+        super().__init__(**kwargs)
+        self.order_align = order_align
+        self.order_use = order_use
+        self.line_density = line_density
+
+    @property
+    def order_align(self):
+        self._order_align = self._get_parameter("order_align")
+        return self._order_align
+
+    @order_align.setter
+    def order_align(self, value):
+        self._order_align = self._set_parameter("order_align", value)
+
+    @property
+    def order_use(self):
+        self._order_use = self._get_parameter("order_use")
+        return self._order_use
+
+    @order_use.setter
+    def order_use(self, value):
+        self._order_use = self._set_parameter("order_use", value)
+
+    @property
+    def line_density(self):
+        self._line_density = self._get_parameter("lineDensity")
+        return self._line_density
+
+    @line_density.setter
+    def line_density(self, value):
+        self._line_density = self._set_parameter("lineDensity", value)
+
+
+class PlaneHoloGrating(Grating):
     """
     Class for plane holographic grating.
 
@@ -1594,6 +1724,7 @@ class PlaneHoloGrating(OpticalElement):
     * waves are diverging (real source point) if elevation and distance are of the same sign, converging otherwise
     (virtual source points)
     """
+
     def __init__(self, azimuth_angle1=0, azimuth_angle2=0, elevation_angle1=0, inverse_distance1=np.inf,
                  inverse_distance2=np.inf, order_align=1, order_use=1, recording_wavelength=351.1e-9,
                  line_density=1e6, **kwargs):
@@ -1625,16 +1756,18 @@ class PlaneHoloGrating(OpticalElement):
                                               "ToroidalHoloGrating")
         else:
             kwargs["element_type"] = "PlaneHoloGrating"
-        super().__init__(**kwargs)
+        super().__init__(order_align=order_align, order_use=order_use, line_density=line_density, **kwargs)
         self.azimuth_angle1 = azimuth_angle1
         self.azimuth_angle2 = azimuth_angle2
         self.elevation_angle1 = elevation_angle1
         self.inverse_distance1 = inverse_distance1
         self.inverse_distance2 = inverse_distance2
-        self.order_align = order_align
-        self.order_use = order_use
         self.recording_wavelength = recording_wavelength
-        self.line_density = line_density
+        self.construction_point_1 = SphericalPoint(-1 / inverse_distance1, pi / 2 - elevation_angle1, 0)
+        self.construction_point_2 = SphericalPoint(-1 / inverse_distance2,
+                                                  pi / 2 - arccos(
+                                                      cos(elevation_angle1) - line_density * recording_wavelength),
+                                                  0)
 
     @property
     def azimuth_angle1(self):
@@ -1682,24 +1815,6 @@ class PlaneHoloGrating(OpticalElement):
         self._inverse_distance2 = self._set_parameter("inverseDist2", value)
 
     @property
-    def order_align(self):
-        self._order_align = self._get_parameter("order_align")
-        return self._order_align
-
-    @order_align.setter
-    def order_align(self, value):
-        self._order_align = self._set_parameter("order_align", value)
-
-    @property
-    def order_use(self):
-        self._order_use = self._get_parameter("order_use")
-        return self._order_use
-
-    @order_use.setter
-    def order_use(self, value):
-        self._order_use = self._set_parameter("order_use", value)
-
-    @property
     def recording_wavelength(self):
         self._recording_wavelength = self._get_parameter("recordingWavelength")
         return self._recording_wavelength
@@ -1708,20 +1823,155 @@ class PlaneHoloGrating(OpticalElement):
     def recording_wavelength(self, value):
         self._recording_wavelength = self._set_parameter("recordingWavelength", value)
 
-    @property
-    def line_density(self):
-        self._line_density = self._get_parameter("lineDensity")
-        return self._line_density
+    def update_construction_points(self):
+        # TODO:doc
+        self.construction_point_1 = SphericalPoint(-1 / self.inverse_distance1, self.elevation_angle1, 0)
+        self.construction_point_2 = SphericalPoint(-1 / self.inverse_distance2,
+                                                   arccos(
+                                                       cos(self.elevation_angle1) - self.line_density * self.recording_wavelength),
+                                                   0)
 
-    @line_density.setter
-    def line_density(self, value):
-        self._line_density = self._set_parameter("lineDensity", value)
+    def from_solemio(self, inverse_dist1, inverse_dist2, cos1, dcos, lamda=None):
+        # TODO:doc
+        if dcos < 0:
+            self.inverse_distance1 = -inverse_dist1
+            self.inverse_distance2 = -inverse_dist2
+            self.elevation_angle1 = arccos(cos1)
+        else:
+            self.inverse_distance1 = -inverse_dist2
+            self.inverse_distance2 = -inverse_dist1
+            self.elevation_angle1 = arccos(cos1 + dcos)
+        if lamda:
+            self.recording_wavelength = lamda
+        self.line_density = abs(dcos / self.recording_wavelength)
+        print(f"line density at center computed from solemio definition : {self.line_density/1000} /mm")
+        print(self.elevation_angle1)
+        print(self.inverse_distance1)
+        print(self.inverse_distance2)
+        self.update_construction_points()
+
+    def from_horiba(self, dist1, dist2, angle1, angle2, lamda=None):
+        # TODO:doc
+        if abs(angle1) < abs(angle2):
+            self.inverse_distance1 = -1/dist1
+            self.inverse_distance2 = -1/dist2
+            self.elevation_angle1 = -(pi/2-angle1)
+        else:
+            self.inverse_distance1 = -1/dist2
+            self.inverse_distance2 = -1/dist1
+            self.elevation_angle1 = -(pi/2-angle2)
+        if lamda:
+            self.recording_wavelength = lamda
+        self.line_density = abs(sin(angle1)-sin(angle2) / self.recording_wavelength)
+        print(f"line density at center computed from solemio definition : {self.line_density/1000} /mm")
+        print(self.elevation_angle1)
+        print(self.inverse_distance1)
+        print(self.inverse_distance2)
+        self.update_construction_points()
+
+    def get_horiba_coords(self):
+        # TODO:doc
+        self.update_construction_points()
+        d1, theta1, phi1 = self.construction_point_1.get_coord_horiba()
+        d2, theta2, phi2 = self.construction_point_2.get_coord_horiba()
+
+        print("distance1 = ", d1)
+        print(f"angle1 =  {theta1} deg")
+        print(f"phi1 = {phi1} deg")
+        print("distance2 = ", d2)
+        print(f"angle2 = {theta2} deg")
+        print(f"phi2 = {phi2} deg")
+        return self.construction_point_1.get_coord_pyoptix(), self.construction_point_2.get_coord_pyoptix(), \
+               self.recording_wavelength
+
+    def get_pyoptix_coords(self):
+        # TODO:doc
+        self.update_construction_points()
+        inv_d1, elevation1, phi1 = self.construction_point_1.get_coord_pyoptix()
+        inv_d2, elevation2, phi2 = self.construction_point_2.get_coord_pyoptix()
+        if elevation1 > elevation2:
+            tmp = (inv_d1, elevation1, phi1)
+            inv_d1, elevation1, phi1 = inv_d2, elevation2, phi2
+            inv_d2, elevation2, phi2 = tmp
+        print("inverse_distance1 = ", inv_d1)
+        print("phi1 = ", phi1)
+        print("elevation_angle1 = ", elevation1)
+        print("inverse_distance2 = ", inv_d2)
+        print("phi2 = ", phi2)
+        print("tpm = ", self.get_tpmm(0))
+        return self.construction_point_1.get_coord_pyoptix(), self.construction_point_2.get_coord_pyoptix(), \
+               self.recording_wavelength, self.get_tpmm(0)
+
+    def get_solemio_coords(self):
+        # TODO:doc
+        self.update_construction_points()
+        inv_d, cos1, phi = self.construction_point_1.get_coord_solemio()
+        print("inverse_distance1 = ", inv_d)
+        print("cos1 = ", cos1)
+        print("phi1 = ", phi)
+        inv_d, dcos, phi = self.construction_point_2.get_coord_solemio(point1=self.construction_point_1)
+        print("inverse_distance2 = ", inv_d)
+        print("dcos = ", dcos)
+        print("phi2 = ", phi)
+        return self.construction_point_1.get_coord_solemio(), \
+               self.construction_point_2.get_coord_solemio(point1=self.construction_point_1), \
+               self.recording_wavelength
+
+    def get_tpmm(self, point_m):
+        # TODO:doc
+        self.update_construction_points()
+        if not isinstance(point_m, Point):
+            point_m = Point(point_m, 0, 0)
+        p1_apparent = self.construction_point_1 - point_m
+        p2_apparent = self.construction_point_2 - point_m
+        _, theta_apparent_1, _ = p1_apparent.get_spherical_coord()
+        _, theta_apparent_2, _ = p2_apparent.get_spherical_coord()
+        return np.abs(sin(theta_apparent_2) - sin(theta_apparent_1)) / self.recording_wavelength
+
+    def get_vls_law(self, x_span, order, return_tpm=False, sample_number=20):
+        # TODO:doc
+        self.update_construction_points()
+        tpm = []  # in m-1
+        for x in np.linspace(-x_span / 2, x_span / 2, sample_number):
+            try:
+                tpm.append(self.get_tpmm(Point(x, 0, 0)))
+            except RuntimeError:
+                tpm.append(np.nan)
+
+        gratinfo = GratingPatternInformation()
+        get_hologram_pattern(self._element_id, gratinfo, x_span, 10e-3)
+        print(f"C hologram info for {self.name}: ")
+        print(f"\t groove/m = {gratinfo.axial_line_density.a0} + {gratinfo.axial_line_density.a1} * x + "
+              f"{gratinfo.axial_line_density.a2} * x^2 + {gratinfo.axial_line_density.a3} * x^3")
+        print(f"\t line radius curvature = {gratinfo.line_curvature}")
+        print(f"\t line tilt = {gratinfo.line_tilt}")
+        if not return_tpm:
+            return np.polyfit(np.linspace(-x_span / 2, x_span / 2, sample_number), tpm, order) * np.array(
+                [milli ** (n + 1) for n in range(order + 1)][::-1])
+        else:
+            return (np.polyfit(np.linspace(-x_span / 2, x_span / 2, sample_number), tpm, order) * np.array(
+                [milli ** (n + 1) for n in range(order + 1)][::-1]), tpm)
+
+    def show_vls_law(self, x_span, order, sample_number=20):
+        # TODO:doc
+        coeffs, tpm = self.get_vls_law(x_span, order, return_tpm=True, sample_number=sample_number)
+        coeffs /= np.array([milli ** (n + 1) for n in range(order + 1)][::-1])
+        fit = np.poly1d(coeffs)
+        plt = figure(plot_width=1000, plot_height=300)
+        plt.xaxis.axis_label = "Distance from center (m)"
+        plt.yaxis.axis_label = "Number of groove per meter"
+        plt.line(np.linspace(-x_span/2, x_span/2, sample_number), np.array(tpm), legend_label="local #groove/m")
+        plt.line(np.linspace(-x_span/2, x_span/2, sample_number), fit(np.linspace(-x_span/2, x_span/2, sample_number)),
+                 legend_label=f"fit (mm-1) : {coeffs * np.array([milli ** (n + 1) for n in range(order + 1)][::-1])}",
+                 color="red")
+        show(plt)
 
 
 class SphericalHoloGrating(SphericalMirror, PlaneHoloGrating):
     """
     Class for spherical holographic gratings. Inherits SphericalMirror and PlaneHoloGrating
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the SphericalHoloGrating class.
@@ -1739,6 +1989,7 @@ class CylindricalHoloGrating(CylindricalMirror, PlaneHoloGrating):
     """
     Class for cylindrical holographic gratings. Inherits CylindricalMirror and PlaneHoloGrating
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the CylindricalHoloGrating class.
@@ -1756,6 +2007,7 @@ class ToroidalHoloGrating(ToroidalMirror, PlaneHoloGrating):
     """
     Class for toroidal holographic gratings. Inherits ToroidalMirror and PlaneHoloGrating
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the ToroidalHoloGrating class.
@@ -1774,6 +2026,7 @@ class PlaneGrating(PlaneHoloGrating):
     Class for plane gratings. Inherits PlaneHoloGrating, inverse_distances are 0 so there is no variation of
     line density
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the PlaneGrating class.
@@ -1819,7 +2072,7 @@ class PlaneGrating(PlaneHoloGrating):
             raise Exception("Property 'elevation_angle1' is not settable")
 
 
-class PlanePoly1DGrating(OpticalElement):
+class PlanePoly1DGrating(Grating):
     """
     Class for plane polynomial gratings, which line density varies as a function if only one coordinate in a polynomial
     way. The center of the grating is assumed to be at the 0 value of the coordinate,leading to the parameter
@@ -1828,7 +2081,9 @@ class PlanePoly1DGrating(OpticalElement):
     Inherits OpticalElement. Inherited by SphericalPoly1DGrating, CylindricalPoly1DGrating and
     ToroidalPoly1DGrating.
     """
-    def __init__(self, polynomial_degree=0, line_density=1e6, line_density_coeffs=[], **kwargs):
+
+    def __init__(self, polynomial_degree=0, line_density=1e6, line_density_coeffs=[], order_align=1, order_use=1,
+                 **kwargs):
         """
         Constructor method for the class PlanePoly1DGrating.
 
@@ -1850,9 +2105,8 @@ class PlanePoly1DGrating(OpticalElement):
                                               "ToroidalPoly1DGrating")
         else:
             kwargs["element_type"] = "PlanePoly1DGrating"
-        super().__init__(**kwargs)
+        super().__init__(line_density=line_density, order_use=order_use, order_align=order_align, **kwargs)
         self.degree = polynomial_degree
-        self.line_density = line_density
         self.line_density_coeffs = line_density_coeffs
 
     @property
@@ -1885,7 +2139,7 @@ class PlanePoly1DGrating(OpticalElement):
         self._line_density_coeffs = []
         assert isinstance(value, list)
         for i in range(1, self.degree + 1):
-            self._line_density_coeffs.append(self._set_parameter(f"lineDensityCoeff_{i}", value[i-1]))
+            self._line_density_coeffs.append(self._set_parameter(f"lineDensityCoeff_{i}", value[i - 1]))
 
 
 class SphericalPoly1DGrating(SphericalMirror, PlanePoly1DGrating):
@@ -1896,6 +2150,7 @@ class SphericalPoly1DGrating(SphericalMirror, PlanePoly1DGrating):
 
     Inherits SphericalMirror and PlanePoly1DGrating.
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the SphericalPoly1DGrating class.
@@ -1917,6 +2172,7 @@ class CylindricalPoly1DGrating(CylindricalMirror, PlanePoly1DGrating):
 
     Inherits CylindricalMirror and PlanePoly1DGrating.
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the CylindricalPoly1DGrating class
@@ -1937,6 +2193,7 @@ class ToroidalPoly1DGrating(ToroidalMirror, PlanePoly1DGrating):
 
     Inherits ToroidalMirror and PlanePoly1DGrating.
     """
+
     def __init__(self, **kwargs):
         """
         Constructor of the ToroidalPoly1DGrating class.
