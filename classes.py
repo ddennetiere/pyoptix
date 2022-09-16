@@ -161,6 +161,7 @@ class Beamline(object):
         self._chains = BeamlineChainDict({})
         self._active_chain = None
         self.name = name
+        self.optical_distances = None
 
     def save_configuration(self, filename=None):
         """
@@ -234,6 +235,7 @@ class Beamline(object):
         :return: None
         """
         assert chain_name in self._chains
+        self.optical_distances = None
         self._active_chain = self.chains[chain_name]
         for i, oe in enumerate(self._active_chain):
             oe.beamline = self
@@ -259,10 +261,41 @@ class Beamline(object):
         :type from_element: OpticalElement or inherited
         :return: code result from relative optix function
         """
+
+        self.get_distance_between_oe(None, None)
         if from_element is not None:
             return align(from_element.element_id, lambda_align)
         else:
             return align(self.active_chain[0].element_id, lambda_align)
+
+    def get_distance_between_oe(self, oe1, oe2):
+        """
+        Returns the optical distance traveled by the chief ray between oe1 and oe2 if oe1 and oe2 are not None.
+
+        :param oe1: First optical element
+        :type oe1: pyoptix.OpticalElement instance or inherited class
+        :param oe2: Second optical element
+        :type oe2: pyoptix.OpticalElement instance or inherited class
+        :return: None if oe1 or oe2 is None, distance between oe1 and oe2 otherwise.
+        :rtype: float
+        """
+        totdist = 0
+        self.optical_distances = {}
+        for oe in self.active_chain:
+            totdist += oe.distance_from_previous
+            self.optical_distances[oe.name] = totdist
+
+        if oe1 is None:
+            return
+        if oe2 is None:
+            return
+        try:
+            assert oe1 in self.active_chain
+            assert oe2 in self.active_chain
+        except AssertionError:
+            raise AssertionError(f"Both {oe1.name} ({oe1 in self.active_chain}) and "
+                                 f"{oe2.name} ({oe2 in self.active_chain}) must be in active chain or be None")
+        return self.optical_distances[oe1.name] - self.optical_distances[oe2.name]
 
     def clear_impacts(self, clear_source=False):
         """
