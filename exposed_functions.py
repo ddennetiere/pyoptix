@@ -242,6 +242,15 @@ def get_transmissive(element_id):
     ret = optix.GetTransmissive(element_id)
     return ret
 
+
+@catch_c_error
+def get_hologram_pattern(element_id, gratinfo, half_length, half_width):
+    optix.GetHologramPatternInfo.argtypes = (HANDLE, HANDLE, DOUBLE, DOUBLE)
+    optix.GetHologramPatternInfo.restype = BOOLEAN
+    ret = optix.GetHologramPatternInfo(element_id, ctypes.byref(gratinfo), DOUBLE(half_length), DOUBLE(half_width))
+    return ret
+
+
 @catch_c_error
 def version():
     optix.Version()
