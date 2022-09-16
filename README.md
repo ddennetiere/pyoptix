@@ -68,8 +68,27 @@ Examples
 Run README.ipynb in jupyterlab to access the following example notebooks
 
 ### Design and simulation
+
+#### Lignes SOLEIL
 - **[Herm1](Hermes%20notebook.ipynb)** - [Hermes beamline](Hermes%20notebook.ipynb)  
 Definition and simulation of the HERMES beamline at SOLEIL
+- **[Herm2](HermesUP%20notebook.ipynb)** - [Hermes beamline](HermesUP%20notebook.ipynb)  
+Definition and simulation of the upgraded HERMES beamline at SOLEIL
+- **[Deim1](Deimos%20notebook.ipynb)** - [Deimos beamline](Deimos%20notebook.ipynb)  
+Definition and simulation of the DEIMOS beamline at SOLEIL
+- **[Deim2](DeimosUP%20notebook.ipynb)** - [Deimos beamline](DeimosUP%20notebook.ipynb)  
+Definition and simulation of the upgraded DEIMOS beamline at SOLEIL
+- **[Anta1](Antares%20notebook.ipynb)** - [Antares beamline](Antares%20notebook.ipynb)  
+Definition and simulation of the Antares beamline at SOLEIL
+- **[Anta2](AntaresUP%20notebook.ipynb)** - [Antares beamline](AntaresUP%20notebook.ipynb)  
+Definition and simulation of the upgraded Antares beamline at SOLEIL
+- **[Cass1](Cassiopee%20notebook.ipynb)** - [Cassiopee beamline](Cassiopee%20notebook.ipynb)  
+Definition and simulation of the Cassiopee beamline at SOLEIL
+- **[Cass2](CassiopeeUP%20notebook.ipynb)** - [Cassiopee beamline](CassiopeeUP%20notebook.ipynb)  
+Definition and simulation of the upgraded Cassiopee beamline at SOLEIL
+
+
+#### Lignes hors SOLEIL
 - **[Atto1](Ellipse%20Helimag.ipynb)** - [Helimag beamline V1](Ellipse%20Helimag.ipynb)  
 Definition and simulation of a beamline for the Attolab facility using revolution conics mirrors
 - **[Atto2](Wolter%20Helimag.ipynb)** - [Helimag beamline V2](Wolter%20Helimag.ipynb)  
