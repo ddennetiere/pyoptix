@@ -145,6 +145,17 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
         beamline.align(wavelength)
         beamline.radiate()
         spots = screen.get_diagram(nrays, show_first_rays=False)
+        try:
+            assert spots["Y"].std() != 0
+            assert spots["X"].std() != 0
+            assert spots["dX"].std() != 0
+            assert spots["dY"].std() != 0
+        except AssertionError:
+            print(beamline.active_chain)
+            for oe in beamline.active_chain[1:]:
+                diag = oe.get_diagram()
+                print(oe.name," : ", diag["Y"].std(), " -> ", (oe.next.name if oe.next is not None else None))
+            raise AssertionError("Unexploitable rays")
         if dimension.lower() == "xy":
             ret = np.std(spots["X"]**2 + spots["Y"]**2)
         elif dimension.lower() == "x":
@@ -154,7 +165,7 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
         else:
             raise AttributeError("Unknown dimension, should be 'x', 'y' or 'xy'")
         if show_progress:
-            print(value, ret)
+            print(variable_oe.__getattribute__(variable), ret)
         return ret
 
     if "fatol" not in options and method == "Nedler-Mead":
