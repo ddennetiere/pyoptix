@@ -1674,7 +1674,9 @@ class ToroidalFilm(ToroidalMirror):
 
 
 class Grating(OpticalElement):
-    # TODO: doc
+    """
+    Abstract class to be inherited by all grating type Optical Element
+    """
     def __init__(self, line_density=1e6, order_use=1, order_align=1, **kwargs):
         super().__init__(**kwargs)
         self.order_align = order_align
@@ -1824,7 +1826,13 @@ class PlaneHoloGrating(Grating):
         self._recording_wavelength = self._set_parameter("recordingWavelength", value)
 
     def update_construction_points(self):
-        # TODO:doc
+        """
+        Method to be called for recomputation of the construction points of the hologram. In particular, to be called
+        after any change applied to the hologram related attribute of the object.
+
+        :return: None
+        :rtype: Nonetype
+        """
         self.construction_point_1 = SphericalPoint(-1 / self.inverse_distance1, self.elevation_angle1, 0)
         self.construction_point_2 = SphericalPoint(-1 / self.inverse_distance2,
                                                    arccos(
@@ -1832,7 +1840,22 @@ class PlaneHoloGrating(Grating):
                                                    0)
 
     def from_solemio(self, inverse_dist1, inverse_dist2, cos1, dcos, lamda=None):
-        # TODO:doc
+        """
+        Definition of the hologram using the SOLEMIO convention where:
+
+        :param inverse_dist1: inverse of the distance between grating and point of construction 1
+        :type inverse_dist1: float
+        :param inverse_dist2: inverse of the distance between grating and point of construction 2
+        :type inverse_dist2: float
+        :param cos1: cosine of the grazing angle (elevation) from grating to point of construction 1
+        :type cos1: float
+        :param dcos: difference between cosines of the grazing angle to points of construction
+        :type dcos: float
+        :param lamda: wavelength used for recording the hologram
+        :type lamda: float
+        :return: None
+        :rtype: Nonetype
+        """
         if dcos < 0:
             self.inverse_distance1 = -inverse_dist1
             self.inverse_distance2 = -inverse_dist2
@@ -1851,7 +1874,22 @@ class PlaneHoloGrating(Grating):
         self.update_construction_points()
 
     def from_horiba(self, dist1, dist2, angle1, angle2, lamda=None):
-        # TODO:doc
+        """
+        Definition of the hologram using the Horiba (Jobin-Yvon) convention where:
+
+        :param dist1: distance between grating and point of construction 1
+        :type dist1: float
+        :param dist2:  distance between grating and point of construction 2
+        :type dist2: float
+        :param angle1: angle (spherical) between normal and axis from grating to point of construction 1
+        :type angle1: float
+        :param angle2: angle (spherical) between normal and axis from grating to point of construction 2
+        :type angle2: float
+        :param lamda: wavelength used for recording the hologram
+        :type lamda: float
+        :return: None
+        :rtype: Nonetype
+        """
         if abs(angle1) < abs(angle2):
             self.inverse_distance1 = -1/dist1
             self.inverse_distance2 = -1/dist2
@@ -1870,7 +1908,12 @@ class PlaneHoloGrating(Grating):
         self.update_construction_points()
 
     def get_horiba_coords(self):
-        # TODO:doc
+        """
+        Method for calculating the hologram parameters in the convention used by Horiba (Jobin Yvon).
+
+        :return: (Coordinates of point 1, coordinates of point 2 , recording wavelength)
+        :rtype: tuple
+        """
         self.update_construction_points()
         d1, theta1, phi1 = self.construction_point_1.get_coord_horiba()
         d2, theta2, phi2 = self.construction_point_2.get_coord_horiba()
@@ -1885,7 +1928,12 @@ class PlaneHoloGrating(Grating):
                self.recording_wavelength
 
     def get_pyoptix_coords(self):
-        # TODO:doc
+        """
+        Method for calculating the hologram parameters in the convention used by PyOptiX.
+
+        :return: (Coordinates of point 1, coordinates of point 2 , recording wavelength, line density at center)
+        :rtype: tuple
+        """
         self.update_construction_points()
         inv_d1, elevation1, phi1 = self.construction_point_1.get_coord_pyoptix()
         inv_d2, elevation2, phi2 = self.construction_point_2.get_coord_pyoptix()
@@ -1903,7 +1951,12 @@ class PlaneHoloGrating(Grating):
                self.recording_wavelength, self.get_tpmm(0)
 
     def get_solemio_coords(self):
-        # TODO:doc
+        """
+        Method for calculating the hologram parameters in the convention used by SOLEMIO.
+
+        :return: (Coordinates of point 1, coordinates of point 2 , recording wavelength)
+        :rtype: tuple
+        """
         self.update_construction_points()
         inv_d, cos1, phi = self.construction_point_1.get_coord_solemio()
         print("inverse_distance1 = ", inv_d)
@@ -1918,7 +1971,15 @@ class PlaneHoloGrating(Grating):
                self.recording_wavelength
 
     def get_tpmm(self, point_m):
-        # TODO:doc
+        """
+        Method for calculating the local line density of an hologram at a given point which coordinates are given
+        in point_m.
+
+        :param point_m: point where the local  line density is computed.
+        :type point_m: pyoptix.Point
+        :return: line density in m^-1
+        :rtype: float
+        """
         self.update_construction_points()
         if not isinstance(point_m, Point):
             point_m = Point(point_m, 0, 0)
@@ -1929,7 +1990,22 @@ class PlaneHoloGrating(Grating):
         return np.abs(sin(theta_apparent_2) - sin(theta_apparent_1)) / self.recording_wavelength
 
     def get_vls_law(self, x_span, order, return_tpm=False, sample_number=20):
-        # TODO:doc
+        """
+        Method for computing the Varied Line Space law of the hologram along its  central axis (azimuth=0).
+        Either returns polynomial coefficient (up to degree 'order') or both coefficients and list of local
+        line densities at "sample_number" points evenly space over a range of "x_span" meters.
+
+        :param x_span: total range over which to compute the VLS law
+        :type x_span: float
+        :param order: degree of the polynomial to which the VLS law is fitted
+        :type order: int
+        :param return_tpm: if True, local list of line densities are returned in a tuple after fit coefficients
+        :type return_tpm: bool
+        :param sample_number: Number of points along the central axis where local line densities are computed
+        :type sample_number: int
+        :return: tuple of (array of fit coeffs, list of line densities) or array of fit coeffs)
+        :rtype: array or tuple
+        """
         self.update_construction_points()
         tpm = []  # in m-1
         for x in np.linspace(-x_span / 2, x_span / 2, sample_number):
@@ -1953,7 +2029,19 @@ class PlaneHoloGrating(Grating):
                 [milli ** (n + 1) for n in range(order + 1)][::-1]), tpm)
 
     def show_vls_law(self, x_span, order, sample_number=20):
-        # TODO:doc
+        """
+        Displays the local line densities computed by pyoptix.PlaneHoloGrating.get_vls_law as well as the fit of
+        those diplaying in legend the coefficients of the polynomial fit.
+
+        :param x_span: total range over which to compute the VLS law
+        :type x_span: float
+        :param order: degree of the polynomial to which the VLS law is fitted
+        :type order: int
+        :param sample_number: Number of points along the central axis where local line densities are computed
+        :type sample_number: int
+        :return: None
+        :rtype: Nonetype
+        """
         coeffs, tpm = self.get_vls_law(x_span, order, return_tpm=True, sample_number=sample_number)
         coeffs /= np.array([milli ** (n + 1) for n in range(order + 1)][::-1])
         fit = np.poly1d(coeffs)
