@@ -1833,8 +1833,8 @@ class PlaneHoloGrating(Grating):
         :return: None
         :rtype: Nonetype
         """
-        self.construction_point_1 = SphericalPoint(-1 / self.inverse_distance1, self.elevation_angle1, 0)
-        self.construction_point_2 = SphericalPoint(-1 / self.inverse_distance2,
+        self.construction_point_1 = SphericalPoint(1 / self.inverse_distance1, self.elevation_angle1, 0)
+        self.construction_point_2 = SphericalPoint(1 / self.inverse_distance2,
                                                    arccos(
                                                        cos(self.elevation_angle1) - self.line_density * self.recording_wavelength),
                                                    0)
@@ -1891,16 +1891,16 @@ class PlaneHoloGrating(Grating):
         :rtype: Nonetype
         """
         if abs(angle1) < abs(angle2):
-            self.inverse_distance1 = -1/dist1
-            self.inverse_distance2 = -1/dist2
-            self.elevation_angle1 = -(pi/2-angle1)
+            self.inverse_distance1 = 1/dist1
+            self.inverse_distance2 = 1/dist2
+            self.elevation_angle1 = -(angle1 + pi/2)
         else:
-            self.inverse_distance1 = -1/dist2
-            self.inverse_distance2 = -1/dist1
-            self.elevation_angle1 = -(pi/2-angle2)
+            self.inverse_distance1 = 1/dist2
+            self.inverse_distance2 = 1/dist1
+            self.elevation_angle1 = -(angle2 + pi/2)
         if lamda:
             self.recording_wavelength = lamda
-        self.line_density = abs(sin(angle1)-sin(angle2) / self.recording_wavelength)
+        self.line_density = abs(sin(angle1)-sin(angle2))/self.recording_wavelength
         print(f"line density at center computed from solemio definition : {self.line_density/1000} /mm")
         print(self.elevation_angle1)
         print(self.inverse_distance1)
