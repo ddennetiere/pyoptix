@@ -248,6 +248,7 @@ class Beamline(object):
         self._elements = []
         self._chains = BeamlineChainDict({})
         self._active_chain = None
+        self.active_chain_name = None
         self.name = name
         self.optical_distances = None
 
@@ -322,6 +323,7 @@ class Beamline(object):
         :return: None
         """
         assert chain_name in self._chains
+        self.active_chain_name = chain_name
         self.optical_distances = None
         self._active_chain = self.chains[chain_name]
         for i, oe in enumerate(self._active_chain):
@@ -978,10 +980,7 @@ class OpticalElement(metaclass=PostInitMeta):
         beamline_name = None
         chain_name = None
         if self.beamline is not None:
-            beamline_name = self.beamline.name
-            for n, v in self.beamline.chains.items():
-                if v == self.beamline.active_chain:
-                    chain_name = n
+            chain_name = self.beamline.active_chain_name
         print(beamline_name, chain_name)
         if nrays is None:
             nrays = self.beamline.active_chain[0].nrays
@@ -1060,8 +1059,10 @@ class OpticalElement(metaclass=PostInitMeta):
         - "aligned_local_frame" : Local frame, with origin on the surface, axe OZ is along the chief ray and OY is in
           the deviation plane of the last preceding reflective element. Transmissive elements do not change the
           AlignedLocalFrame
-        - "surface_frame" : Local frame used to describe a surface. Origin is at surface intercept wit the chief ray.
+        - "surface_frame" : Local frame used to describe a surface. Origin is at surface intercept with the chief ray.
           Oz is along the surface normal (at origin). OX is the tangential axis for reflective elements.
+
+        Method to be used for computing footprints on a mirror.
 
         :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
         :type nrays: int
@@ -1767,9 +1768,10 @@ class PlaneHoloGrating(Grating):
         self.recording_wavelength = recording_wavelength
         self.construction_point_1 = SphericalPoint(-1 / inverse_distance1, pi / 2 - elevation_angle1, 0)
         self.construction_point_2 = SphericalPoint(-1 / inverse_distance2,
-                                                  pi / 2 - arccos(
-                                                      cos(elevation_angle1) - line_density * recording_wavelength),
-                                                  0)
+                                                   pi / 2 - arccos(
+                                                                   cos(elevation_angle1) -
+                                                                   line_density * recording_wavelength),
+                                                   0)
 
     @property
     def azimuth_angle1(self):
