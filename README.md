@@ -86,6 +86,11 @@ Definition and simulation of the upgraded Antares beamline at SOLEIL
 Definition and simulation of the Cassiopee beamline at SOLEIL
 - **[Cass2](CassiopeeUP%20notebook.ipynb)** - [Cassiopee beamline](CassiopeeUP%20notebook.ipynb)  
 Definition and simulation of the upgraded Cassiopee beamline at SOLEIL
+- **[Plei1](Pleiades%20notebook.ipynb)** - [Pleiades beamline](Pleiades%20notebook.ipynb)  
+Definition and simulation of the Pleiades beamline at SOLEIL
+- **[Desi1](Desirs%20notebook.ipynb)** - [Desirs beamline](Desirs%20notebook.ipynb)  
+Definition and simulation of the Desirs beamline at SOLEIL
+
 
 
 #### Lignes hors SOLEIL
