@@ -2123,12 +2123,12 @@ class PlaneGrating(PlaneHoloGrating):
 
         :param kwargs: See PlaneHoloGrating doc for the parameters
         """
-        kwargs["inverse_distance1"] = 0
-        kwargs["inverse_distance2"] = 0
+        kwargs["inverse_distance1"] = np.inf
+        kwargs["inverse_distance2"] = np.inf
         kwargs["elevation_angle1"] = np.arccos(0.93963)
         super().__init__(**kwargs)
-        self.inverse_distance1 = 0
-        self.inverse_distance2 = 0
+        self.inverse_distance1 = np.inf
+        self.inverse_distance2 = np.inf
         self.elevation_angle1 = np.arccos(0.93963)
 
     @property
@@ -2138,7 +2138,7 @@ class PlaneGrating(PlaneHoloGrating):
 
     @inverse_distance1.setter
     def inverse_distance1(self, value):
-        if value != 0:
+        if value != np.inf:
             raise Exception("Property 'inverse_distance1' is not settable")
 
     @property
@@ -2148,7 +2148,7 @@ class PlaneGrating(PlaneHoloGrating):
 
     @inverse_distance2.setter
     def inverse_distance2(self, value):
-        if value != 0:
+        if value != np.inf:
             raise Exception("Property 'inverse_distance2' is not settable")
 
     @property
