@@ -159,9 +159,11 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
         if dimension.lower() == "xy":
             ret = np.std(spots["X"]**2 + spots["Y"]**2)
         elif dimension.lower() == "x":
-            ret = abs(pearsonr(spots["X"], spots["dX"])[0])
+            # ret = abs(pearsonr(spots["X"], spots["dX"])[0])
+            ret = spots["X"].std()
         elif dimension.lower() == "y":
-            ret = abs(pearsonr(spots["Y"], spots["dY"])[0])
+            # ret = abs(pearsonr(spots["Y"], spots["dY"])[0])
+            ret = spots["X"].std()
         else:
             raise AttributeError("Unknown dimension, should be 'x', 'y' or 'xy'")
         if show_progress:
