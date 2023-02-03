@@ -1858,14 +1858,17 @@ class PlaneHoloGrating(Grating):
         :return: None
         :rtype: Nonetype
         """
-        if dcos < 0:
-            self.inverse_distance1 = -inverse_dist1
-            self.inverse_distance2 = -inverse_dist2
-            self.elevation_angle1 = arccos(cos1)
-        else:
-            self.inverse_distance1 = -inverse_dist2
-            self.inverse_distance2 = -inverse_dist1
-            self.elevation_angle1 = arccos(cos1 + dcos)
+        # if dcos < 0:
+        #     self.inverse_distance1 = -inverse_dist1
+        #     self.inverse_distance2 = -inverse_dist2
+        #     self.elevation_angle1 = arccos(cos1)
+        # else:
+        #     self.inverse_distance1 = -inverse_dist2
+        #     self.inverse_distance2 = -inverse_dist1
+        #     self.elevation_angle1 = arccos(cos1 + dcos)
+        self.inverse_distance1 = -inverse_dist1
+        self.inverse_distance2 = -inverse_dist2
+        self.elevation_angle1 = min(arccos(cos1), arccos(cos1 + dcos))
         if lamda:
             self.recording_wavelength = lamda
         self.line_density = abs(dcos / self.recording_wavelength)
