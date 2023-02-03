@@ -126,6 +126,7 @@ def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
             title += f" of {beamline_name}"
         if chain_name is not None:
             title += f" in config. {chain_name}"
+    title += f" at E = {1239.842e-9/columndatasource.data['Lambda'].mean():.1f} eV"
     layout = scatter_plot_2d(columndatasource, x_key, y_key, title=title,
                              x_label=x_key, x_unit=x_unit, y_label=y_key, y_unit=y_unit, **kwargs)
     return layout
@@ -200,7 +201,7 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
         y_range = (y.min(), y.max())
 
     p = figure(tools=TOOLS, plot_width=600, plot_height=600, min_border=10, min_border_left=50,
-               toolbar_location="above", x_axis_location=None, y_axis_location=None,
+               toolbar_location="left", x_axis_location=None, y_axis_location=None,
                title=title, x_range=x_range, y_range=y_range)
     p.background_fill_color = "#fafafa"
     p.select(BoxSelectTool).select_every_mousemove = False
