@@ -240,15 +240,7 @@ def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="
     beamline.radiate()
 
     def correlation(value):
-        spots = screen.get_diagram(nrays, show_first_rays=False, distance_from_oe=value)
-        if dimension.lower() == "xy":
-            ret = np.std(spots["X"]**2 + spots["Y"]**2)
-        elif dimension.lower() == "x":
-            ret = abs(pearsonr(spots["X"], spots["dX"])[0])
-        elif dimension.lower() == "y":
-            ret = abs(pearsonr(spots["Y"], spots["dY"])[0])
-        else:
-            raise AttributeError("Unknown dimension, should be 'x', 'y' or 'xy'")
+        ret = correlation_on_screen(screen, nrays, dimension=dimension, distance_to_screen=value)
         if show_progress:
             print(value, ret)
         return ret
@@ -265,6 +257,71 @@ def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="
     if solution.success:
         if adjust_distance:
             screen.distance_from_previous += solution.x[0]
+        return solution.x[0]
+    else:
+        raise RuntimeError("Unable to reach an optimum")
+
+
+def correlation_on_screen(screen, nrays, dimension="y", distance_to_screen=0):
+    spots = screen.get_diagram(nrays, show_first_rays=False, distance_from_oe=distance_to_screen)
+    if dimension.lower() == "xy":
+        ret = np.std(spots["X"]**2 + spots["Y"]**2)
+    elif dimension.lower() == "x":
+        ret = abs(pearsonr(spots["X"], spots["dX"])[0])
+    elif dimension.lower() == "y":
+        ret = abs(pearsonr(spots["Y"], spots["dY"])[0])
+    else:
+        raise AttributeError("Unknown dimension, should be 'x', 'y' or 'xy'")
+    return ret
+
+
+def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="y", nrays=None, method="Nelder-Mead",
+                     show_progress=False, tol=1e-3, options=None, move_screen=False, verbose=1):
+    old_nrays = beamline.active_chain[0].nrays
+    old_link = screen.next
+    screen.next = None
+    if nrays is not None:
+        beamline.active_chain[0].nrays = int(nrays)
+    if type(oes) == list:
+        assert len(oes) == len(attributes), "Number of optical element must match number of attributes"
+    else:
+        oes = [oes]
+        attributes = [attributes]
+    if type(wavelengths) == float:
+        wavelengths = [wavelengths]
+
+    def FOM(attributes_values):
+        for oe, attrib, attrib_value in zip(oes, attributes, attributes_values):
+            attributes_values_0.append(oe.__setattribute__(attrib, attrib_value))
+        contributions = []
+        for wavelength in wavelengths:
+            beamline.clear_impacts(clear_source=True)
+            beamline.align(wavelength)
+            beamline.radiate()
+            if move_screen:
+                find_focus(beamline, screen, wavelength, dimension=dimension, nrays=nrays, method="Nelder-Mead",
+                           show_progress=False, tol=1e-3)
+            contributions.append(correlation_on_screen(screen, nrays, dimension=dimension))
+        ret = np.sqrt(np.pow(np.array(contributions), 2))
+        if show_progress:
+            for oe, attrib in zip(oes, attributes):
+                print(f"{oe.name}.{attrib} = {oe.__getattribute__(attrib)}")
+            print(f"-> FOM = {ret}")
+        return ret
+
+    attributes_values_0 = []
+    for oe, attrib in zip(oes, attributes):
+        attributes_values_0.append(oe.__getattribute__(attrib))
+    solution = minimize(FOM, np.array(attributes_values_0), method=method, tol=tol,
+                        options=options)
+    if verbose:
+        print(f"Minimization success: {solution.success}, converged to :")
+        for oe, attrib in zip(oes, attributes):
+            print(f"{oe.name}.{attrib} = {oe.__getattribute__(attrib)}")
+        print(f"-> FOM = {solution.x}")
+    beamline.active_chain[0].nrays = int(old_nrays)
+    screen.next = old_link
+    if solution.success:
         return solution.x[0]
     else:
         raise RuntimeError("Unable to reach an optimum")
