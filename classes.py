@@ -94,10 +94,12 @@ class GratingPatternInformation(Structure):
     C structure defining the pattern parameters of an hologram used for holographic grating.
     Fields are the polynomial expansion of the line density, and the central line tilt and curvature of an holographic
     grating, where :
+
     - axial_line_density is an array which will receive the coefficients of the line density approximation by a
       third degree polynomial. The term of degree 0 is the nominal line density at grating center (in lines/m)
     - line_curvature is the angle of the angle of the central line of the grating line with the Y axis (in rad)
     - line_tilt is the angle of the angle of the central line of the grating line with the Y axis (in rad)
+
     """
     _fields_ = [("axial_line_density", PolynomialExpansion),
                 ("line_tilt", c_double),
@@ -430,11 +432,12 @@ class Beamline(object):
         """
         Prints the optical element in the active chain with the orientation of their local vertical axis.
         For example :
-            - a vertical deflecting mirror with a reflective surface pointed up (deflection towards +Z) will
-            appear will an "up" arrow,
-            - a screen should appear with an "up" arrow, meaning that its "y" axis is vertical and pointed upwards,
-            - an horizontal deflecting mirror with a reflective surface on the left side (deflection towards +X) will
-            appear with a "left" arrow.
+
+        - a vertical deflecting mirror with a reflective surface pointed up (deflection towards +Z) will
+          appear will an "up" arrow,
+        - a screen should appear with an "up" arrow, meaning that its "y" axis is vertical and pointed upwards,
+        - an horizontal deflecting mirror with a reflective surface on the left side (deflection towards +X) will
+          appear with a "left" arrow.
 
         :return: None
         :rtype: Nonetype
@@ -1086,6 +1089,30 @@ class OpticalElement(metaclass=PostInitMeta):
         if show_first_rays:
             print(spots.head())
         return spots
+
+    def show_impacts(self, nrays=None, reference_frame="local_absolute_frame", **kwargs):
+        impacts = self.get_impacts_data(nrays=nrays, reference_frame=reference_frame, show_first_rays=False)
+
+        anamorphic_factor = 1/np.sin(self.theta)
+        if (self.phi % pi) - pi/2 < 1e-3:
+            deviation = "horizontal"
+            impacts["X"] *= anamorphic_factor
+        else:
+            deviation = "vertical"
+            impacts["Y"] *= anamorphic_factor
+
+        figs = []
+        coldatasource = ColumnDataSource(impacts)
+        figs.append(plot_spd(coldatasource, x_key="X", y_key="Y",
+                             beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
+                             oe_name=self._name, **kwargs))
+        figs.append(plot_spd(coldatasource, x_key="X", y_key="Z",
+                             beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
+                             oe_name=self._name, **kwargs))
+        handles = []
+        for fig in figs:
+            handles.append(show(fig, notebook_handle=True))
+        return coldatasource, figs
 
     def export_beam_mcpl(self, reference_frame):
         """
