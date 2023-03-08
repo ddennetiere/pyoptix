@@ -557,17 +557,17 @@ class Beamline(object):
         if not side_only:
             p.line(top_points[:-1, 0], top_points[:-1, 1], color="blue", legend_label="top view")
             labels_top = LabelSet(x='X', y='Y', text='names', angle=30,
-                                  x_offset=0, y_offset=-15, source=source_top, render_mode='canvas')
+                                  x_offset=0, y_offset=-15, source=source_top)#, render_mode='canvas')
             p.add_layout(labels_top)
         if not top_only:
             p.line(side_points[:-1, 0], side_points[:-1, 1], color="red", legend_label="side view")
             labels_side = LabelSet(x='X', y='Y', text='names', angle=-30,
-                                   x_offset=0, y_offset=15, source=source_side, render_mode='canvas')
+                                   x_offset=0, y_offset=15, source=source_side)#, render_mode='canvas')
             p.add_layout(labels_side)
         show(p)
 
     def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1 / 5000,
-                       show_spd=False, verbose=0, nrays=5000, criterion="fwhm"):
+                       show_spd=False, verbose=0, nrays=5000, criterion="fwhm", return_all=False):
         """
         Computes the resolution of a beamline in its `mono_slit` plane at a given `wavelength`. An a priori resolution
         must be given as `dlambda_over_lambda` for calculation purposes and the orientation of deviation relative
@@ -593,7 +593,10 @@ class Beamline(object):
         :type verbose: int
         :param nrays: Number of rays per spot to be propagated in order to compute the resolution. Default: 5000
         :type nrays: int
-        :return: Resolution in lambda/dlambda
+        :param return_all: If True returns a dictionary containing spot size according to criterion, dispersion (defined
+            as the distance between spots at lambda and at lambda+dlambda in µm), lambda (in m),
+            dlambda, if False returns the resolution in lambda/dlambda
+        :return: Resolution in lambda/dlambda of dict (see return_all)
         :rtype: float
         """
         self.clear_impacts(clear_source=True)
@@ -644,7 +647,11 @@ class Beamline(object):
         self.active_chain[0].nrays = stored_nrays
         mono_slit.next = slit_next_OE
 
-        return resolution
+        if return_all:
+            return {criterion: mono_chr_fwhm * 1e6, "dispersion_on_screen": distance * 1e6, "wavelength": wavelength,
+                    "dlambda": wavelength*dlambda_over_lambda}
+        else:
+            return resolution
 
 
 class OpticalElement(metaclass=PostInitMeta):
@@ -2053,12 +2060,13 @@ class PlaneHoloGrating(Grating):
               f"{gratinfo.axial_line_density.a2} * x^2 + {gratinfo.axial_line_density.a3} * x^3")
         print(f"\t line radius curvature = {gratinfo.line_curvature}")
         print(f"\t line tilt = {gratinfo.line_tilt}")
+        tpm = np.array(tpm, dtype=np.float64)
         if not return_tpm:
-            return np.polyfit(np.linspace(-x_span / 2, x_span / 2, sample_number), tpm, order) * np.array(
-                [milli ** (n + 1) for n in range(order + 1)][::-1])
+            return np.polyfit(np.linspace(-x_span / 2, x_span / 2, sample_number, dtype=np.float64), tpm, order) * \
+                   np.array([milli ** (n + 1) for n in range(order + 1)][::-1], dtype=np.float64)
         else:
-            return (np.polyfit(np.linspace(-x_span / 2, x_span / 2, sample_number), tpm, order) * np.array(
-                [milli ** (n + 1) for n in range(order + 1)][::-1]), tpm)
+            return (np.polyfit(np.linspace(-x_span / 2, x_span / 2, sample_number, dtype=np.float64), tpm, order) *
+                    np.array([milli ** (n + 1) for n in range(order + 1)][::-1], dtype=np.float64), tpm)
 
     def show_vls_law(self, x_span, order, sample_number=20):
         """
@@ -2077,7 +2085,7 @@ class PlaneHoloGrating(Grating):
         coeffs, tpm = self.get_vls_law(x_span, order, return_tpm=True, sample_number=sample_number)
         coeffs /= np.array([milli ** (n + 1) for n in range(order + 1)][::-1])
         fit = np.poly1d(coeffs)
-        plt = figure(plot_width=1000, plot_height=300)
+        plt = figure(width=1000, height=300)
         plt.xaxis.axis_label = "Distance from center (m)"
         plt.yaxis.axis_label = "Number of groove per meter"
         plt.line(np.linspace(-x_span/2, x_span/2, sample_number), np.array(tpm), legend_label="local #groove/m")

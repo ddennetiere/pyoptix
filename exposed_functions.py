@@ -1,7 +1,6 @@
 import functools
 import ctypes
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE, BOOLEAN
-
 global optix
 
 
@@ -44,7 +43,7 @@ def catch_c_error(function):
 
 def load_optix():
     global optix
-    print("intialzing SR library")
+    print("intialzing optix library")
     optix = ctypes.cdll.LoadLibrary(r'D:\Dennetiere\optix\release\OptiX.dll')
     optix.GetOptiXLastError.restype = BYTE
     optix.GetOptiXLastError.argtypes = [ctypes.c_char_p, INT]
