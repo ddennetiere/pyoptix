@@ -1,12 +1,15 @@
 # coding: utf-8
+import ctypes
 import numpy as np
-from ctypes import Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_ulong, create_string_buffer
+from ctypes import (Union, Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_ulong,
+                    create_string_buffer, c_int64)
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
 from .mcpl import PyOptixMCPLWriter
 from .exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
                                 get_element_name, set_recording, get_next_element, get_previous_element,
                                 get_spot_diagram, chain_element_by_id, create_element, clear_impacts, get_impacts_data,
-                                set_transmissive, get_transmissive, get_hologram_pattern)
+                                set_transmissive, get_transmissive, get_hologram_pattern, fit_surface_to_slopes,
+                                fit_surface_to_heights, get_array_parameter, get_array_parameter_size)
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
@@ -64,12 +67,32 @@ class Bounds(Structure):
                 ("max", c_double)]
 
 
+c_float_p = ctypes.POINTER(ctypes.c_float)
+array_parameter_list = ['coefficients', "surfaceLimits"]
+
+
+class Dims(Structure):
+    """
+    C structure to be used in optix parameters
+    """
+    _fields_ = [("x", c_int64),
+                ("y", c_int64)]
+
+
+class ArrayParameter(Structure):
+    _fields_ = [("ndims", Dims), ("data", c_float_p)]
+
+
+class ArrayValue(Union):
+    _fields_ = [("value", c_double), ("array", ArrayParameter)]
+
+
 class Parameter(Structure):
     """
     C structure defining modifiable fields of optix optical element parameters. Note bounds type is Bounds. See Bounds
     docstring.
     """
-    _fields_ = [("value", c_double),
+    _fields_ = [("value", ArrayValue),
                 ("bounds", Bounds),
                 ("multiplier", c_double),
                 ("type", c_int32),
@@ -761,18 +784,33 @@ class OpticalElement(metaclass=PostInitMeta):
                 "multiplier": param.multiplier, "type": param.type, "group": param.group, "flags": param.flags}
 
     def _get_parameter(self, param_name):
-        param = Parameter()
-        get_parameter(self._element_id, param_name, param)
+        param = self._get_c_parameter(param_name)
+        if param_name not in array_parameter_list:
+            return param.value.value
         return param.value
 
-    def _set_parameter(self, param_name, value):
+    def _get_c_parameter(self, param_name):
         param = Parameter()
-        get_parameter(self._element_id, param_name, param)
+        if param_name not in array_parameter_list:
+            get_parameter(self._element_id, param_name, param)
+        else:
+            param_dims = Dims()
+            get_array_parameter_size(self._element_id, param_name, param_dims)
+            data = np.empty((param_dims.x, param_dims.y)).astype(np.float)
+            param.value.array.data = data.ctypes.data_as(c_float_p)
+            param.value.array.ndims.x = data.shape[0]
+            param.value.array.ndims.y = data.shape[1]
+            get_array_parameter(self._element_id, param_name, param, param_dims)
+        return param
+
+    def _set_parameter(self, param_name, value):
+        # param = Parameter()
+        param = self._get_c_parameter(param_name)
         if isinstance(value, dict):
             for key in value:
                 assert key in ("value", "bounds", "multiplier", "type", "group", "flags")
                 if key == "value":
-                    param.value = DOUBLE(value[key])
+                    param.value.value = DOUBLE(value[key])
                 elif key == "multiplier":
                     param.multiplier = DOUBLE(value[key])
                 elif key == "type":
@@ -786,10 +824,19 @@ class OpticalElement(metaclass=PostInitMeta):
                     bounds.min = DOUBLE(value[key][0])
                     bounds.max = DOUBLE(value[key][1])
                     param.bounds = bounds
+        elif isinstance(value, np.ndarray):
+            assert param_name in array_parameter_list
+            data = value.astype(np.float)
+            param.value.array.data = data.ctypes.data_as(c_float_p)
+            param.value.array.ndims.x = value.shape[0]
+            if len(value.shape) == 2:
+                param.value.array.ndims.y = value.shape[1]
+            else:
+                param.value.array.ndims.y = 1
         else:
             try:
                 value = float(value)
-                param.value = DOUBLE(value)
+                param.value.value = DOUBLE(value)
             except TypeError:
                 raise AttributeError("value of parameter must be castable in a float or a dictionnary")
         if param_name in optix_dictionnary:
@@ -1416,6 +1463,114 @@ class PlaneMirror(OpticalElement):
             assert kwargs["element_type"] == "PlaneMirror"
         else:
             kwargs["element_type"] = "PlaneMirror"
+        super().__init__(**kwargs)
+
+
+class PolynomialOpticalElement(OpticalElement):
+    def __init__(self, **kwargs):
+        """
+        Constructor for the PlaneMirror class
+        :param kwargs: See OpticalElement doc for parameters
+        """
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] in ["NaturalPolynomialMirror", "LegendrePolynomialMirror"]
+        else:
+            raise AttributeError("Abstract class not to be instantiated")
+        super().__init__(**kwargs)
+        self.coeffs = np.array([0, 0])
+        self.limits = np.array([[-1, 1, -1, 1]])
+
+    @property
+    def coeffs(self):
+        self._coeffs = self._get_parameter("coefficients")
+        return self._coeffs
+
+    @coeffs.setter
+    def coeffs(self, value):
+        self._coeffs = self._set_parameter("coefficients", value)
+
+    @property
+    def limits(self):
+        self._limits = self._get_parameter("surfaceLimits")
+        return self._limits
+
+    @limits.setter
+    def limits(self, value):
+        self._limits = self._set_parameter("surfaceLimits", value)
+
+    def fit_heights(self, order_x, order_y, filename):
+        """
+        Fitting method to a XYZ file. The file must contain exactly 3 columns of values describing the XYZ surface.
+        Values should be in meters.
+        :param order_x: order of the polynomial fit in the X direction
+        :type order_x: int
+        :param order_y: order of the polynomial fit in the Y direction
+        :type order_y: int
+        :param filename: absolute filename to the file containing the height data
+        :type filename: str
+        :return: the rms residual of the fit
+        :rtype: np.array
+        """
+        heights = np.loadtxt(filename)
+        sigma_h = np.empty(heights.shape)
+        fit_surface_to_heights(self.element_id, order_x, order_y, self.limits, heights, sigma_h)
+        return sigma_h
+
+    def fit_slopes(self, order_x, order_y, filename):
+        """
+        Fitting method to a XYX'Y' file. The file must contain exactly 4 columns of values describing the
+        X,Y,dZ/dX, dZ/dY slopes.
+        Values should be in meters and radians.
+        :param order_x: order of the polynomial fit in the X direction
+        :type order_x: int
+        :param order_y: order of the polynomial fit in the Y direction
+        :type order_y: int
+        :param filename: absolute filename to the file containing the height data
+        :type filename: str
+        :return: a tuple containing the maps of residuals of the fits along X and Y respectively
+        :rtype: NoneType
+        """
+        slopes = np.loadtxt(filename)
+        sigma_x = np.empty(slopes.shape)
+        sigma_y = np.empty(slopes.shape)
+        fit_surface_to_heights(self.element_id, order_x, order_y, self.limits, slopes, sigma_x, sigma_y)
+        return sigma_x, sigma_y
+
+    def plot_surface(self, nb_points_x=100, nb_points_y=100):
+        x = np.linspace(self.limits[0], self.limits[1], nb_points_x)
+        y = np.linspace(self.limits[2], self.limits[3], nb_points_y)
+        zz = np.polynomial.polynomial.polygrid2d(x, y, self.coeffs)
+
+
+class NaturalPolynomialMirror(PolynomialOpticalElement):
+    """
+    Class for mirrors whose surface is defined by a polynomial.
+    """
+    def __init__(self, **kwargs):
+        """
+        Constructor for the NaturalPolynomialMirror class
+        :param kwargs: See OpticalElement doc for parameters
+        """
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "NaturalPolynomialMirror"
+        else:
+            kwargs["element_type"] = "NaturalPolynomialMirror"
+        super().__init__(**kwargs)
+
+
+class LegendrePolynomialMirror(PolynomialOpticalElement):
+    """
+    Class for mirrors whose surface is defined by a polynomial.
+    """
+    def __init__(self, **kwargs):
+        """
+        Constructor for the LegendrePolynomialMirror class
+        :param kwargs: See OpticalElement doc for parameters
+        """
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] == "LegendrePolynomialMirror"
+        else:
+            kwargs["element_type"] = "LegendrePolynomialMirror"
         super().__init__(**kwargs)
 
 

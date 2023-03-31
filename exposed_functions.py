@@ -115,6 +115,23 @@ def get_parameter(element_id, parameter_name, parameter):
 
 
 @catch_c_error
+def get_array_parameter(element_id, parameter_name, parameter_data, size):
+    optix.GetArrayParameter.argtypes = [HANDLE, LPCSTR, HANDLE, HANDLE]
+    optix.GetArrayParameter.restype = INT
+    ret = optix.GetArrayParameter(element_id, parameter_name.encode(), ctypes.byref(parameter_data),
+                                  ctypes.byref(size))
+    return ret
+
+
+@catch_c_error
+def get_array_parameter_size(element_id, parameter_name, size):
+    optix.GetParameterArraySize.argtypes = [HANDLE, LPCSTR, HANDLE]
+    optix.GetParameterArraySize.restype = BOOLEAN
+    ret = optix.GetParameterArraySize(element_id, parameter_name.encode(), ctypes.byref(size))
+    return ret
+
+
+@catch_c_error
 def set_parameter(element_id, parameter_name, parameter):
     optix.SetParameter.argtypes = [HANDLE, LPCSTR, HANDLE]
     optix.SetParameter.restype = INT
@@ -247,6 +264,24 @@ def get_hologram_pattern(element_id, gratinfo, half_length, half_width):
     optix.GetHologramPatternInfo.argtypes = (HANDLE, HANDLE, DOUBLE, DOUBLE)
     optix.GetHologramPatternInfo.restype = BOOLEAN
     ret = optix.GetHologramPatternInfo(element_id, ctypes.byref(gratinfo), DOUBLE(half_length), DOUBLE(half_width))
+    return ret
+
+
+@catch_c_error
+def fit_surface_to_heights(element_id, order_x, order_y, limits, heights, sigma_h):
+    optix.FitSurfaceToHeights.argtypes = (HANDLE, INT, INT, HANDLE, HANDLE, HANDLE)
+    optix.FitSurfaceToHeights.restype = BOOLEAN
+    ret = optix.FitSurfaceToHeights(element_id, order_x, order_y, ctypes.byref(limits), ctypes.byref(heights),
+                                    ctypes.byref(sigma_h))
+    return ret
+
+
+@catch_c_error
+def fit_surface_to_slopes(element_id, order_x, order_y, limits, slopes, sigma_x, sigma_y):
+    optix.FitSurfaceToSlopes.argtypes = (HANDLE, INT, INT, HANDLE, HANDLE, HANDLE, HANDLE)
+    optix.FitSurfaceToSlopes.restype = BOOLEAN
+    ret = optix.FitSurfaceToSlopes(element_id, order_x, order_y, ctypes.byref(limits), ctypes.byref(slopes),
+                                   ctypes.byref(sigma_x), ctypes.byref(sigma_y))
     return ret
 
 
