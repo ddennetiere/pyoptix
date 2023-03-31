@@ -10,6 +10,8 @@ from bokeh.models import PolyAnnotation, ColumnDataSource, LabelSet
 import ipysheet as ipys  # sheet, cell, s_row, s_column, cell_range
 import ipywidgets
 from IPython.display import display
+import plotly.express as px
+import pandas
 
 
 # Definition des fonctions d'affichage
@@ -78,7 +80,7 @@ def display_parameter_sheet(oe):
                                                                                   "multiplier", "type", "group",
                                                                                   "flags"])
     for i, param in enumerate(params):
-        ipys.row(i, [param, params[param]["value"], params[param]["bounds"][0], params[param]["bounds"][1],
+        ipys.row(i, [param, params[param]["value"].value, params[param]["bounds"][0], params[param]["bounds"][1],
                      params[param]["multiplier"], params[param]["type"], params[param]["group"],
                      params[param]["flags"]])
     params_sheet.column_width = [15, 20, 10, 10, 10, 10, 10, 10]
@@ -89,6 +91,16 @@ def display_parameter_sheet(oe):
 
     display(params_sheet)
     return params_sheet
+
+
+def general_FWHM(x):
+    x_dist = x - x.mean()
+    x_dist = np.sort(x_dist)
+    x_integral_dist_pos = np.cumsum(np.where(x_dist > 0, 1, 0))
+    x_fwhm_pos = x_dist[x_integral_dist_pos > 0.87 * x_integral_dist_pos.max()][0]
+    x_integral_dist_neg = np.cumsum(np.where(x_dist[::-1] < 0, 1, 0))
+    x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87 * x_integral_dist_neg.max()][0]
+    return x_fwhm_pos - x_fwhm_neg
 
 
 def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
@@ -236,16 +248,16 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.5, **line_args)
     ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.1, **line_args)
 
-    x_dist = x - x.mean()
-    x_dist = np.sort(x_dist)
-    x_integral_dist_pos = np.cumsum(np.where(x_dist > 0, 1, 0))
-    x_fwhm_pos = x_dist[x_integral_dist_pos > 0.87 * x_integral_dist_pos.max()][0]
-    x_integral_dist_neg = np.cumsum(np.where(x_dist[::-1] < 0, 1, 0))
-    x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87 * x_integral_dist_neg.max()][0]
+    # x_dist = x - x.mean()
+    # x_dist = np.sort(x_dist)
+    # x_integral_dist_pos = np.cumsum(np.where(x_dist > 0, 1, 0))
+    # x_fwhm_pos = x_dist[x_integral_dist_pos > 0.87 * x_integral_dist_pos.max()][0]
+    # x_integral_dist_neg = np.cumsum(np.where(x_dist[::-1] < 0, 1, 0))
+    # x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87 * x_integral_dist_neg.max()][0]
 
     # mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (x_fwhm_pos - x_fwhm_neg, x_unit))
     mytext = Label(x=3 * x.min() / 4, y=-hhist.max() / 2,
-                   text=f'{x_fwhm_pos - x_fwhm_neg:.2e} {x_unit} FWHM, {x.std():.2e} {x_unit} RMS')
+                   text=f'{general_FWHM(x):.2e} {x_unit} FWHM, {x.std():.2e} {x_unit} RMS')
     ph.add_layout(mytext)
 
     # create the vertical histogram
@@ -263,15 +275,15 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **line_args)
     pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **line_args)
 
-    y_dist = y - y.mean()
-    y_dist = np.sort(y_dist)
-    y_integral_dist_pos = np.cumsum(np.where(y_dist > 0, 1, 0))
-    y_fwhm_pos = y_dist[y_integral_dist_pos > 0.87 * y_integral_dist_pos.max()][0]
-    y_integral_dist_neg = np.cumsum(np.where(y_dist[::-1] < 0, 1, 0))
-    y_fwhm_neg = y_dist[::-1][y_integral_dist_neg > 0.87 * y_integral_dist_neg.max()][0]
+    # y_dist = y - y.mean()
+    # y_dist = np.sort(y_dist)
+    # y_integral_dist_pos = np.cumsum(np.where(y_dist > 0, 1, 0))
+    # y_fwhm_pos = y_dist[y_integral_dist_pos > 0.87 * y_integral_dist_pos.max()][0]
+    # y_integral_dist_neg = np.cumsum(np.where(y_dist[::-1] < 0, 1, 0))
+    # y_fwhm_neg = y_dist[::-1][y_integral_dist_neg > 0.87 * y_integral_dist_neg.max()][0]
 
     mytext = Label(x=-vhist.max() / 2, y=3 * y.max() / 4,
-                   text=f'{y_fwhm_pos - y_fwhm_neg:.2e} {y_unit} FWHM, {y.std():.2e} {y_unit} RMS',
+                   text=f'{general_FWHM(y):.2e} {y_unit} FWHM, {y.std():.2e} {y_unit} RMS',
                    angle=-np.pi / 2)
     pv.add_layout(mytext)
 
@@ -287,3 +299,93 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
         return layout, (2.35 * x.std(), 2.35 * y.std())
     else:
         return layout
+
+
+def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_plot=False, orthonorm=False,
+                    save_in_file="", return_fwhm=False, **kwargs):
+    """
+    Wrapper function for the PyOptix object of the scatter_plot_2d function. Data is expected as first parameter
+    in a pandas.Dataframe, the column names must contain X_key and y_key.
+
+    :param df: DataFrame to be plotted with keys given by xkey and ykey or OpticalElement the diagram of which to plot
+    :type df: pandas.DataFrame or pyoptix.OpticalElement
+    :param light_plot: Does not color scatter points for quick plot
+    :type light_plot: bool
+    :param orthonorm: Sets X range = Y range so as to have a real life spot shape
+    :type orthonorm: bool
+    :param save_in_file: Name of the file to save the layout to as a png. Default = "", which means not saving to file
+    :type save_in_file: str
+    :param return_fwhm: If True, returns the Full Width at Half Maximum of the spot is both dimensions as well as the
+        plot layout
+    :type return_fwhm: bool
+    :param show_map: Plot an hexagonal map instead of scatter plot
+    :type show_map: bool
+    :param x_key: name of the Dataframe column containing the X value
+    :type x_key: str
+    :param y_key:  name of the Dataframe column containing the Y value
+    :type y_key: str
+    :param kwargs: See scatter_plot_2d doc for additional parameters
+    :param oe_name: Name of the optical element where the diagram is captured
+    :type oe_name: str
+    :return: layout of the plot to be used as parameter of bokeh.plotting.show
+    :rtype: bokeh.models.layouts.LayoutDOM
+    """
+    if not isinstance(df, pandas.DataFrame):
+        kwargs["chain_name"] = df.beamline.active_chain_name
+        kwargs["beamline_name"] = df.beamline.name
+        oe_name = df.name
+        df = df.get_diagram()
+    if x_key[0] == "d":
+        x_unit = "rad"
+    else:
+        x_unit = "m"
+    if y_key[0] == "d":
+        y_unit = "rad"
+    else:
+        y_unit = "m"
+    title = f"{y_key} vs {x_key}"
+    if oe_name != "":
+        title += f" on {oe_name}"
+    if "beamline_name" in kwargs and "chain_name" in kwargs:
+        beamline_name = kwargs.pop("beamline_name")
+        chain_name = kwargs.pop("chain_name")
+        if beamline_name is not None:
+            title += f" of {beamline_name}"
+        if chain_name is not None:
+            title += f" in config. {chain_name}"
+    if "width" not in kwargs:
+        kwargs["width"] = 800
+    if "height" not in kwargs:
+        kwargs["height"] = 800
+    title += f" at E = {1239.842e-9/df['Lambda'].mean():.1f} eV"
+    x = np.copy(df[x_key])
+    y = np.copy(df[y_key])
+    if show_map:
+        plot = px.density_heatmap
+    else:
+        plot = px.scatter
+    if not light_plot and not show_map:
+        # Calculate the point density
+        xy = np.vstack([x, y])
+        z = gaussian_kde(xy)(xy)
+        z = z / z.max()
+        kwargs["color"] = z
+    if orthonorm:
+        x_ptp = np.ptp(x)
+        y_ptp = np.ptp(y)
+        x_range = (x.mean() - max(x_ptp, y_ptp) / 2, x.mean() + max(x_ptp, y_ptp) / 2)
+        y_range = (y.mean() - max(x_ptp, y_ptp) / 2, y.mean() + max(x_ptp, y_ptp) / 2)
+    else:
+        x_range = (x.min(), x.max())
+        y_range = (y.min(), y.max())
+    fig = plot(df, x_key, y_key, marginal_x="histogram", marginal_y="histogram", range_x=x_range, range_y=y_range,
+               title=title, **kwargs)
+    fig.layout["xaxis"]["title"] = f"{x_key}: {x.std():.2e} {x_unit} RMS, {general_FWHM(x):.2e} {x_unit} FWHM"
+    fig.layout["yaxis"]["title"] = f"{y_key}: {y.std():.2e} {y_unit} RMS, {general_FWHM(y):.2e} {y_unit} FWHM"
+    fig.update_coloraxes(showscale=False)
+    if save_in_file:
+        fig.write_image(save_in_file)
+    if return_fwhm:
+        return fig, general_FWHM(x), general_FWHM(y)
+    else:
+        return fig
