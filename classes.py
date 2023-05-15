@@ -2075,15 +2075,17 @@ class PlaneHoloGrating(Grating):
         #     self.elevation_angle1 = arccos(cos1 + dcos)
         self.inverse_distance1 = -inverse_dist1
         self.inverse_distance2 = -inverse_dist2
-        self.elevation_angle1 = min(arccos(cos1), arccos(cos1 + dcos))
+        self.elevation_angle1 = -min(arccos(cos1), arccos(cos1 + dcos))
         if lamda:
             self.recording_wavelength = lamda
         self.line_density = abs(dcos / self.recording_wavelength)
-        print(f"line density at center computed from solemio definition : {self.line_density/1000} /mm")
-        print(self.elevation_angle1)
-        print(self.inverse_distance1)
-        print(self.inverse_distance2)
         self.update_construction_points()
+        VLS_coeffs = self.get_vls_law(100e-3, 3)
+        VLS_poly = np.polynomial.polynomial.Polynomial(VLS_coeffs[::-1])
+        print(f"line density computed from solemio definition : {VLS_poly} /mm")
+        print("angle ", self.elevation_angle1/degree, "deg")
+        print("inv1 ", self.inverse_distance1)
+        print("inv2 ", self.inverse_distance2)
 
     def from_horiba(self, dist1, dist2, angle1, angle2, lamda=None):
         """
