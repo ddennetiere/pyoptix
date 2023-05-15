@@ -18,3 +18,5 @@ make.bat
 source/*
 Tests/Wolter
 
+/Tests/TestArrayParameter.py
+/Tests/*.xml
