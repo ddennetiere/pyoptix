@@ -276,7 +276,58 @@ def correlation_on_screen(screen, nrays, dimension="y", distance_to_screen=0):
 
 
 def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="y", nrays=None, method="Nelder-Mead",
-                     show_progress=False, tol=1e-3, options=None, move_screen=False, verbose=1):
+                     show_progress=False, tol=1e-3, options=None, move_screen=False, norm=2, verbose=1):
+    """
+    Optimize the optical system based on the figure of merit (FOM) using the specified optimization method.
+
+    Parameters
+    ----------
+    beamline : pyoptix.Beamline
+        Beamline object containing the optical elements and their properties
+    screen : pyoptix.OpticalElement
+        Screen object containing the position and orientation of the screen in the beamline
+    wavelengths : float or list of floats
+        Wavelengths to be used in the optimization
+    oes : object or list of objects
+        Optical element(s) to be optimized, length has to match the number of attibutes.
+    attributes : str or list of str
+        Attribute(s) of the optical element(s) to be optimized, length has to match the number or optical elements
+    dimension : str, optional
+        Dimension of the screen diagram to be optimized (default is "y")
+    nrays : int, optional
+        Number of rays used to generate the diagram (default is None)
+    method : str, optional
+        Optimization method to be used (default is "Nelder-Mead")
+    show_progress : bool, optional
+        If True, print the current value of the FOM during optimization (default is False)
+    tol : float, optional
+        Tolerance for termination (default is 1e-3)
+    options : dict, optional
+        Options for the optimization method (default is None)
+    move_screen : bool, optional
+        If True, move the screen to the focal position during optimization (default is False)
+    norm : int, optional
+        Order of the norm used to calculate the FOM (default is 2)
+    verbose : int, optional
+        If 1, print the optimized values of the attributes (default is 1)
+
+    Returns
+    -------
+    float
+        Optimized value of the first attribute of the first optical element
+
+    Raises
+    ------
+    RuntimeError
+        If the optimization fails to converge to a minimum
+
+    Notes
+    -----
+    The function uses the figure of merit (FOM) defined as the norm of the standard deviations of the screen
+    diagrams for the specified wavelengths. The optimization method minimizes the FOM with respect to the
+    specified attribute(s) of the optical element(s).
+    """
+
     old_nrays = beamline.active_chain[0].nrays
     old_link = screen.next
     screen.next = None
@@ -304,7 +355,7 @@ def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="
                            show_progress=False, tol=1e-3)
             contributions.append(screen.get_diagram()[dimension].std())
             # contributions.append(correlation_on_screen(screen, nrays, dimension=dimension))
-        ret = np.sqrt(np.power(np.array(contributions), 2))
+        ret = np.linalg.norm(contributions, norm)
         if show_progress:
             for oe, attrib in zip(oes, attributes):
                 print(f"{oe.name}.{attrib} = {oe.__getattribute__(attrib)}")
