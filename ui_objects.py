@@ -53,6 +53,58 @@ def to_jet(grayscale):
 TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset,save, box_zoom"
 
 
+def format_prefix(value, precision=2, unit="m"):
+    """
+   Formats a numerical value with an appropriate SI prefix.
+
+   Args:
+   - value: A float representing the numerical value to be formatted.
+   - precision: An integer representing the number of decimal places to include in the formatted value (default: 2).
+   - unit: A string representing the unit of measurement to be appended to the formatted value (default: "m").
+
+   Returns:
+   - A string representing the formatted value with the appropriate SI prefix and unit.
+
+   Raises:
+   - ValueError: If the exponent is out of range of the available prefixes.
+    """
+    SI_PREFIX_UNITS = u"yzafpnµm kMGTPEZY"
+    negative = False
+    digits = precision + 2
+
+    if value == 0.:
+        expof10 = 0
+    else:
+        if value < 0.:
+            value = -value
+            negative = True
+        expof10 = int(np.log10(value))
+        if expof10 > 0:
+            expof10 = (expof10 // 3) * 3
+        else:
+            expof10 = (-expof10 + 3) // 3 * (-3)
+
+        value *= 10 ** (-expof10)
+
+        if value >= 1000.:
+            value /= 1000.0
+            expof10 += 3
+        elif value >= 100.0:
+            digits -= 2
+        elif value >= 10.0:
+            digits -= 1
+
+        if negative:
+            value *= -1
+    expof10 = int(expof10)
+    prefix_levels = (len(SI_PREFIX_UNITS) - 1) // 2
+    si_level = expof10 // 3
+
+    if abs(si_level) > prefix_levels:
+        raise ValueError("Exponent out range of available prefixes.")
+    return f"{round(value*10**digits)/10**digits} "+SI_PREFIX_UNITS[si_level + prefix_levels].strip()+unit
+
+
 def display_progress_bar(max_count):
     """
     Displays and a progressbar jupyterlab widget for long calculations. To update, add 1 to the returned object.value.
@@ -82,7 +134,7 @@ def display_parameter_sheet(oe):
                                                                                   "multiplier", "type", "group",
                                                                                   "flags"])
     for i, param in enumerate(params):
-        ipys.row(i, [param, params[param]["value"].value, params[param]["bounds"][0], params[param]["bounds"][1],
+        ipys.row(i, [param, params[param]["value"], params[param]["bounds"][0], params[param]["bounds"][1],
                      params[param]["multiplier"], params[param]["type"], params[param]["group"],
                      params[param]["flags"]])
     params_sheet.column_width = [15, 20, 10, 10, 10, 10, 10, 10]
@@ -258,8 +310,10 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     # x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87 * x_integral_dist_neg.max()][0]
 
     # mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (x_fwhm_pos - x_fwhm_neg, x_unit))
-    mytext = Label(x=3 * x.min() / 4, y=-hhist.max() / 2,
-                   text=f'{general_FWHM(x):.2e} {x_unit} FWHM, {x.std():.2e} {x_unit} RMS')
+    mytext = Label(x=x.mean()+0.75 * (x.min()-x.mean()), y=-hhist.max() / 2,
+                   text=f'{format_prefix(general_FWHM(x), precision=2, unit=x_unit)} FWHM, '
+                        f'{format_prefix(x.std(), precision=2, unit=x_unit)} RMS')
+                   # text=f'{general_FWHM(x):.2e} {x_unit} FWHM, {x.std():.2e} {x_unit} RMS')
     ph.add_layout(mytext)
 
     # create the vertical histogram
@@ -284,8 +338,10 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     # y_integral_dist_neg = np.cumsum(np.where(y_dist[::-1] < 0, 1, 0))
     # y_fwhm_neg = y_dist[::-1][y_integral_dist_neg > 0.87 * y_integral_dist_neg.max()][0]
 
-    mytext = Label(x=-vhist.max() / 2, y=3 * y.max() / 4,
-                   text=f'{general_FWHM(y):.2e} {y_unit} FWHM, {y.std():.2e} {y_unit} RMS',
+    mytext = Label(x=-vhist.max() / 2, y=y.mean() + 0.75*(y.max()-y.mean()),
+                   text=f'{format_prefix(general_FWHM(y), precision=2, unit=y_unit)} FWHM, '
+                        f'{format_prefix(y.std(), precision=2, unit=y_unit)} RMS',
+                   # text=f'{general_FWHM(y):.2e} {y_unit} FWHM, {y.std():.2e} {y_unit} RMS',
                    angle=-np.pi / 2)
     pv.add_layout(mytext)
 
