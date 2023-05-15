@@ -12,6 +12,8 @@ import ipywidgets
 from IPython.display import display
 import plotly.express as px
 import pandas
+import plotly.graph_objs as go
+from numpy.polynomial import Polynomial
 
 
 # Definition des fonctions d'affichage
@@ -380,8 +382,10 @@ def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_
         y_range = (y.min(), y.max())
     fig = plot(df, x_key, y_key, marginal_x="histogram", marginal_y="histogram", range_x=x_range, range_y=y_range,
                title=title, **kwargs)
-    fig.layout["xaxis"]["title"] = f"{x_key}: {x.std():.2e} {x_unit} RMS, {general_FWHM(x):.2e} {x_unit} FWHM"
-    fig.layout["yaxis"]["title"] = f"{y_key}: {y.std():.2e} {y_unit} RMS, {general_FWHM(y):.2e} {y_unit} FWHM"
+    fig.layout["xaxis"]["title"] = f"{x_key}: {format_prefix(x.std(), precision=2, unit=x_unit)} RMS, " \
+                                   f"{format_prefix(general_FWHM(x), precision=2, unit=x_unit)} FWHM"
+    fig.layout["yaxis"]["title"] = f"{y_key}: {format_prefix(y.std(), precision=2, unit=y_unit)} RMS, " \
+                                   f"{format_prefix(general_FWHM(y), precision=2, unit=y_unit)} FWHM"
     fig.update_coloraxes(showscale=False)
     if save_in_file:
         fig.write_image(save_in_file)
@@ -389,3 +393,49 @@ def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_
         return fig, general_FWHM(x), general_FWHM(y)
     else:
         return fig
+
+
+def plot_polynomial_surface(coeffs, xy_limits):
+    """
+    Plots a 3D surface of a polynomial described by its coefficients on a specified XY plane.
+
+    Parameters
+    ----------
+    coeffs : list or array-like
+        Coefficients of the polynomial in descending order of degree.
+    xy_limits : list or array-like
+        A list or array of length 4 that specifies the limits of the surface on the XY plane.
+        The first and second elements correspond to the minimum and maximum values of `x`, respectively,
+        while the third and fourth elements correspond to the minimum and maximum values of `y`, respectively.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+
+    Example
+    -------
+    >>> coeffs = [1, 2, 3, 4, 5, 6]
+    >>> xy_limits = [-5, 5, -10, 10]
+    >>> fig = plot_polynomial_surface(coeffs, xy_limits)
+    >>> fig.show()
+
+    """
+    # Generate a grid of values for x and y
+    x = np.linspace(xy_limits[0], xy_limits[1], 100)
+    y = np.linspace(xy_limits[2], xy_limits[3], 100)
+    X, Y = np.meshgrid(x, y)
+
+    # Calculate z-values from the polynomial coefficients
+    p = Polynomial(coeffs)
+    Z = p(X, Y)
+
+    # Create the 3D surface using Plotly
+    fig = go.Figure(data=[go.Surface(x=X, y=Y, z=Z)])
+
+    # Set the figure parameters
+    fig.update_layout(title='Polynomial 3D Surface',
+                      scene=dict(xaxis_title='X',
+                                 yaxis_title='Y',
+                                 zaxis_title='Z'))
+
+    return fig
