@@ -276,7 +276,8 @@ def correlation_on_screen(screen, nrays, dimension="y", distance_to_screen=0):
 
 
 def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="y", nrays=None, method="Nelder-Mead",
-                     show_progress=False, tol=1e-3, options=None, move_screen=False, norm=2, verbose=1):
+                     show_progress=False, tol=1e-3, options=None, move_screen=False, norm=2, special_align=lambda:None,
+                     verbose=1):
     """
     Optimize the optical system based on the figure of merit (FOM) using the specified optimization method.
 
@@ -308,6 +309,8 @@ def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="
         If True, move the screen to the focal position during optimization (default is False)
     norm : int, optional
         Order of the norm used to calculate the FOM (default is 2)
+    special_align : callable, optional
+        function to be called before running simulation, can be used for alignment
     verbose : int, optional
         If 1, print the optimized values of the attributes (default is 1)
 
@@ -348,6 +351,7 @@ def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="
         for wavelength in wavelengths:
             beamline.clear_impacts(clear_source=True)
             beamline.align(wavelength)
+            special_align()
             beamline.generate(wavelength)
             beamline.radiate()
             if move_screen:
