@@ -213,10 +213,12 @@ class Beamline(object):
                         oe._set_parameter(param, params[param])
 
     def save_beamline(self, filename=None):
-        raise NotImplementedError()
+        if filename:
+            save_as_xml(filename)
 
     def load_beamline(self, filename=None):
-        raise NotImplementedError()
+        if filename:
+            load_from_xml(filename)
 
     @property
     def chains(self):

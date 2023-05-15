@@ -283,6 +283,22 @@ def radiate(source_id):
 
 
 @catch_c_error
+def save_as_xml(filename):
+    optix.SaveSystemAsXml.argtypes = [LPCSTR]
+    optix.SaveSystemAsXml.restype = BOOLEAN
+    ret = optix.SaveSystemAsXml(filename.encode())
+    return ret
+
+
+@catch_c_error
+def load_from_xml(filename):
+    optix.LoadSystemFromXml.argtypes = [LPCSTR]
+    optix.LoadSystemFromXml.restype = BOOLEAN
+    ret = optix.LoadSystemFromXml(filename.encode())
+    return ret
+
+
+@catch_c_error
 def enumerate_elements(hsys, element_id, element_name):
     optix.EnumerateElements.argtypes = [HANDLE, HANDLE, LPCSTR, INT]
     optix.EnumerateElements.restype = INT
