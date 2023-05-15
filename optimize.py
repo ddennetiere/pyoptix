@@ -292,17 +292,19 @@ def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="
 
     def FOM(attributes_values):
         for oe, attrib, attrib_value in zip(oes, attributes, attributes_values):
-            attributes_values_0.append(oe.__setattribute__(attrib, attrib_value))
+            attributes_values_0.append(oe.__setattr__(attrib, attrib_value))
         contributions = []
         for wavelength in wavelengths:
             beamline.clear_impacts(clear_source=True)
             beamline.align(wavelength)
+            beamline.generate(wavelength)
             beamline.radiate()
             if move_screen:
                 find_focus(beamline, screen, wavelength, dimension=dimension, nrays=nrays, method="Nelder-Mead",
                            show_progress=False, tol=1e-3)
-            contributions.append(correlation_on_screen(screen, nrays, dimension=dimension))
-        ret = np.sqrt(np.pow(np.array(contributions), 2))
+            contributions.append(screen.get_diagram()[dimension].std())
+            # contributions.append(correlation_on_screen(screen, nrays, dimension=dimension))
+        ret = np.sqrt(np.power(np.array(contributions), 2))
         if show_progress:
             for oe, attrib in zip(oes, attributes):
                 print(f"{oe.name}.{attrib} = {oe.__getattribute__(attrib)}")
