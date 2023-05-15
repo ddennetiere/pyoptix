@@ -949,10 +949,14 @@ class OpticalElement(metaclass=PostInitMeta):
         chain_name = None
         if self.beamline is not None:
             chain_name = self.beamline.active_chain_name
+            beamline_name = self.beamline.name
         print(beamline_name, chain_name)
         if nrays is None:
             nrays = self.beamline.active_chain[0].nrays
         spots = self.get_diagram(nrays=nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
+        if spots["X"].std() == 0:
+            print("Warning empty diagram:\n", spots)
+            return None, None
         datasources = {"xy": ColumnDataSource(spots), "xxp": ColumnDataSource(spots), "yyp": ColumnDataSource(spots)}
         figs = []
         if display == "all":
