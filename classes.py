@@ -2,14 +2,17 @@
 import ctypes
 import numpy as np
 from ctypes import (Union, Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_ulong,
-                    create_string_buffer, c_int64)
-from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE
+                    create_string_buffer, c_int64, pointer)
+from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE, UINT
 from .mcpl import PyOptixMCPLWriter
 from .exposed_functions import (get_parameter, set_parameter, align, generate, radiate, enumerate_parameters,
                                 get_element_name, set_recording, get_next_element, get_previous_element,
                                 get_spot_diagram, chain_element_by_id, create_element, clear_impacts, get_impacts_data,
                                 set_transmissive, get_transmissive, get_hologram_pattern, fit_surface_to_slopes,
-                                fit_surface_to_heights, get_array_parameter, get_array_parameter_size)
+                                fit_surface_to_heights, get_array_parameter, get_array_parameter_size,
+                                get_array_parameter_dims, dump_parameter, dump_arg_parameter,
+                                get_parameter_flags, Bounds, Parameter, ParamArray, FrameID, RecordingMode, Diagram,
+                                GratingPatternInformation, save_as_xml, generate_polarized, load_from_xml)
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
@@ -44,6 +47,9 @@ optix_dictionnary = {
     "invq": "inverse_q",
     "waistX": "waist_x",
     "waistY": "waist_y",
+    "surfaceLimits": "surface_limits",
+    "apertureX": "aperture_x",
+    "trajectoryRadius": "trajectory_radius",
 
 }
 
@@ -59,119 +65,7 @@ class PostInitMeta(type):
         return instance
 
 
-class Bounds(Structure):
-    """
-    C structure to be used in optix parameters
-    """
-    _fields_ = [("min", c_double),
-                ("max", c_double)]
-
-
-c_float_p = ctypes.POINTER(ctypes.c_float)
 array_parameter_list = ['coefficients', "surfaceLimits"]
-
-
-class Dims(Structure):
-    """
-    C structure to be used in optix parameters
-    """
-    _fields_ = [("x", c_int64),
-                ("y", c_int64)]
-
-
-class ArrayParameter(Structure):
-    _fields_ = [("ndims", Dims), ("data", c_float_p)]
-
-
-class ArrayValue(Union):
-    _fields_ = [("value", c_double), ("array", ArrayParameter)]
-
-
-class Parameter(Structure):
-    """
-    C structure defining modifiable fields of optix optical element parameters. Note bounds type is Bounds. See Bounds
-    docstring.
-    """
-    _fields_ = [("value", ArrayValue),
-                ("bounds", Bounds),
-                ("multiplier", c_double),
-                ("type", c_int32),
-                ("group", c_int32),
-                ("flags", c_uint32),
-                ]
-
-
-class PolynomialExpansion(Structure):
-    """
-    C structure to be used in optix parameters
-    """
-    _fields_ = [("a0", c_double),
-                ("a1", c_double),
-                ("a2", c_double),
-                ("a3", c_double),
-                ]
-
-
-class GratingPatternInformation(Structure):
-    """
-    C structure defining the pattern parameters of an hologram used for holographic grating.
-    Fields are the polynomial expansion of the line density, and the central line tilt and curvature of an holographic
-    grating, where :
-
-    - axial_line_density is an array which will receive the coefficients of the line density approximation by a
-      third degree polynomial. The term of degree 0 is the nominal line density at grating center (in lines/m)
-    - line_curvature is the angle of the angle of the central line of the grating line with the Y axis (in rad)
-    - line_tilt is the angle of the angle of the central line of the grating line with the Y axis (in rad)
-
-    """
-    _fields_ = [("axial_line_density", PolynomialExpansion),
-                ("line_tilt", c_double),
-                ("line_curvature", c_double),
-                ]
-
-
-class FrameID(object):
-    general_frame = c_int32(0)
-    local_absolute_frame = c_int32(1)
-    aligned_local_frame = c_int32(2)
-    surface_frame = c_int32(3)
-
-
-class RecordingMode(object):
-    recording_output = c_int32(2)
-    recording_input = c_int32(1)
-    recording_none = c_int32(0)
-
-
-class Diagram(Structure):
-    """
-    C structure for accessing optix spot diagrams
-    """
-    _fields_ = [("dim", c_int),
-                ("reserved", c_int),
-                ("count", c_int),
-                ("lost", c_int),
-                ("min", POINTER(c_double)),
-                ("max", POINTER(c_double)),
-                ("mean", POINTER(c_double)),
-                ("sigma", POINTER(c_double)),
-                ("spots", POINTER(c_double)),
-                ]
-
-    def __init__(self, nreserved=0, ndim=5):
-        super().__init__()
-        self.dim = ndim
-        self.reserved = nreserved
-        p_min = (c_double * ndim)()
-        self.min = cast(p_min, POINTER(c_double))
-        p_max = (c_double * ndim)()
-        self.max = cast(p_max, POINTER(c_double))
-        p_mean = (c_double * ndim)()
-        self.mean = cast(p_mean, POINTER(c_double))
-        p_sigma = (c_double * ndim)()
-        self.sigma = cast(p_sigma, POINTER(c_double))
-        p_spots = (c_double * ndim * nreserved)()
-        self.spots = cast(p_spots, POINTER(c_double))
 
 
 class ChainList(list):
@@ -780,37 +674,45 @@ class OpticalElement(metaclass=PostInitMeta):
         if param_name in inv_dict_optix:
             param_name = inv_dict_optix[param_name]
         get_parameter(self._element_id, param_name, param)
+        # return {"value": param.value, "bounds": (param.bounds.min, param.bounds.max),
+        #         "multiplier": param.multiplier, "type": param.type, "group": param.group, "flags": param.flags}
         return {"value": param.value, "bounds": (param.bounds.min, param.bounds.max),
                 "multiplier": param.multiplier, "type": param.type, "group": param.group, "flags": param.flags}
 
     def _get_parameter(self, param_name):
         param = self._get_c_parameter(param_name)
-        if param_name not in array_parameter_list:
-            return param.value.value
-        return param.value
+        if param.flags & 0x8:
+            return param.array
+        else:
+            return param.value
 
     def _get_c_parameter(self, param_name):
         param = Parameter()
-        if param_name not in array_parameter_list:
-            get_parameter(self._element_id, param_name, param)
+        flags = c_uint32()
+        get_parameter_flags(self.element_id, param_name, flags)
+        if flags.value & 0x8:
+            # the paracmeter contains an array
+            dims = (c_int64 * 2)()
+            if get_array_parameter_dims(self.element_id, param_name, dims) != 0:
+                param.array = np.empty([dims[1], dims[0]])
+                get_array_parameter(self.element_id, param_name, param, dims[0] * dims[1])
         else:
-            param_dims = Dims()
-            get_array_parameter_size(self._element_id, param_name, param_dims)
-            data = np.empty((param_dims.x, param_dims.y)).astype(np.float)
-            param.value.array.data = data.ctypes.data_as(c_float_p)
-            param.value.array.ndims.x = data.shape[0]
-            param.value.array.ndims.y = data.shape[1]
-            get_array_parameter(self._element_id, param_name, param, param_dims)
+            # release the array data and unset flags array bit, if needed
+            param.flags &= ~(1 << 3)
+            get_parameter(self.element_id, param_name, param)
         return param
 
     def _set_parameter(self, param_name, value):
-        # param = Parameter()
+        if param_name in optix_dictionnary:
+            pyoptix_param_name = optix_dictionnary[param_name]
+        else:
+            pyoptix_param_name = param_name
         param = self._get_c_parameter(param_name)
-        if isinstance(value, dict):
+        if isinstance(value, dict):  # value is a dictionnary
             for key in value:
                 assert key in ("value", "bounds", "multiplier", "type", "group", "flags")
                 if key == "value":
-                    param.value.value = DOUBLE(value[key])
+                    param.value = DOUBLE(value[key])
                 elif key == "multiplier":
                     param.multiplier = DOUBLE(value[key])
                 elif key == "type":
@@ -824,25 +726,23 @@ class OpticalElement(metaclass=PostInitMeta):
                     bounds.min = DOUBLE(value[key][0])
                     bounds.max = DOUBLE(value[key][1])
                     param.bounds = bounds
-        elif isinstance(value, np.ndarray):
+            set_parameter(self._element_id, param_name, param)
+        elif isinstance(value, np.ndarray):  # value is an array
             assert param_name in array_parameter_list
-            data = value.astype(np.float)
-            param.value.array.data = data.ctypes.data_as(c_float_p)
-            param.value.array.ndims.x = value.shape[0]
-            if len(value.shape) == 2:
-                param.value.array.ndims.y = value.shape[1]
-            else:
-                param.value.array.ndims.y = 1
-        else:
+            # print(f"setting {param_name} with array {value}")
+            param.array = value
+            # dump_arg_parameter(param)
+        elif isinstance(value, (float, int)):  # value is a float
             try:
                 value = float(value)
-                param.value.value = DOUBLE(value)
+                param.value = DOUBLE(value)
             except TypeError:
-                raise AttributeError("value of parameter must be castable in a float or a dictionnary")
-        if param_name in optix_dictionnary:
-            pyoptix_param_name = optix_dictionnary[param_name]
+                raise AttributeError("value of parameter must be castable in a float, an numpy.ndarray or a dictionnary")
         else:
-            pyoptix_param_name = param_name
+            raise AttributeError("Unknown value type")
+        if param_name in array_parameter_list:
+            # print(f"Setting in _set_parameter {param_name} with {param} ")
+            pass
         set_parameter(self._element_id, param_name, param)
         if "lineDensityCoeff_" in pyoptix_param_name:  # cas particulier des classes filles de Poly1D
             deg = int(pyoptix_param_name.split("_")[-1])
@@ -852,7 +752,12 @@ class OpticalElement(metaclass=PostInitMeta):
             get_parameter(self._element_id, param_name, param)
         else:
             self.__getattribute__(pyoptix_param_name)  # update of internal variable
-        return self._get_parameter(param_name)
+        updated_parameter = self._get_c_parameter(param_name)
+        if updated_parameter.flags & (1<<3):  # parameter is an array parameter
+            # print(f"updated {param_name}:\n", updated_parameter)
+            return updated_parameter.array
+        else:
+            return updated_parameter.value
 
     @property
     def element_id(self):
@@ -1283,19 +1188,37 @@ class OpticalElement(metaclass=PostInitMeta):
             print(f"Dump of all optix parameter for {self.name}")
         param_dict = {"oe_name": self.name, "oe_params": {}, "oe_class": self.__class__}
         while hparam:
+            if param_name.value.decode() not in array_parameter_list:
+                value = param.value
+            else:
+                pa = ParamArray()
+
+                ppa_src = param.p_array
+                cast(ppa_src, POINTER(ParamArray))
+                pa_src = ppa_src.contents
+                pa.dims[0] = pa_src.dims[0]
+                pa.dims[1] = pa_src.dims[1]
+                size = pa.dims[0] * pa.dims[1]
+                databuf = np.fromiter(pa_src.data, np.float64, count=size)
+                value = np.ndarray((pa.dims[1], pa.dims[0]), dtype=np.float64, buffer=databuf)
             if verbose:
-                print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+                print("\t", f"{param_name.value.decode()}: {value} [{param.bounds.min}, {param.bounds.max}],"
                             f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
-            param_dict["oe_params"][param_name.value.decode()] = {"value": param.value,
+            param_dict["oe_params"][param_name.value.decode()] = {"value": value,
                                                                   "bounds": [param.bounds.min, param.bounds.max],
                                                                   "multiplier": param.multiplier,
                                                                   "type": param.type, "group": param.group,
                                                                   "flags": param.flags}
             enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
+
+        if param_name.value.decode() not in array_parameter_list:
+            value = param.value
+        else:
+            value = "array"
         if verbose:
-            print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
+            print("\t", f"{param_name.value.decode()}: {value} [{param.bounds.min}, {param.bounds.max}],"
                         f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
-        param_dict["oe_params"][param_name.value.decode()] = {"value": param.value,
+        param_dict["oe_params"][param_name.value.decode()] = {"value": value,
                                                               "bounds": [param.bounds.min, param.bounds.max],
                                                               "multiplier": param.multiplier,
                                                               "type": param.type, "group": param.group,
@@ -1477,26 +1400,26 @@ class PolynomialOpticalElement(OpticalElement):
         else:
             raise AttributeError("Abstract class not to be instantiated")
         super().__init__(**kwargs)
-        self.coeffs = np.array([0, 0])
-        self.limits = np.array([[-1, 1, -1, 1]])
+        self.surface_limits = np.array([[-1, 1], [-1, 1]])
+        self.coefficients = np.zeros((1, 1))
 
     @property
-    def coeffs(self):
-        self._coeffs = self._get_parameter("coefficients")
-        return self._coeffs
+    def coefficients(self):
+        self._coefficients = self._get_parameter("coefficients")
+        return self._coefficients
 
-    @coeffs.setter
-    def coeffs(self, value):
-        self._coeffs = self._set_parameter("coefficients", value)
+    @coefficients.setter
+    def coefficients(self, value):
+        self._coefficients = self._set_parameter("coefficients", value)
 
     @property
-    def limits(self):
-        self._limits = self._get_parameter("surfaceLimits")
-        return self._limits
+    def surface_limits(self):
+        self._surface_limits = self._get_parameter("surfaceLimits")
+        return self._surface_limits
 
-    @limits.setter
-    def limits(self, value):
-        self._limits = self._set_parameter("surfaceLimits", value)
+    @surface_limits.setter
+    def surface_limits(self, value):
+        self._surface_limits = self._set_parameter("surfaceLimits", value)
 
     def fit_heights(self, order_x, order_y, filename):
         """
@@ -1513,7 +1436,7 @@ class PolynomialOpticalElement(OpticalElement):
         """
         heights = np.loadtxt(filename)
         sigma_h = np.empty(heights.shape)
-        fit_surface_to_heights(self.element_id, order_x, order_y, self.limits, heights, sigma_h)
+        fit_surface_to_heights(self.element_id, order_x, order_y, self.surface_limits, heights, sigma_h)
         return sigma_h
 
     def fit_slopes(self, order_x, order_y, filename):
@@ -1714,7 +1637,7 @@ class CylindricalMirror(OpticalElement):
 
         :param curvature: inverse of the base circle radius in m-1
         :type curvature: float
-        :param axis_angle: angle between the mirror X axis and the cylinder axis of invariance
+        :param axis_angle: angle between the mirror X axis and the cylinder axis of invariance : 0 = tangential cylinder
         :type axis_angle: float
         :param kwargs: See OpticalElement doc for other parameters
         """
