@@ -238,7 +238,7 @@ def release_optix():
     ctypes.windll.kernel32.FreeLibrary.argtypes = [HMODULE]
     libhandle = optix._handle
     ctypes.windll.kernel32.FreeLibrary(libhandle)
-    # del SRlib
+    del optix
 
 
 @catch_c_error
