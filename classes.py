@@ -1250,8 +1250,93 @@ class Source(OpticalElement):
         """
         if "element_type" in kwargs:
             assert kwargs["element_type"] in ["GaussianSource", "RadialSource", "XYGridSource",
-                                              "AstigmaticGaussianSource"]
+                                              "AstigmaticGaussianSource", "BMtypeGaussianSource"]
         super().__init__(**kwargs)
+
+
+class BMSource(OpticalElement):
+    """
+    Class for Bending magnet sources
+    """
+    def __init__(self, sigma_x=0, sigma_y=0, aperture_x=0, sigma_y_div=0, trajectory_radius=5.36, nrays=0, **kwargs):
+        """
+        Constructor of a gaussian source type element of size sigma_x*sigma_y and divergence aperture_x*sigma_y_div.
+        Will generate nrays rays when method generate is called.
+
+        :param sigma_x: RMS source size in X direction in m
+        :type sigma_x: float
+        :param sigma_y: RMS source size in Y direction in m
+        :type sigma_y: float
+        :param aperture_x: collection angle in the deflection plane
+        :type aperture_x: float
+        :param sigma_y_div: RMS source divergence in Y direction
+        :type sigma_y_div: float
+        :param nrays: number of rays to be generated
+        :type nrays: int
+        :param kwargs: See OpticalElement doc for other parameters
+        """
+        kwargs["element_type"] = "BMtypeGaussianSource"
+        super().__init__(**kwargs)
+        self.sigma_x = sigma_x
+        self.sigma_y = sigma_y
+        self.aperture_x = aperture_x
+        self.sigma_y_div = sigma_y_div
+        self.nrays = nrays
+        self.trajectory_radius = trajectory_radius
+
+    @property
+    def nrays(self):
+        self._nrays = self._get_parameter("nRays")
+        return self._nrays
+
+    @nrays.setter
+    def nrays(self, value):
+        self._nrays = self._set_parameter("nRays", value)
+
+    @property
+    def sigma_x(self):
+        self._sigma_x = self._get_parameter("sigmaX")
+        return self._sigma_x
+
+    @sigma_x.setter
+    def sigma_x(self, value):
+        self._sigma_x = self._set_parameter("sigmaX", value)
+
+    @property
+    def sigma_y(self):
+        self._sigma_y = self._get_parameter("sigmaY")
+        return self._sigma_y
+
+    @sigma_y.setter
+    def sigma_y(self, value):
+        self._sigma_y = self._set_parameter("sigmaY", value)
+
+    @property
+    def aperture_x(self):
+        self._aperture_x = self._get_parameter("apertureX")
+        return self._aperture_x
+
+    @aperture_x.setter
+    def aperture_x(self, value):
+        self._aperture_x = self._set_parameter("apertureX", value)
+
+    @property
+    def sigma_y_div(self):
+        self._sigma_y_div = self._get_parameter("sigmaYdiv")
+        return self._sigma_y_div
+
+    @sigma_y_div.setter
+    def sigma_y_div(self, value):
+        self._sigma_y_div = self._set_parameter("sigmaYdiv", value)
+
+    @property
+    def trajectory_radius(self):
+        self._trajectory_radius = self._get_parameter("trajectoryRadius")
+        return self._trajectory_radius
+
+    @trajectory_radius.setter
+    def trajectory_radius(self, value):
+        self._trajectory_radius = self._set_parameter("trajectoryRadius", value)
 
 
 class GaussianSource(Source):
