@@ -266,6 +266,15 @@ def generate(source_id, lamda):
 
 
 @catch_c_error
+def generate_polarized(source_id, lamda, pol):
+    optix.GeneratePol.argtypes = [HANDLE, DOUBLE, ctypes.c_char]
+    optix.GeneratePol.restype = INT
+    # ret = optix.GeneratePol(source_id, lamda, 0x53)
+    ret = optix.GeneratePol(source_id, lamda, ctypes.c_char(pol.encode()))
+    return ret
+
+
+@catch_c_error
 def radiate(source_id):
     optix.Radiate.argtypes = [HANDLE]
     optix.Radiate.restype = BOOLEAN

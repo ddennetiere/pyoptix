@@ -332,13 +332,17 @@ class Beamline(object):
         else:
             return radiate(self.active_chain[0].element_id)
 
-    def generate(self, lambda_radiate):
+    def generate(self, lambda_radiate, polarization=None):
         """
         Generates rays at `lambda_radiate` wavelength.
 
         :param lambda_radiate: Wavelength of the rays in m
+        :param polarization: Polarization of the generated rays which can be 'S', 'P', 'R' (circular right),
+         'L'(circular left)
         :return:
         """
+        if polarization:
+            return generate_polarized(self.active_chain[0].element_id, lambda_radiate, polarization)
         return generate(self.active_chain[0].element_id, lambda_radiate)
 
     def _add_element(self, new_element):
