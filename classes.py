@@ -957,17 +957,21 @@ class OpticalElement(metaclass=PostInitMeta):
         if spots["X"].std() == 0:
             print("Warning empty diagram:\n", spots)
             return None, None
+        if self.recording_mode == RecordingMode.recording_output:
+            oe_name = "after "+self._name
+        else:
+            oe_name = "before "+self._name
         datasources = {"xy": ColumnDataSource(spots), "xxp": ColumnDataSource(spots), "yyp": ColumnDataSource(spots)}
         figs = []
         if display == "all":
             display = "xy, xxp, yyp"
         if "xy" in display:
             figs.append(plot_spd(datasources["xy"], x_key="X", y_key="Y", light_plot=light_xy, show_map=map_xy,
-                                 beamline_name=beamline_name, chain_name=chain_name, oe_name=self._name, **kwargs))
+                                 beamline_name=beamline_name, chain_name=chain_name, oe_name=oe_name, **kwargs))
         if "xxp" in display:
             figs.append(
                 plot_spd(datasources["xxp"], x_key="X", y_key="dX", light_plot=light_xxp, beamline_name=beamline_name,
-                         chain_name=chain_name, oe_name=self._name, **kwargs))
+                         chain_name=chain_name, oe_name=oe_name, **kwargs))
 
             def fun(x):
                 return (spots["X"] + x * spots["dX"]).std()
@@ -980,7 +984,7 @@ class OpticalElement(metaclass=PostInitMeta):
         if "yyp" in display:
             figs.append(
                 plot_spd(datasources["yyp"], x_key="Y", y_key="dY", light_plot=light_yyp, beamline_name=beamline_name,
-                         chain_name=chain_name, oe_name=self._name, **kwargs))
+                         chain_name=chain_name, oe_name=oe_name, **kwargs))
 
             def fun(x):
                 return (spots["Y"] + x * spots["dY"]).std()
@@ -1074,7 +1078,7 @@ class OpticalElement(metaclass=PostInitMeta):
         coldatasource = ColumnDataSource(impacts)
         figs.append(plot_spd(coldatasource, x_key="X", y_key="Y",
                              beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
-                             oe_name=self._name, **kwargs))
+                             oe_name="on "+self._name, **kwargs))
         figs.append(plot_spd(coldatasource, x_key="X", y_key="Z",
                              beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
                              oe_name=self._name, **kwargs))

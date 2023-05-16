@@ -184,7 +184,7 @@ def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
         y_unit = "m"
     title = f"{y_key} vs {x_key}"
     if oe_name != "":
-        title += f" on {oe_name}"
+        title += f" {oe_name}"
     if "beamline_name" in kwargs and "chain_name" in kwargs:
         beamline_name = kwargs.pop("beamline_name")
         chain_name = kwargs.pop("chain_name")
@@ -403,7 +403,7 @@ def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_
         y_unit = "m"
     title = f"{y_key} vs {x_key}"
     if oe_name != "":
-        title += f" on {oe_name}"
+        title += f" {oe_name}"
     if "beamline_name" in kwargs and "chain_name" in kwargs:
         beamline_name = kwargs.pop("beamline_name")
         chain_name = kwargs.pop("chain_name")
