@@ -1064,15 +1064,38 @@ class OpticalElement(metaclass=PostInitMeta):
         return spots
 
     def show_impacts(self, nrays=None, reference_frame="local_absolute_frame", **kwargs):
+        """
+        If recording_mode is set to any other value than RecordingMode.recording_none, show the (X,Y) and (X,Z)
+        cross sections of the (X, Y, Z, dX, dY, dZ, Lambda) pandas dataframe where each row is a computed ray in the
+        frame of reference given in parameter reference_frame either :
+
+        - "general_frame" : Absolute laboratory frame
+        - "local_absolute_frame" : Absolute frame with origin on the surface
+        - "aligned_local_frame" : Local frame, with origin on the surface, axe OZ is along the chief ray and OY is in
+          the deviation plane of the last preceding reflective element. Transmissive elements do not change the
+          AlignedLocalFrame
+        - "surface_frame" : Local frame used to describe a surface. Origin is at surface intercept with the chief ray.
+          Oz is along the surface normal (at origin). OX is the tangential axis for reflective elements.
+
+        Method to be used for computing footprints on a mirror.
+
+        :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
+        :type nrays: int
+        :param reference_frame: reference frame for coordinates see above
+        :type reference_frame: str
+        :param kwargs: See pyoptix.ui_objects.plot_spd doc for additional parameters
+        :return: tuple of (spd_data, handle(s) of the figures)
+        :rtype: tuple
+        """
         impacts = self.get_impacts_data(nrays=nrays, reference_frame=reference_frame, show_first_rays=False)
 
-        anamorphic_factor = 1/np.sin(self.theta)
-        if (self.phi % pi) - pi/2 < 1e-3:
-            deviation = "horizontal"
-            impacts["X"] *= anamorphic_factor
-        else:
-            deviation = "vertical"
-            impacts["Y"] *= anamorphic_factor
+        # anamorphic_factor = 1/np.sin(self.theta)
+        # if (self.phi % pi) - pi/2 < 1e-3:
+        #     deviation = "horizontal"
+        #     impacts["X"] *= anamorphic_factor
+        # else:
+        #     deviation = "vertical"
+        #     impacts["Y"] *= anamorphic_factor
 
         figs = []
         coldatasource = ColumnDataSource(impacts)
@@ -1081,7 +1104,7 @@ class OpticalElement(metaclass=PostInitMeta):
                              oe_name="on "+self._name, **kwargs))
         figs.append(plot_spd(coldatasource, x_key="X", y_key="Z",
                              beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
-                             oe_name=self._name, **kwargs))
+                             oe_name="on "+self._name, **kwargs))
         handles = []
         for fig in figs:
             handles.append(show(fig, notebook_handle=True))
