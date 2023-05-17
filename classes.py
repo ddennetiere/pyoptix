@@ -16,7 +16,8 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
-from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet
+from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet, \
+    plot_beamline
 from numpy import pi, cos, sin, tan, arccos, arcsin, arctan
 from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import minimize
@@ -575,6 +576,72 @@ class Beamline(object):
                     "dlambda": wavelength*dlambda_over_lambda}
         else:
             return resolution
+
+    def draw_to_scale(self, wavelength=300e-9, radiate=False, configurations=[],
+                      align_callable=lambda wavelength: None):
+        """
+        Generate and plot the beamline spot diagram to scale for each recording optical element
+        for the specified wavelength(s) and configurations.
+
+
+        Parameters
+        ----------
+        wavelength : float or list of floats, optional
+            Wavelength(s) for which to generate the beamline diagram (default is 300e-9). If list, length must match
+            the number of configuration.
+        radiate : bool, optional
+            If True, radiate the beamline for each configuration (default is False).
+            Set to True if multiple configurations are provided
+        configurations : list of str, optional
+            Configurations to be plotted (default is []). If [], hte current configuratio of the beamline is used
+        align_callable : function, optional
+            Function to align the beamline for a given wavelength (default is lambda wavelength: None)
+
+        Returns
+        -------
+        pandas DataFrame
+            DataFrame containing the recorded impact data for the plotted configurations
+
+        Notes
+        -----
+        - If configurations is provided, the beamline will be modified and radiated, regardless of the radiate flag.
+        - If radiate is True or multiple configurations are specified, a warning will be printed.
+        - If wavelength is a list, it must have the same length as configurations.
+        - The beamline diagram is generated to scale for the specified wavelength and configurations.
+        - The recorded impact data for each configuration is collected and returned as a DataFrame.
+        - The X-coordinate values in the impact data are flipped (multiplied by -1) to match the plotting convention.
+        - The beamline diagram is plotted using the plot_beamline function.
+        """
+
+        if configurations:
+            radiate = True
+        else:
+            configurations = [self.active_chain_name]
+        if radiate:
+            print("WARNING : for radiate = True or multiple configurations, beamline will be modified after plot")
+        if isinstance(wavelength, list):
+            assert len(wavelength) == len(configurations)
+        diags = []
+        for config in configurations:
+            if radiate:
+                self.active_chain = config
+                for oe in self.active_chain:
+                    oe.recording_mode = RecordingMode.recording_output
+                self.clear_impacts(clear_source=True)
+                align_callable(wavelength)
+                self.align(wavelength)
+                self.generate(wavelength)
+                self.radiate()
+            for oe in self.active_chain:
+                if oe.recording_mode != RecordingMode.recording_none:
+                    impacts = oe.get_impacts_data(reference_frame="general_frame")
+                    impacts["name"] = oe.name
+                    impacts["configuration"] = config
+                    impacts["X"] *= -1
+                    diags.append(impacts)
+        spots = pd.concat(diags)
+        plot_beamline(spots)
+        return spots
 
 
 class OpticalElement(metaclass=PostInitMeta):

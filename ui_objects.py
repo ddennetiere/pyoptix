@@ -1,3 +1,4 @@
+import pandas as pd
 from bokeh.plotting import figure, show
 from bokeh.io import export_png
 import numpy as np
@@ -495,3 +496,28 @@ def plot_polynomial_surface(coeffs, xy_limits):
                                  zaxis_title='Z'))
 
     return fig
+
+
+def plot_beamline(spots):
+    if len(list(spots["configuration"].unique())) == 1:
+        color_by = "name"
+    else:
+        color_by = "configuration"
+    fig = px.scatter(spots, x="Z", y="X", color=color_by,
+                     labels={
+                     "Z": "S",
+                     "X": "X",
+                     "Y": "Z"},
+                     hover_data=['name', "configuration"], title="Top view")
+    fig.update_layout(scene=dict(xaxis_title='X',
+                                 yaxis_title='Z',))
+    fig.show()
+    fig = px.scatter(spots, x="Z", y="Y", color=color_by,
+                     labels={
+                     "Z": "S",
+                     "X": "X",
+                     "Y": "Z"},
+                     hover_data=['name', "configuration"], title="Side view")
+    fig.update_layout(scene=dict(xaxis_title='S',
+                                 yaxis_title='Z',))
+    fig.show()
