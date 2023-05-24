@@ -499,6 +499,7 @@ def plot_polynomial_surface(coeffs, xy_limits):
 
 
 def plot_beamline(spots):
+    spots = spots.loc[spots['Intensity'] != 0]
     if len(list(spots["configuration"].unique())) == 1:
         color_by = "name"
     else:
@@ -521,3 +522,50 @@ def plot_beamline(spots):
     fig.update_layout(scene=dict(xaxis_title='S',
                                  yaxis_title='Z',))
     fig.show()
+
+
+def ellipse(x_center=0, y_center=0, angle=0, x_axis=1, y_axis=1,  N=100):
+    # x_center, y_center the coordinates of ellipse center
+    # ax1 ax2 two orthonormal vectors representing the ellipse axis directions
+    # a, b the ellipse parameters
+    ax1 = [np.cos(angle), np.sin(angle)]
+    ax2 = [-np.sin(angle), np.cos(angle)]
+    try:
+        assert np.linalg.norm(ax1) == 1
+        assert np.linalg.norm(ax2) == 1
+    except AssertionError:
+        raise ValueError('ax1, ax2 must be unit vectors')
+    assert abs(np.dot(ax1, ax2)) < 1e-06, ValueError('ax1, ax2 must be orthogonal vectors')
+    t = np.linspace(0, 2*np.pi, N)
+    # ellipse parameterization with respect to a system of axes of directions a1, a2
+    xs = x_axis * np.cos(t)
+    ys = y_axis * np.sin(t)
+    # rotation matrix
+    rotation_matrix = np.array([ax1, ax2]).T
+    # coordinate of the  ellipse points with respect to the system of axes [1, 0], [0,1] with origin (0,0)
+    xp, yp = np.dot(rotation_matrix, [xs, ys])
+    x = xp + x_center
+    y = yp + y_center
+    return x, y
+
+
+def plot_aperture(stops, title=""):
+    fig = go.Figure()
+    for stop_number, stop_details in stops.items():
+        fill_color = "white"
+        if stop_details["opacity"]:
+            fill_color = "black"
+        if stop_details["kind"] == "Polygon":
+            vertex = np.array(stop_details["vertex"])
+            fig.add_trace(go.Scatter(x=vertex[:, 0], y=vertex[:, 1], fill="toself", fillcolor=fill_color,
+                                     name=f"Polygon #{stop_number}"))
+        else:
+            ellipse_coords = ellipse(x_center=stop_details["x_center"], y_center=stop_details["y_center"],
+                                     angle=stop_details["angle"],
+                                     x_axis=stop_details["x_axis"], y_axis=stop_details["y_axis"])
+            fig.add_trace(go.Scatter(x=ellipse_coords[0], y=ellipse_coords[1], fill="toself", fillcolor=fill_color,
+                                     name=f"Ellipse #{stop_number}"))
+    fig.update_layout(title=title)
+    if stops["0"]["opacity"] == 0:
+        fig.update_layout(plot_bgcolor='black')
+    return fig

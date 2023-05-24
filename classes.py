@@ -12,12 +12,18 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
                                 fit_surface_to_heights, get_array_parameter, get_array_parameter_size,
                                 get_array_parameter_dims, dump_parameter, dump_arg_parameter,
                                 get_parameter_flags, Bounds, Parameter, ParamArray, FrameID, RecordingMode, Diagram,
-                                GratingPatternInformation, save_as_xml, generate_polarized, load_from_xml)
+                                GratingPatternInformation, save_as_xml, generate_polarized, load_from_xml,
+                                enumerate_stops, set_aperture_activity, get_aperture_activity,
+                                add_rectangular_stop, get_polygon_parameters, add_polygonal_stop, insert_polygonal_stop,
+                                replace_stop_by_polygon, insert_rectangular_stop, replace_stop_by_rectangle,
+                                get_ellipse_parameters, add_elliptical_stop, insert_elliptical_stop,
+                                replace_stop_by_ellipse, add_circular_stop, insert_circular_stop,
+                                replace_stop_by_circle)
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
 from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet, \
-    plot_beamline
+    plot_beamline, plot_aperture
 from numpy import pi, cos, sin, tan, arccos, arcsin, arctan
 from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import minimize
@@ -1031,6 +1037,9 @@ class OpticalElement(metaclass=PostInitMeta):
         if nrays is None:
             nrays = self.beamline.active_chain[0].nrays
         spots = self.get_diagram(nrays=nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
+        spots = spots.loc[spots['Intensity'] != 0]
+        if not spots.loc[spots['Intensity'] == 0].empty:
+            print("Warning : la colorisation présente des effets de bords avec les ouvertures")
         if spots["X"].std() == 0:
             print("Warning empty diagram:\n", spots)
             return None, None
@@ -1093,10 +1102,10 @@ class OpticalElement(metaclass=PostInitMeta):
         assert self.recording_mode != RecordingMode.recording_none
         if nrays is None:
             nrays = self.beamline.active_chain[0].nrays
-        diagram = Diagram(ndim=5, nreserved=int(nrays))
+        diagram = Diagram(ndim=6, nreserved=int(nrays))
         get_spot_diagram(self.element_id, diagram, distance_from_oe)
         spots = pd.DataFrame(np.copy(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim))),
-                             columns=("X", "Y", "dX", "dY", "Lambda"))
+                             columns=("X", "Y", "dX", "dY", "Lambda", "Intensity"))
         if show_first_rays:
             print(spots.head())
         return spots
@@ -1104,7 +1113,7 @@ class OpticalElement(metaclass=PostInitMeta):
     def get_impacts_data(self, nrays=None, reference_frame=None, show_first_rays=False):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, returns a
-        (X, Y, Z, dX, dY, dZ, Lambda) pandas dataframe where each row is a computed ray in the frame
+        (X, Y, Z, dX, dY, dZ, Lambda, Intensity) pandas dataframe where each row is a computed ray in the frame
         of reference given in parameter reference_frame either :
 
         - "general_frame" : Absolute laboratory frame
@@ -1128,14 +1137,14 @@ class OpticalElement(metaclass=PostInitMeta):
         assert self.recording_mode != RecordingMode.recording_none
         if nrays is None:
             nrays = self.beamline.active_chain[0].nrays
-        diagram = Diagram(ndim=7, nreserved=int(nrays))
+        diagram = Diagram(ndim=8, nreserved=int(nrays))
         frame = {"general_frame": FrameID.general_frame,
                  "local_absolute_frame": FrameID.local_absolute_frame,
                  "aligned_local_frame": FrameID.aligned_local_frame,
                  "surface_frame": FrameID.surface_frame}
         get_impacts_data(self.element_id, diagram, frame[reference_frame])
         spots = pd.DataFrame(np.copy(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim))),
-                             columns=("X", "Y", "Z", "dX", "dY", "dZ", "Lambda"))
+                             columns=("X", "Y", "Z", "dX", "dY", "dZ", "Lambda", "Intensity"))
         if show_first_rays:
             print(spots.head())
         return spots
@@ -1143,8 +1152,8 @@ class OpticalElement(metaclass=PostInitMeta):
     def show_impacts(self, nrays=None, reference_frame="local_absolute_frame", **kwargs):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, show the (X,Y) and (X,Z)
-        cross sections of the (X, Y, Z, dX, dY, dZ, Lambda) pandas dataframe where each row is a computed ray in the
-        frame of reference given in parameter reference_frame either :
+        cross sections of the (X, Y, Z, dX, dY, dZ, Lambda, Intensity) pandas dataframe where each row is a computed
+        ray in the frame of reference given in parameter reference_frame either :
 
         - "general_frame" : Absolute laboratory frame
         - "local_absolute_frame" : Absolute frame with origin on the surface
@@ -1165,7 +1174,9 @@ class OpticalElement(metaclass=PostInitMeta):
         :rtype: tuple
         """
         impacts = self.get_impacts_data(nrays=nrays, reference_frame=reference_frame, show_first_rays=False)
-
+        impacts = impacts.loc[impacts['Intensity'] != 0]
+        if not impacts.loc[impacts['Intensity'] == 0].empty:
+            print("Warning : la colorisation présente des effets de bords avec les ouvertures")
         # anamorphic_factor = 1/np.sin(self.theta)
         # if (self.phi % pi) - pi/2 < 1e-3:
         #     deviation = "horizontal"
@@ -1341,6 +1352,295 @@ class OpticalElement(metaclass=PostInitMeta):
 
     def display_properties(self):
         display_parameter_sheet(self)
+
+    def enumerate_stops(self, max_vertex=8):
+        """
+        Any Element based on a Surface class has an ApertureStop member, which is composed of an array of superimposed
+        stopping Region Regions or Stops;
+
+        - Each Region is a simply connected domain, which can be either a Polygon or an Ellipse.
+            Mind that no check is made on the simply connected character of a polygon when created
+        - Each region defines the opacity of its inside area and imposes it over all underlying regions. *
+        - It doesn't define the opacity of its outside area unless it is the bottom element of the stack. *
+            - if the region Opacity=true, the optical transmittance is 0 inside the region
+            - if the region Opacity=false, the optical transmittance is 1. inside the region
+        - The opacity of the intersection of all outside areas of all region is the opposite of the opacity of the
+            bottom region (first define in the stack)
+
+        In other words, the first stop defines an opacity in all space. Adding an opaque Region obstructs the
+        transmission under the region area, but does not change the outside
+        while adding a transparent Region opens an aperture though all the stacked stops &nd still does not change
+        the outside
+
+
+        - The logical stack should define reducing region sizes from bottom to top. This is intended to allow rounding
+        of squared apertures and stops.
+
+        All functions of the Aperture API are returning a size_t value. A negative return value, actually -1, means an
+        error occurred and the GetOptiXLastError can be checked for a reason.
+
+        :param max_vertex: number of expected vertexes to be looked up in memory, 8 for a rectangle. Must be even.
+            Default: 8
+        :type max_vertex: int
+        :return: Dictionnary containing the regions describing the aperture and their parameters
+        :rtype: dict
+        """
+        assert max_vertex % 2 == 0, AttributeError("max_vertex must be even")
+        stops = {}
+        stops_kind = enumerate_stops(self._element_id)
+        for i, kind in enumerate(stops_kind):
+            stops_details = {}
+            if kind == "Polygon":
+                stops_details["kind"] = kind
+                handle, vertex, opacity = self.get_polygon_parameters(i, max_vertex)
+                vertex_x = vertex[::2]
+                vertex_y = vertex[1::2]
+                stops_details["handle"] = handle
+                stops_details["vertex"] = list(zip(vertex_x, vertex_y))
+                stops_details["opacity"] = opacity
+            elif kind == "Ellipse":
+                stops_details["kind"] = kind
+                handle, x_axis, y_axis, opacity, x_center, y_center, angle = self.get_elliptical_stop_parameters(i)
+                stops_details["handle"] = handle
+                stops_details["x_axis"] = x_axis
+                stops_details["y_axis"] = y_axis
+                stops_details["x_center"] = x_center
+                stops_details["y_center"] = y_center
+                stops_details["angle"] = angle
+                stops_details["opacity"] = opacity
+            else:
+                stops_details["kind"] = kind
+            stops[str(i)] = stops_details
+        return stops
+
+    def set_aperture_activity(self, active=True):
+        """
+        Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.
+
+        Parameters:
+        active (bool): The activity state of the aperture. Default is True.
+        """
+        set_aperture_activity(self.element_id, active)
+
+    def get_aperture_activity(self):
+        """
+        Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.
+
+        Returns:
+        bool: The activity state of the aperture.
+        """
+        return get_aperture_activity(self.element_id)[1]
+
+    def add_rectangular_stop(self, x_width, y_width, opacity=0, x_center=0, y_center=0, angle=0):
+        """
+        Add a rectangular region to the aperture. X axis is along the length of the optical element.
+
+        Parameters:
+        x_width (float): Width of the rectangular region.
+        y_width (float): Height of the rectangular region.
+        opacity (float): Opacity of the rectangular stop. Default is 0 meaning transparent inside the rectangle,
+            absorbant outside of it.
+        x_center (float): X-coordinate of the center of the rectangular stop. Default is 0.
+        y_center (float): Y-coordinate of the center of the rectangular stop. Default is 0.
+        angle (float): Rotation angle of the rectangular stop in radians. Default is 0.
+        """
+        add_rectangular_stop(self.element_id, x_width, y_width, opacity, x_center, y_center, angle)
+
+    def get_polygon_parameters(self, index, array_width):
+        """
+        Get the parameters of a polygonal stop in the aperture.
+
+        Parameters:
+            index (int): The index of the polygonal stop in the list of apertures, see enumerate_stops.
+            array_width (int): The width of the array storing the stops.
+
+        Returns:
+            tuple: A tuple containing the parameters of the polygonal stop and the opacity of the polygon.
+        """
+        return get_polygon_parameters(self.element_id, index, array_width)[1:]
+
+    def add_polygonal_stop(self, num_sides, vertex_array, opacity=0):
+        """
+        Add a polygonal stop to the aperture.
+
+        Parameters:
+            num_sides (int): The number of sides of the polygon.
+            vertex_array (array-like): The vertices of the polygon.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+        """
+        add_polygonal_stop(self.element_id, num_sides, vertex_array, opacity)
+
+    def insert_polygonal_stop(self, index, num_sides, vertex_array, opacity=0):
+        """
+        Insert a polygonal stop at the specified index in the aperture.
+
+        Parameters:
+            index (int): The index at which the polygonal stop should be inserted. See enumerate.stops.
+            num_sides (int): The number of sides of the polygon.
+            vertex_array (array-like): The vertices of the polygon.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+        """
+        insert_polygonal_stop(self.element_id, index, num_sides, vertex_array, opacity)
+
+    def replace_stop_by_polygon(self, index, num_sides, vertex_array, opacity=0):
+        """
+        Replace a stop in the aperture with a polygonal stop.
+
+        Parameters:
+            index (int): The index of the stop to be replaced, see enumerate_stops.
+            num_sides (int): The number of sides of the polygon.
+            vertex_array (array-like): The vertices of the polygon.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+        """
+        replace_stop_by_polygon(self.element_id, index, num_sides, vertex_array, opacity)
+
+    def insert_rectangular_stop(self, index, x_width, y_width, opacity=0, x_center=0, y_center=0, angle=0):
+        """
+        Insert a rectangular stop at the specified index in the aperture.
+
+        Parameters:
+            index (int): The index at which the rectangular stop should be inserted, see enumerate_stops.
+            x_width (float): The width of the rectangular stop along the x-axis.
+            y_width (float): The width of the rectangular stop along the y-axis.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+            x_center (float): The x-coordinate of the center of the stop. Default is 0.
+            y_center (float): The y-coordinate of the center of the stop. Default is 0.
+            angle (float): The rotation angle of the stop in radians. Default is 0.
+        """
+        insert_rectangular_stop(self.element_id, index, x_width, y_width, opacity, x_center, y_center, angle)
+
+    def replace_stop_by_rectangle(self, index, x_width, y_width, opacity=0, x_center=0, y_center=0, angle=0):
+        """
+        Replace a stop in the aperture with a rectangular stop.
+
+        Parameters:
+            index (int): The index of the stop to be replaced, see enumerate_stops.
+            x_width (float): The width of the rectangular stop along the x-axis.
+            y_width (float): The width of the rectangular stop along the y-axis.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+            x_center (float): The x-coordinate of the center of the stop. Default is 0.
+            y_center (float): The y-coordinate of the center of the stop. Default is 0.
+            angle (float): The rotation angle of the stop in radians. Default is 0.
+        """
+        replace_stop_by_rectangle(self.element_id, index, x_width, y_width, opacity, x_center, y_center, angle)
+
+    def get_elliptical_stop_parameters(self, index):
+        """
+        Get the parameters of an elliptical stop in the aperture.
+
+        Parameters:
+            index (int): The index of the elliptical stop, see enumerate_stops.
+
+        Returns:
+            tuple: A tuple containing the parameters of the elliptical stop : boolean=1 if parameters have been
+                successfully retrieved + parameters in the order defined in add_elliptical_stop
+        """
+        return get_ellipse_parameters(self.element_id, index)
+
+    def add_elliptical_stop(self, x_axis, y_axis, opacity=0, x_center=0, y_center=0, angle=0):
+        """
+        Add an elliptical stop to the aperture.
+
+        Parameters:
+            x_axis (float): The length of the major axis of the ellipse.
+            y_axis (float): The length of the minor axis of the ellipse.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+            x_center (float): The x-coordinate of the center of the stop. Default is 0.
+            y_center (float): The y-coordinate of the center of the stop. Default is 0.
+            angle (float): The rotation angle of the stop in radians. Default is 0.
+        """
+        add_elliptical_stop(self.element_id, x_axis, y_axis, opacity, x_center, y_center, angle)
+
+    def insert_elliptical_stop(self, index, x_axis, y_axis, opacity=0, x_center=0, y_center=0, angle=0):
+        """
+        Insert an elliptical stop at the specified index in the aperture.
+
+        Parameters:
+            index (int): The index at which the elliptical stop should be inserted, see enumerate_stops.
+            x_axis (float): The length of the major axis of the ellipse.
+            y_axis (float): The length of the minor axis of the ellipse.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+            x_center (float): The x-coordinate of the center of the stop. Default is 0.
+            y_center (float): The y-coordinate of the center of the stop. Default is 0.
+            angle (float): The rotation angle of the stop in radians. Default is 0.
+        """
+        insert_elliptical_stop(self.element_id, index, x_axis, y_axis, opacity, x_center, y_center, angle)
+
+    def replace_stop_by_ellipse(self, index, x_axis, y_axis, opacity=0, x_center=0, y_center=0, angle=0):
+        """
+        Replace a stop in the aperture with an elliptical stop.
+
+        Parameters:
+            index (int): The index of the stop to be replaced, see enumerate_stops.
+            x_axis (float): The length of the major axis of the ellipse.
+            y_axis (float): The length of the minor axis of the ellipse.
+            opacity (float): The opacity of the stop.  Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+            x_center (float): The x-coordinate of the center of the stop. Default is 0.
+            y_center (float): The y-coordinate of the center of the stop. Default is 0.
+            angle (float): The rotation angle of the stop in radians. Default is 0.
+        """
+        replace_stop_by_ellipse(self.element_id, index, x_axis, y_axis, opacity, x_center, y_center, angle)
+
+    def add_circular_stop(self, radius, opacity=0, x_center=0, y_center=0):
+        """
+        Add a circular stop to the aperture. Note a circular stop is of kind "Ellipse"
+
+        Parameters:
+            radius (float): The radius of the circular stop.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+            x_center (float): The x-coordinate of the center of the stop. Default is 0.
+            y_center (float): The y-coordinate of the center of the stop. Default is 0.
+        """
+
+        add_circular_stop(self.element_id, radius, opacity, x_center, y_center)
+
+    def insert_circular_stop(self, index, radius, opacity=0, x_center=0,  y_center=0):
+        """
+        Insert a circular stop at the specified index in the aperture.
+
+        Parameters:
+            index (int): The index at which the circular stop should be inserted.
+            radius (float): The radius of the circular stop.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+            x_center (float): The x-coordinate of the center of the stop. Default is 0.
+            y_center (float): The y-coordinate of the center of the stop. Default is 0.
+        """
+        insert_circular_stop(self.element_id, index, radius, opacity, x_center, y_center)
+
+    def replace_stop_by_circle(self, index, radius, opacity=0,  x_center=0, y_center=0):
+        """
+        Replace a stop in the aperture with a circular stop.
+
+        Parameters:
+            index (int): The index of the stop to be replaced, see enumerate_stops.
+            radius (float): The radius of the circular stop.
+            opacity (float): The opacity of the stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+            x_center (float): The x-coordinate of the center of the stop. Default is 0.
+            y_center (float): The y-coordinate of the center of the stop. Default is 0.
+        """
+        replace_stop_by_circle(self.element_id, index, radius, opacity, x_center, y_center)
+
+    def draw_aperture(self, max_vertex=8):
+        """
+        Draw all the sub region of the aperture, the ones that are absorbing inside are filled with black.
+
+        Parameters:
+            max_vertex (int): The maximum number of vertices to look up in memory for polygons. Default is 8.
+        """
+        stops = self.enumerate_stops(max_vertex)
+        fig = plot_aperture(stops, title=f"Composite aperture of {self.name}")
+        fig.show()
 
 
 class Source(OpticalElement):
