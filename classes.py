@@ -171,6 +171,7 @@ class Beamline(object):
         self.active_chain_name = None
         self.name = name
         self.optical_distances = None
+        self.align_steps = lambda lambda_align: None
 
     def save_configuration(self, filename=None):
         """
@@ -261,23 +262,33 @@ class Beamline(object):
         ret_str += self._active_chain.__repr__()
         print(ret_str)
 
-    def align(self, lambda_align, from_element=None):
+    def align(self, lambda_align, from_element=None, **kwargs):
         """
         Computes the absolute positions of the optics using the optics parameters. To be called before radiate.
 
         :param lambda_align: Wavelength to be used for coordinate calculations in m. Can be different from actual
             radiated wavelength
         :type lambda_align: float
-        :param from_element: Source element from which to compute the coordinates
+        :param from_element: Source element from which to compute the coordinates. Default is first element of
+            active_chain
         :type from_element: OpticalElement or inherited
+        :param kwargs: Keyword arguments passed to beamline.align_steps
+        :type kwargs: Keyword arguments
         :return: code result from relative optix function
         """
 
         self.get_distance_between_oe(None, None)
         if from_element is not None:
-            return align(from_element.element_id, lambda_align)
+            ret = align(from_element.element_id, lambda_align)
         else:
-            return align(self.active_chain[0].element_id, lambda_align)
+            ret = align(self.active_chain[0].element_id, lambda_align)
+        try:
+            self.align_steps(lambda_align, **kwargs)
+        except AttributeError:
+            raise AttributeError("Beamline's method align_steps must have one positional argument which is the "
+                                 "wavelength of alignment and can have as many keyword argument as needed."
+                                 "Default is lambda wavelength: None. ")
+        return ret
 
     def get_distance_between_oe(self, oe1, oe2):
         """
@@ -578,7 +589,7 @@ class Beamline(object):
             return resolution
 
     def draw_to_scale(self, wavelength=300e-9, radiate=False, configurations=[],
-                      align_callable=lambda wavelength: None):
+                      **kwargs):
         """
         Generate and plot the beamline spot diagram to scale for each recording optical element
         for the specified wavelength(s) and configurations.
@@ -594,8 +605,8 @@ class Beamline(object):
             Set to True if multiple configurations are provided
         configurations : list of str, optional
             Configurations to be plotted (default is []). If [], hte current configuratio of the beamline is used
-        align_callable : function, optional
-            Function to align the beamline for a given wavelength (default is lambda wavelength: None)
+        kwargs : keyword arguments, optional
+            Keyword arguments passed to beamline align_steps method
 
         Returns
         -------
@@ -628,8 +639,7 @@ class Beamline(object):
                 for oe in self.active_chain:
                     oe.recording_mode = RecordingMode.recording_output
                 self.clear_impacts(clear_source=True)
-                align_callable(wavelength)
-                self.align(wavelength)
+                self.align(wavelength, **kwargs)
                 self.generate(wavelength)
                 self.radiate()
             for oe in self.active_chain:
