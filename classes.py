@@ -1126,6 +1126,7 @@ class OpticalElement(metaclass=PostInitMeta):
 
         Method to be used for computing footprints on a mirror.
 
+
         :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
         :type nrays: int
         :param reference_frame: reference frame for coordinates see above
@@ -1392,16 +1393,14 @@ class OpticalElement(metaclass=PostInitMeta):
             stops_details = {}
             if kind == "Polygon":
                 stops_details["kind"] = kind
-                handle, vertex, opacity = self.get_polygon_parameters(i, max_vertex)
+                vertex, opacity = self.get_polygon_parameters(i, max_vertex)
                 vertex_x = vertex[::2]
                 vertex_y = vertex[1::2]
-                stops_details["handle"] = handle
                 stops_details["vertex"] = list(zip(vertex_x, vertex_y))
                 stops_details["opacity"] = opacity
             elif kind == "Ellipse":
                 stops_details["kind"] = kind
-                handle, x_axis, y_axis, opacity, x_center, y_center, angle = self.get_elliptical_stop_parameters(i)
-                stops_details["handle"] = handle
+                x_axis, y_axis, opacity, x_center, y_center, angle = self.get_elliptical_stop_parameters(i)
                 stops_details["x_axis"] = x_axis
                 stops_details["y_axis"] = y_axis
                 stops_details["x_center"] = x_center
