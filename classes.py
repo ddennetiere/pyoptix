@@ -178,6 +178,7 @@ class Beamline(object):
         self.name = name
         self.optical_distances = None
         self.align_steps = lambda lambda_align: None
+        self.n_generated_rays = 0
 
     def save_configuration(self, filename=None):
         """
@@ -220,9 +221,11 @@ class Beamline(object):
                     for param in params:
                         oe._set_parameter(param, params[param])
 
+
     def save_beamline(self, filename=None):
         if filename:
             save_as_xml(filename)
+
 
     def load_beamline(self, filename=None):
         if filename:
@@ -337,6 +340,7 @@ class Beamline(object):
         from_element = 1
         if clear_source:
             from_element = 0
+            self.n_generated_rays = 0
         return clear_impacts(self.active_chain[from_element].element_id)
 
     def radiate(self, from_element=None):
@@ -361,6 +365,7 @@ class Beamline(object):
          'L'(circular left)
         :return:
         """
+        self.n_generated_rays += self._active_chain[0].nrays
         if polarization:
             return generate_polarized(self.active_chain[0].element_id, lambda_radiate, polarization)
         return generate(self.active_chain[0].element_id, lambda_radiate)
@@ -650,7 +655,7 @@ class Beamline(object):
                 self.radiate()
             for oe in self.active_chain:
                 if oe.recording_mode != RecordingMode.recording_none:
-                    impacts = oe.get_impacts_data(reference_frame="general_frame")
+                    impacts = oe.get_impacts(reference_frame="general_frame")
                     impacts["name"] = oe.name
                     impacts["configuration"] = config
                     impacts["X"] *= -1
@@ -1001,7 +1006,7 @@ class OpticalElement(metaclass=PostInitMeta):
         description += f"\n\t oriented in yaw at {self._psi / degree} deg\n"
         return description
 
-    def show_diagram(self, nrays=None, distance_from_oe=0, map_xy=False, light_xy=False,
+    def show_diagram(self, distance_from_oe=0, map_xy=False, light_xy=False,
                      light_xxp=False, light_yyp=False, show_first_rays=False, display="all", show_spd=True, **kwargs):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
@@ -1009,8 +1014,6 @@ class OpticalElement(metaclass=PostInitMeta):
         For quick display, light_xy, light_xxp and light_yyp can be set to True.
         For more realistic rendering, map_xy can be set to True.
 
-        :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
-        :type nrays: int
         :param distance_from_oe: distance from the element at which to draw the spot diagram in m
         :type distance_from_oe: str
         :param map_xy: set to True for hexagonal pixel rendering of X vs Y diagram
@@ -1034,9 +1037,7 @@ class OpticalElement(metaclass=PostInitMeta):
             chain_name = self.beamline.active_chain_name
             beamline_name = self.beamline.name
         print(beamline_name, chain_name)
-        if nrays is None:
-            nrays = self.beamline.active_chain[0].nrays
-        spots = self.get_diagram(nrays=nrays, distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
+        spots = self.get_diagram(distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
         spots = spots.loc[spots['Intensity'] != 0]
         if not spots.loc[spots['Intensity'] == 0].empty:
             print("Warning : la colorisation présente des effets de bords avec les ouvertures")
@@ -1086,13 +1087,11 @@ class OpticalElement(metaclass=PostInitMeta):
                 handles.append(show(fig, notebook_handle=True))
         return datasources, figs
 
-    def get_diagram(self, nrays=None, distance_from_oe=0, show_first_rays=False):
+    def get_diagram(self, distance_from_oe=0, show_first_rays=False):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, returns a
         (X, Y, dX, dY, Lambda) pandas dataframe where each row is a computed ray
 
-        :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
-        :type nrays: int
         :param distance_from_oe: distance from the element at which to draw the spot diagram in m
         :type distance_from_oe: str
         :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
@@ -1100,8 +1099,7 @@ class OpticalElement(metaclass=PostInitMeta):
         :return: pandas.Dataframe containing all rays intercept on the optics surface
         """
         assert self.recording_mode != RecordingMode.recording_none
-        if nrays is None:
-            nrays = self.beamline.active_chain[0].nrays
+        nrays = self.beamline.n_generated_rays
         diagram = Diagram(ndim=6, nreserved=int(nrays))
         get_spot_diagram(self.element_id, diagram, distance_from_oe)
         spots = pd.DataFrame(np.copy(np.ctypeslib.as_array(diagram.spots, shape=(diagram.reserved, diagram.dim))),
@@ -1110,7 +1108,7 @@ class OpticalElement(metaclass=PostInitMeta):
             print(spots.head())
         return spots
 
-    def get_impacts_data(self, nrays=None, reference_frame=None, show_first_rays=False):
+    def get_impacts(self, reference_frame="surface_frame", show_first_rays=False):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, returns a
         (X, Y, Z, dX, dY, dZ, Lambda, Intensity) pandas dataframe where each row is a computed ray in the frame
@@ -1127,8 +1125,6 @@ class OpticalElement(metaclass=PostInitMeta):
         Method to be used for computing footprints on a mirror.
 
 
-        :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
-        :type nrays: int
         :param reference_frame: reference frame for coordinates see above
         :type reference_frame: str
         :param show_first_rays: set to True for a table display of the parameter of the first rays in diagram
@@ -1136,8 +1132,7 @@ class OpticalElement(metaclass=PostInitMeta):
         :return: pandas.Dataframe containing all rays intercept on the optics surface
         """
         assert self.recording_mode != RecordingMode.recording_none
-        if nrays is None:
-            nrays = self.beamline.active_chain[0].nrays
+        nrays = self.beamline.n_generated_rays
         diagram = Diagram(ndim=8, nreserved=int(nrays))
         frame = {"general_frame": FrameID.general_frame,
                  "local_absolute_frame": FrameID.local_absolute_frame,
@@ -1150,11 +1145,11 @@ class OpticalElement(metaclass=PostInitMeta):
             print(spots.head())
         return spots
 
-    def show_impacts(self, nrays=None, reference_frame="local_absolute_frame", **kwargs):
+    def show_impacts(self, reference_frame="local_absolute_frame", plots=None, **kwargs):
         """
-        If recording_mode is set to any other value than RecordingMode.recording_none, show the (X,Y) and (X,Z)
-        cross sections of the (X, Y, Z, dX, dY, dZ, Lambda, Intensity) pandas dataframe where each row is a computed
-        ray in the frame of reference given in parameter reference_frame either :
+        If recording_mode is set to any other value than RecordingMode.recording_none, shows by default the (X,Y) and
+        (X,Z) cross sections of the (X, Y, Z, dX, dY, dZ, Lambda, Intensity) pandas dataframe where each row is a
+        computed ray in the frame of reference given in parameter reference_frame either :
 
         - "general_frame" : Absolute laboratory frame
         - "local_absolute_frame" : Absolute frame with origin on the surface
@@ -1166,6 +1161,8 @@ class OpticalElement(metaclass=PostInitMeta):
 
         Method to be used for computing footprints on a mirror.
 
+        :param plots: Plots to be displayed. Default is [("X", "Y"), ("X", "Z")]
+        :type plots: list of tuple
         :param nrays: number of expected rays (default: source_oe.nrays). Only use if generate is called multiple times.
         :type nrays: int
         :param reference_frame: reference frame for coordinates see above
@@ -1174,26 +1171,20 @@ class OpticalElement(metaclass=PostInitMeta):
         :return: tuple of (spd_data, handle(s) of the figures)
         :rtype: tuple
         """
-        impacts = self.get_impacts_data(nrays=nrays, reference_frame=reference_frame, show_first_rays=False)
+        if plots is None:
+            plots = [('X', 'Y'), ('X', 'Z')]
+        impacts = self.get_impacts(reference_frame=reference_frame, show_first_rays=False)
         impacts = impacts.loc[impacts['Intensity'] != 0]
         if not impacts.loc[impacts['Intensity'] == 0].empty:
-            print("Warning : la colorisation présente des effets de bords avec les ouvertures")
-        # anamorphic_factor = 1/np.sin(self.theta)
-        # if (self.phi % pi) - pi/2 < 1e-3:
-        #     deviation = "horizontal"
-        #     impacts["X"] *= anamorphic_factor
-        # else:
-        #     deviation = "vertical"
-        #     impacts["Y"] *= anamorphic_factor
+            print("Warning : plot colorization will show artefacts around borders if used with apertures")
 
         figs = []
         coldatasource = ColumnDataSource(impacts)
-        figs.append(plot_spd(coldatasource, x_key="X", y_key="Y",
-                             beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
-                             oe_name="on "+self._name, **kwargs))
-        figs.append(plot_spd(coldatasource, x_key="X", y_key="Z",
-                             beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
-                             oe_name="on "+self._name, **kwargs))
+        for plot in plots:
+            x_axis, y_axis = plot
+            figs.append(plot_spd(coldatasource, x_key=x_axis, y_key=y_axis,
+                                 beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
+                                 oe_name="on "+self._name, **kwargs))
         handles = []
         for fig in figs:
             handles.append(show(fig, notebook_handle=True))
@@ -1203,9 +1194,9 @@ class OpticalElement(metaclass=PostInitMeta):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, exports a
         MCPL (see https://mctools.github.io/mcpl/) in the frame
-        of reference given in parameter reference_frame (see doc of OpticalElement.get_impacts_data)
+        of reference given in parameter reference_frame (see doc of OpticalElement.get_impacts)
 
-        :param reference_frame:reference frame for coordinates see  OpticalElement.get_impacts_data
+        :param reference_frame:reference frame for coordinates see  OpticalElement.get_impacts
         :type reference_frame: str
         :return: None
         :rtype: Nonetype
@@ -1213,7 +1204,7 @@ class OpticalElement(metaclass=PostInitMeta):
         mcpl_file_out = PyOptixMCPLWriter("my_mcpl_file.mcpl")
         mcpl_file_out.add_comment(f"File generated with beamline {self.beamline.name}")
         mcpl_file_out.add_comment(f"Test MCPL file from MCPL_interfacing.ipynb")
-        mcpl_file_out.dump_diagram(self.get_impacts_data(reference_frame=reference_frame))
+        mcpl_file_out.dump_diagram(self.get_impacts(reference_frame=reference_frame))
         mcpl_file_out.write_to_file()
 
     def from_element_id(self, element_id, print_all=False):
