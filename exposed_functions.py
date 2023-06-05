@@ -336,6 +336,12 @@ def load_optix():
     optix.ReplaceStopByCircle.argtypes = [HANDLE, HANDLE, c_double, BOOLEAN, c_double, c_double]
     optix.ReplaceStopByCircle.restype = HANDLE
     optix.SetAperturesActive.argtypes = [BOOLEAN]
+    optix.GetSurfaceFrame.argtypes = [HANDLE, POINTER(c_double)]
+    optix.GetSurfaceFrame.restypes = BOOLEAN
+    optix.GetTransmissive.argtypes = [HANDLE]
+    optix.GetTransmissive.restypes = BOOLEAN
+    optix.SetTransmissive.argtypes = [HANDLE, BOOLEAN]
+    optix.GetTransmissive.restypes = BOOLEAN
     return optix
 
 

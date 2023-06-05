@@ -1271,27 +1271,25 @@ class OpticalElement(metaclass=PostInitMeta):
 
     def set_transmissive(self, is_transmissive):
         """
-        Sets a grating as transmissive or reflective depending on the value of is_transmissive.
-        Only works for gratings.
+        Sets an optical element as transmissive or reflective depending on the value of is_transmissive.
 
-        :param is_transmissive: if True, makes the grating transmissive, if False, reflective
+        :param is_transmissive: if True, makes the optical element transmissive, if False, reflective
         :type is_transmissive: bool
         :return: None
         :rtype: Nonetype
         """
-        assert "grating" in self._element_type.lower()
-        set_transmissive(self, is_transmissive)
+        # assert "grating" in self._element_type.lower()
+        set_transmissive(self._element_id, is_transmissive)
 
     def get_transmissive(self):
         """
-        Returns True if grating is transmissive, False if reflective.
-        Only works for gratings.
+        Returns True if optical element is transmissive, False if reflective.
 
-        :return: True if grating is transmissive, False if reflective
+        :return: True if optical element is transmissive, False if reflective
         :rtype: bool
         """
-        assert "grating" in self._element_type.lower()
-        return get_transmissive(self)
+        # assert "grating" in self._element_type.lower()
+        return bool(get_transmissive(self._element_id))
 
     def dump_properties(self, verbose=1):
         """
