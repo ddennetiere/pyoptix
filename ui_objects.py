@@ -12,7 +12,7 @@ import ipysheet as ipys  # sheet, cell, s_row, s_column, cell_range
 import ipywidgets
 from IPython.display import display
 import plotly.express as px
-import pandas
+import pandas as pd
 import plotly.graph_objs as go
 from numpy.polynomial import Polynomial
 
@@ -389,7 +389,7 @@ def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_
     :return: layout of the plot to be used as parameter of bokeh.plotting.show
     :rtype: bokeh.models.layouts.LayoutDOM
     """
-    if not isinstance(df, pandas.DataFrame):
+    if not isinstance(df, pd.DataFrame):
         kwargs["chain_name"] = df.beamline.active_chain_name
         kwargs["beamline_name"] = df.beamline.name
         oe_name = df.name
@@ -509,7 +509,7 @@ def plot_beamline(spots):
                      "Z": "S",
                      "X": "X",
                      "Y": "Z"},
-                     hover_data=['name', "configuration"], title="Top view")
+                     hover_data=['name', "configuration", "center_s", "center_x"], title="Top view")
     fig.update_layout(scene=dict(xaxis_title='X',
                                  yaxis_title='Z',))
     fig.show()
@@ -518,7 +518,7 @@ def plot_beamline(spots):
                      "Z": "S",
                      "X": "X",
                      "Y": "Z"},
-                     hover_data=['name', "configuration"], title="Side view")
+                     hover_data=['name', "configuration", "center_s", "center_z"], title="Side view")
     fig.update_layout(scene=dict(xaxis_title='S',
                                  yaxis_title='Z',))
     fig.show()

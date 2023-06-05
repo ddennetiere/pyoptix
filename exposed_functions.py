@@ -743,5 +743,14 @@ def set_aperture_active(activity):
 
 
 @catch_c_error
+def get_surface_frame(element_id):
+    frame_vectors = np.empty((4, 3), dtype=float)
+    pointer = frame_vectors.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    # pointer, read_only_flag = frame_vectors.__array_interface__['data']
+    result = optix.GetSurfaceFrame(element_id, pointer)
+    return result, frame_vectors
+
+
+@catch_c_error
 def version():
     optix.Version()

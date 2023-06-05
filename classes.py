@@ -18,7 +18,7 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
                                 replace_stop_by_polygon, insert_rectangular_stop, replace_stop_by_rectangle,
                                 get_ellipse_parameters, add_elliptical_stop, insert_elliptical_stop,
                                 replace_stop_by_ellipse, add_circular_stop, insert_circular_stop,
-                                replace_stop_by_circle)
+                                replace_stop_by_circle, get_surface_frame)
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
@@ -27,6 +27,7 @@ from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource
 from numpy import pi, cos, sin, tan, arccos, arcsin, arctan
 from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import minimize
+from scipy.spatial.transform import Rotation
 import pickle
 
 # dictionnary for optix to pyoptix attribute import
@@ -615,7 +616,7 @@ class Beamline(object):
             If True, radiate the beamline for each configuration (default is False).
             Set to True if multiple configurations are provided
         configurations : list of str, optional
-            Configurations to be plotted (default is []). If [], hte current configuratio of the beamline is used
+            Configurations to be plotted (default is []). If [], the current configuration of the beamline is used
         kwargs : keyword arguments, optional
             Keyword arguments passed to beamline align_steps method
 
@@ -633,6 +634,7 @@ class Beamline(object):
         - The recorded impact data for each configuration is collected and returned as a DataFrame.
         - The X-coordinate values in the impact data are flipped (multiplied by -1) to match the plotting convention.
         - The beamline diagram is plotted using the plot_beamline function.
+        - The PyOptix reference frame (X,Y,Z) translates in the SOLEIL frame as (-X, Z, S)
         """
 
         if configurations:
@@ -656,7 +658,11 @@ class Beamline(object):
             for oe in self.active_chain:
                 if oe.recording_mode != RecordingMode.recording_none:
                     impacts = oe.get_impacts(reference_frame="general_frame")
+                    center = oe.get_local_frame()["Center_pyoptix"]
                     impacts["name"] = oe.name
+                    impacts["center_x"] = -center[0]
+                    impacts["center_z"] = center[1]
+                    impacts["center_s"] = center[2]
                     impacts["configuration"] = config
                     impacts["X"] *= -1
                     diags.append(impacts)
@@ -1005,6 +1011,45 @@ class OpticalElement(metaclass=PostInitMeta):
         description += f"\n\t oriented in roll at {self._phi / degree} deg"
         description += f"\n\t oriented in yaw at {self._psi / degree} deg\n"
         return description
+
+    def get_local_frame(self, verbose=0, degrees=True):
+        """
+        Returns the surface frame orientation and position of the given element in the absolute frame
+
+        This method return an array of four vectors of size 3, in the location pointed by frame_vectors.
+        They are respectively and in this order, the unit vectors in X, Y, and Z, followed by the position of the
+        frame origin in the absolute frame, where Z in normal to the surface at it center, Y tangent to the length
+        of the surface, X tangent to the width of the surface.
+        The PyOptix reference frame (X,Y,Z) translates in the SOLEIL
+        frame as (-X, Z, S), ie the SOLEIL frame (S, X, Z) has a PyOptix matrix of [[0,0,1], [-1,0,0], [0,1,0]]
+
+        :return: dictionnary containing the coordinate of each local axis of the surface in the reference frame,
+            a 3 float array describing its center and the pitch, roll and yaw angle of the surface frame relative to
+            rotations around X, Y and Z respectively
+        :rtype: dict
+        """
+        _, vectors = get_surface_frame(self.element_id)
+        x_vector, y_vector, z_vector, pos_vector = vectors
+        mirror_frame = Rotation.from_matrix([[0, 1, 0], [0, 0, 1], [1, 0, 0]]).inv()
+        surface_frame = Rotation.from_matrix([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
+        mat = np.array([x_vector, y_vector, z_vector])
+        if "film" in self._element_type.lower() or "source" in self._element_type.lower():
+            pitch, roll, yaw = Rotation.from_matrix(mat).as_euler("xyz", degrees=True)
+            mat = surface_frame.apply(mat)
+        else:
+            mat = mirror_frame.apply(mat)
+            roll, pitch, yaw = Rotation.from_matrix(mat).as_euler("xyz", degrees=True)
+        mat = Rotation.from_matrix(mat)
+        if verbose:
+            print("Orientation of", self.name)
+            print(list(zip(["roll", "pitch", "yaw"], [roll, pitch, yaw])))
+            print("X:", list(zip("SXZ", mat.as_matrix()[0])))
+            print("Y:", list(zip("SXZ", mat.as_matrix()[1])))
+            print("Z:", list(zip("SXZ", mat.as_matrix()[2])))
+        return {"X_pyoptix": x_vector, "Y_pyoptix": y_vector, "Z_pyoptix": z_vector, "Center_pyoptix": pos_vector,
+                "X_soleil": mat.as_matrix()[0], "Y_soleil": mat.as_matrix()[1], "Z_soleil": mat.as_matrix()[2],
+                "Center_soleil": surface_frame.apply(pos_vector),
+                "pitch": pitch, "yaw": yaw, "roll": roll}
 
     def show_diagram(self, distance_from_oe=0, map_xy=False, light_xy=False,
                      light_xxp=False, light_yyp=False, show_first_rays=False, display="all", show_spd=True, **kwargs):
