@@ -287,16 +287,16 @@ class Beamline(object):
         """
 
         self.get_distance_between_oe(None, None)
-        if from_element is not None:
-            ret = align(from_element.element_id, lambda_align)
-        else:
-            ret = align(self.active_chain[0].element_id, lambda_align)
         try:
             self.align_steps(lambda_align, **kwargs)
         except AttributeError:
             raise AttributeError("Beamline's method align_steps must have one positional argument which is the "
                                  "wavelength of alignment and can have as many keyword argument as needed."
                                  "Default is lambda wavelength: None. ")
+        if from_element is not None:
+            ret = align(from_element.element_id, lambda_align)
+        else:
+            ret = align(self.active_chain[0].element_id, lambda_align)
         return ret
 
     def get_distance_between_oe(self, oe1, oe2):
