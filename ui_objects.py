@@ -507,7 +507,15 @@ def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_s
                       scene=dict(xaxis_title='X',
                                  yaxis_title='Y',
                                  zaxis_title='Z'))
+    if probe_stat:
+        Z_y = Z[np.abs(Y) < probe_stat/2]
+        Z_x = Z[np.abs(X) < probe_stat/2]
 
+        Zp_y = np.diff(Z_y)/np.diff(Y[np.abs(X) < probe_stat/2])
+        Zp_x = np.diff(Z_x) / np.diff(X[np.abs(Y) < probe_stat/2])
+
+        print(f"Along X : \n\tshape error = {Z_x.std()} m RMS\n\tslope error = {Zp_x.std()} rad RMS")
+        print(f"Along Y : \n\tshape error = {Z_y.std()} m RMS\n\tslope error = {Zp_y.std()} rad RMS")
     return fig
 
 
