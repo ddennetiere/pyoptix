@@ -519,33 +519,43 @@ def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_s
     return fig
 
 
-def plot_beamline(spots):
+def plot_beamline(spots, plot_3D=False):
     spots = spots.loc[spots['Intensity'] != 0]
+    spots["size"] = 0.1
     if len(list(spots["configuration"].unique())) == 1:
         color_by = "name"
     else:
         color_by = "configuration"
-    fig = px.scatter(spots, x="Z", y="X", color=color_by,
-                     labels={
-                     "Z": "S",
-                     "X": "X",
-                     "Y": "Z"},
-                     hover_data=['name', "configuration", "center_s", "center_x"], title="Top view")
-    fig.update_layout(scene=dict(xaxis_title='X',
-                                 yaxis_title='Z',))
-    fig.show()
-    fig = px.scatter(spots, x="Z", y="Y", color=color_by,
-                     labels={
-                     "Z": "S",
-                     "X": "X",
-                     "Y": "Z"},
-                     hover_data=['name', "configuration", "center_s", "center_z"], title="Side view")
-    fig.update_layout(scene=dict(xaxis_title='S',
-                                 yaxis_title='Z',))
-    fig.show()
+    if plot_3D:
+        fig = px.scatter_3d(spots, x="Z", y="X", z="Y", color=color_by,
+                            labels={"Z": "S", "X": "X", "Y": "Z"},
+                            hover_data=['name', "configuration", "center_s", "center_x"], title="3D View",
+                            height=800, size="size"
+                            )
+        fig.update_layout(scene={'aspectmode':'data'})
+        fig.show()
+    else:
+        fig = px.scatter(spots, x="Z", y="X", color=color_by,
+                         labels={
+                             "Z": "S",
+                             "X": "X",
+                             "Y": "Z"},
+                         hover_data=['name', "configuration", "center_s", "center_x"], title="Top view")
+        fig.update_layout(scene=dict(xaxis_title='X',
+                                     yaxis_title='Z', ))
+        fig.show()
+        fig = px.scatter(spots, x="Z", y="Y", color=color_by,
+                         labels={
+                             "Z": "S",
+                             "X": "X",
+                             "Y": "Z"},
+                         hover_data=['name', "configuration", "center_s", "center_z"], title="Side view")
+        fig.update_layout(scene=dict(xaxis_title='S',
+                                     yaxis_title='Z', ))
+        fig.show()
 
 
-def ellipse(x_center=0, y_center=0, angle=0, x_axis=1, y_axis=1,  N=100):
+def ellipse(x_center=0, y_center=0, angle=0, x_axis=1, y_axis=1, N=100):
     # x_center, y_center the coordinates of ellipse center
     # ax1 ax2 two orthonormal vectors representing the ellipse axis directions
     # a, b the ellipse parameters
@@ -557,7 +567,7 @@ def ellipse(x_center=0, y_center=0, angle=0, x_axis=1, y_axis=1,  N=100):
     except AssertionError:
         raise ValueError('ax1, ax2 must be unit vectors')
     assert abs(np.dot(ax1, ax2)) < 1e-06, ValueError('ax1, ax2 must be orthogonal vectors')
-    t = np.linspace(0, 2*np.pi, N)
+    t = np.linspace(0, 2 * np.pi, N)
     # ellipse parameterization with respect to a system of axes of directions a1, a2
     xs = x_axis * np.cos(t)
     ys = y_axis * np.sin(t)
