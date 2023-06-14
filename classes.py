@@ -561,10 +561,10 @@ class Beamline(object):
             dim = "X"
         else:
             raise AttributeError("Unknown orientation")
-        spd = mono_slit.get_diagram(self.active_chain[0].nrays * 2)
+        spd = mono_slit.get_diagram()
         if show_spd:
             print(spd)
-            mono_slit.show_diagram(self.active_chain[0].nrays * 2)
+            mono_slit.show_diagram()
         projection = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim])
         projection_dl = np.array(
             spd.where(spd["Lambda"] == (wavelength + wavelength * dlambda_over_lambda)).dropna()[dim])
