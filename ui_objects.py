@@ -600,3 +600,39 @@ def plot_aperture(stops, title=""):
     if stops["0"]["opacity"] == 0:
         fig.update_layout(plot_bgcolor='black')
     return fig
+
+
+def plot_beamline_normals(beamline, enlarge_normals=True, orthonormal=True):
+    """
+    Plots the normal to each optical element surface along the beamline
+    :param orthonormal: makes the axes orthonormal (angles appear as in reality, but small offsets are hard to see)
+    :type orthonormal: bool
+    :param enlarge_normals: multiply the normals by a big factor to make them more visible
+    :type enlarge_normals: bool
+    :param beamline: Aligned beamline the optical element of which to plot
+    :type beamline: pyoptix.Beamline
+    :return: None
+    :rtype: NoneType
+    """
+    fig = go.Figure()
+    length_bl = beamline.active_chain[-1].get_local_frame()["Center_soleil"][0]
+    for oe in beamline.active_chain:
+        loc_fr = oe.get_local_frame()
+        if not oe.get_transmissive() and enlarge_normals:
+            loc_fr["Z_soleil"] *= length_bl / 2
+        fig.add_trace(go.Scatter3d(x=[loc_fr["Center_soleil"][0], loc_fr["Center_soleil"][0] + loc_fr["Z_soleil"][0]],
+                                   y=[loc_fr["Center_soleil"][1], loc_fr["Center_soleil"][1] + loc_fr["Z_soleil"][1]],
+                                   z=[loc_fr["Center_soleil"][2], loc_fr["Center_soleil"][2] + loc_fr["Z_soleil"][2]],
+                                   mode="lines+markers",
+                                   marker=dict(symbol="diamond", size=2),
+                                   name=oe.name
+                                   ))
+    fig.update_layout(scene_camera_eye=dict(x=-0.76, y=1.8, z=0.92), height=800,
+                      title="Optical element normals in " + beamline.active_chain_name,
+                      scene=dict(xaxis_title='S', yaxis_title='X', zaxis_title="Z"))
+    if orthonormal:
+        # fig.update_layout(scene=dict(xaxis_range=[0, length_bl],
+        #                              yaxis_range=[-length_bl / 2, length_bl / 2],
+        #                              zaxis_range=[-length_bl / 2, length_bl / 2]))
+        fig.update_layout(scene={'aspectmode': 'data'}, )
+    fig.show()
