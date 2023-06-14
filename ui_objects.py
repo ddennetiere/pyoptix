@@ -2,6 +2,8 @@ import pandas as pd
 from bokeh.plotting import figure, show
 from bokeh.io import export_png
 import numpy as np
+from numpy.polynomial.legendre import legval2d
+from numpy.polynomial.polynomial import polyval2d
 from scipy.stats import gaussian_kde
 from bokeh.models import BoxSelectTool, LassoSelectTool, Spacer, Label
 from bokeh.layouts import row, column
@@ -103,7 +105,7 @@ def format_prefix(value, precision=2, unit="m"):
 
     if abs(si_level) > prefix_levels:
         raise ValueError("Exponent out range of available prefixes.")
-    return f"{round(value*10**digits)/10**digits} "+SI_PREFIX_UNITS[si_level + prefix_levels].strip()+unit
+    return f"{round(value * 10 ** digits) / 10 ** digits} " + SI_PREFIX_UNITS[si_level + prefix_levels].strip() + unit
 
 
 def display_progress_bar(max_count):
@@ -193,7 +195,7 @@ def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
             title += f" of {beamline_name}"
         if chain_name is not None:
             title += f" in config. {chain_name}"
-    title += f" at E = {1239.842e-9/columndatasource.data['Lambda'].mean():.1f} eV"
+    title += f" at E = {1239.842e-9 / columndatasource.data['Lambda'].mean():.1f} eV"
     layout = scatter_plot_2d(columndatasource, x_key, y_key, title=title,
                              x_label=x_key, x_unit=x_unit, y_label=y_key, y_unit=y_unit, **kwargs)
     return layout
@@ -311,10 +313,10 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     # x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87 * x_integral_dist_neg.max()][0]
 
     # mytext = Label(x=x.mean(), y=-hhist.max() / 2, text='%.2e %s FWHM' % (x_fwhm_pos - x_fwhm_neg, x_unit))
-    mytext = Label(x=x.mean()+0.75 * (x.min()-x.mean()), y=-hhist.max() / 2,
+    mytext = Label(x=x.mean() + 0.75 * (x.min() - x.mean()), y=-hhist.max() / 2,
                    text=f'{format_prefix(general_FWHM(x), precision=2, unit=x_unit)} FWHM, '
                         f'{format_prefix(x.std(), precision=2, unit=x_unit)} RMS')
-                   # text=f'{general_FWHM(x):.2e} {x_unit} FWHM, {x.std():.2e} {x_unit} RMS')
+    # text=f'{general_FWHM(x):.2e} {x_unit} FWHM, {x.std():.2e} {x_unit} RMS')
     ph.add_layout(mytext)
 
     # create the vertical histogram
@@ -339,7 +341,7 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     # y_integral_dist_neg = np.cumsum(np.where(y_dist[::-1] < 0, 1, 0))
     # y_fwhm_neg = y_dist[::-1][y_integral_dist_neg > 0.87 * y_integral_dist_neg.max()][0]
 
-    mytext = Label(x=-vhist.max() / 2, y=y.mean() + 0.75*(y.max()-y.mean()),
+    mytext = Label(x=-vhist.max() / 2, y=y.mean() + 0.75 * (y.max() - y.mean()),
                    text=f'{format_prefix(general_FWHM(y), precision=2, unit=y_unit)} FWHM, '
                         f'{format_prefix(y.std(), precision=2, unit=y_unit)} RMS',
                    # text=f'{general_FWHM(y):.2e} {y_unit} FWHM, {y.std():.2e} {y_unit} RMS',
@@ -416,7 +418,7 @@ def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_
         kwargs["width"] = 800
     if "height" not in kwargs:
         kwargs["height"] = 800
-    title += f" at E = {1239.842e-9/df['Lambda'].mean():.1f} eV"
+    title += f" at E = {1239.842e-9 / df['Lambda'].mean():.1f} eV"
     x = np.copy(df[x_key])
     y = np.copy(df[y_key])
     if show_map:
@@ -452,7 +454,7 @@ def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_
         return fig
 
 
-def plot_polynomial_surface(coeffs, xy_limits):
+def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_stat=0.002):
     """
     Plots a 3D surface of a polynomial described by its coefficients on a specified XY plane.
 
@@ -464,6 +466,12 @@ def plot_polynomial_surface(coeffs, xy_limits):
         A list or array of length 4 that specifies the limits of the surface on the XY plane.
         The first and second elements correspond to the minimum and maximum values of `x`, respectively,
         while the third and fourth elements correspond to the minimum and maximum values of `y`, respectively.
+    probe_stat : float
+        A size over which to compute the statistical form and slope errors as with an optical profiler
+    mesh : int
+        number of sampling points over the surface size for each axis
+    legendre : bool
+        if True the coefficients are applied to the legendre serie of polynomials, if False over the natural polynomials
 
     Returns
     -------
@@ -478,14 +486,19 @@ def plot_polynomial_surface(coeffs, xy_limits):
 
     """
     # Generate a grid of values for x and y
-    x = np.linspace(xy_limits[0], xy_limits[1], 100)
-    y = np.linspace(xy_limits[2], xy_limits[3], 100)
+    x = np.linspace(-1, 1, mesh) # axes are scaled later because the polynomials of legval2d are defined over [-1,1]
+    y = np.linspace(-1, 1, mesh)
     X, Y = np.meshgrid(x, y)
 
     # Calculate z-values from the polynomial coefficients
-    p = Polynomial(coeffs)
-    Z = p(X, Y)
+    if not legendre:
+        Z = polyval2d(X, Y, coeffs)
+    else:
+        Z = legval2d(X, Y, coeffs)
 
+    x_scaled = (x + xy_limits[0])*(xy_limits[1] - xy_limits[0])
+    y_scaled = (y + xy_limits[2])*(xy_limits[3] - xy_limits[2])
+    X, Y = np.meshgrid(x_scaled, y_scaled)
     # Create the 3D surface using Plotly
     fig = go.Figure(data=[go.Surface(x=X, y=Y, z=Z)])
 
