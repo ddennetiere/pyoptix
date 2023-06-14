@@ -514,7 +514,7 @@ class Beamline(object):
         show(p)
 
     def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1 / 5000,
-                       show_spd=False, verbose=0, nrays=5000, criterion="fwhm", return_all=False):
+                       show_spd=False, verbose=0, nrays=5000, criterion="fwhm", return_all=False, **kwargs):
         """
         Computes the resolution of a beamline in its `mono_slit` plane at a given `wavelength`. An a priori resolution
         must be given as `dlambda_over_lambda` for calculation purposes and the orientation of deviation relative
@@ -551,7 +551,7 @@ class Beamline(object):
         slit_next_OE = mono_slit.next
         mono_slit.next = None
         self.active_chain[0].nrays = nrays
-        self.align(wavelength)
+        self.align(wavelength, **kwargs)
         self.generate(wavelength)
         self.generate(wavelength + wavelength * dlambda_over_lambda)
         self.radiate()
