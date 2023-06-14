@@ -600,7 +600,7 @@ class Beamline(object):
         else:
             return resolution
 
-    def draw_to_scale(self, wavelength=300e-9, radiate=False, configurations=[],
+    def draw_to_scale(self, wavelength=300e-9, radiate=False, configurations=[], plot3D=False,
                       **kwargs):
         """
         Generate and plot the beamline spot diagram to scale for each recording optical element
@@ -667,7 +667,7 @@ class Beamline(object):
                     impacts["X"] *= -1
                     diags.append(impacts)
         spots = pd.concat(diags)
-        plot_beamline(spots)
+        plot_beamline(spots, plot_3D=plot3D)
         return spots
 
 
