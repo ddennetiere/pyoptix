@@ -213,9 +213,12 @@ def catch_c_error(function):
         if show_return:
             print(function.__name__, "returned", ret)
         if not ret:
-            buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
-            optix.GetOptiXLastError(buf, 256)
-            print(function.__name__, args, kwargs, "error", buf.value)
+            # buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
+            # optix.GetOptiXLastError(buf, 256)
+            buf = ctypes.c_char_p()
+            optix.GetOptiXError(ctypes.byref(buf))
+            print("In ", function.__name__, f"error {args[0]}:\n", buf.value.decode())
+            # print(function.__name__, args, kwargs, "error", buf.value)
         else:
             if confirm and confirm_ok:
                 print(function.__name__, "ok")
@@ -230,6 +233,8 @@ def load_optix():
     optix = ctypes.cdll.LoadLibrary(r'D:\Dennetiere\optix\release\OptiX.dll')
     optix.GetOptiXLastError.restype = BYTE
     optix.GetOptiXLastError.argtypes = [ctypes.c_char_p, INT]
+    optix.GetOptiXError.restype = BYTE
+    optix.GetOptiXError.argtypes = [HANDLE]
     optix.FitSurfaceToSlopes.argtypes = (HANDLE, INT, INT, HANDLE, HANDLE, HANDLE, HANDLE)
     optix.FitSurfaceToSlopes.restype = BOOLEAN
     optix.FitSurfaceToHeights.argtypes = (HANDLE, INT, INT, HANDLE, HANDLE, HANDLE)
@@ -341,7 +346,6 @@ def load_optix():
     optix.GetTransmissive.argtypes = [HANDLE]
     optix.GetTransmissive.restypes = BOOLEAN
     optix.SetTransmissive.argtypes = [HANDLE, BOOLEAN]
-    optix.GetTransmissive.restypes = BOOLEAN
     return optix
 
 
