@@ -18,7 +18,7 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
                                 replace_stop_by_polygon, insert_rectangular_stop, replace_stop_by_rectangle,
                                 get_ellipse_parameters, add_elliptical_stop, insert_elliptical_stop,
                                 replace_stop_by_ellipse, add_circular_stop, insert_circular_stop,
-                                replace_stop_by_circle, get_surface_frame)
+                                replace_stop_by_circle, get_surface_frame, get_element_id)
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
@@ -735,10 +735,13 @@ class OpticalElement(metaclass=PostInitMeta):
         """
         super().__init__()
         self._recording_mode = RecordingMode.recording_none
-        self._element_id = None
+        self._element_id = get_element_id(name)
         self._element_type = element_type
         if element_id is not None:
             self.from_element_id(element_id)
+            self._element_id = element_id
+        elif self._element_id is not None:  # the element already exists
+            pass
         elif element_type != "" and name != "":
             self._element_id = create_element(element_type, name)
             self._name = name
