@@ -2032,6 +2032,77 @@ class LegendrePolynomialMirror(PolynomialOpticalElement):
         super().__init__(**kwargs)
 
 
+class ConicalMirror(OpticalElement):
+    """
+        Class for conical mirrors. Inherits OpticalElement.
+
+        Generates all cone-shaped mirrors using parameters curvature, directrix_angle and apex_distance such as:
+
+        curvature is the curvature (1/Rc) of the directric circle passing through the origin point  in m-1
+        directrix_angle  is the inclination angle of the directrix circle plane with respect to the YOZ plane in rad
+        apex_distance is the distance from apex to the origin point
+
+        The surface is positioned such as the X axis is one generatrix and the apex is the point of coordinates
+        (-x0, 0,0), the directrix circle passing by the origin has a curvature 1/r and its plane is inclined by
+        theta around the direction Y with 1/r= curvature, -x0=apex_distance.
+        The cone is a revolution cone only if the apex is on the circle normal passing by its center,
+        ie 1/curvature + apex_distance*sin(directix_angle) = 0
+
+    """
+
+    def __init__(self, curvature=1, directix_angle=0, apex_distance=1, **kwargs):
+        """
+        Constructor for the ConicalMirror class. For details of convention of conical parameter, see
+        ConicalMirror class doc.
+
+        :param curvature: curvature (1/Rc) of the directric circle passing through the origin point  in m-1
+        :type curvature: float
+        :param directix_angle: inclination angle of the directrix circle plane with respect to the YOZ plane in rad
+        :type directix_angle: float
+        :param apex_distance: distance from apex to the origin point
+        :type apex_distance: float
+        :param kwargs: See OpticalElement doc for parameters
+        """
+        if "element_type" in kwargs:
+            assert kwargs["element_type"] in ["ConicalMirror"]
+        else:
+            kwargs["element_type"] = "ConicalMirror"
+        super().__init__(**kwargs)
+        self.curvature = curvature
+        self.directrix_angle = directix_angle
+        self.apex_distance = apex_distance
+
+    @property
+    def curvature(self):
+        self._curvature = self._get_parameter("curvature")
+        return self._curvature
+
+    @curvature.setter
+    def curvature(self, value):
+        self._curvature = self._set_parameter("curvature", value)
+
+    @property
+    def directrix_angle(self):
+        self._directrix_angle = self._get_parameter("directrix_angle")
+        return self._directrix_angle
+
+    @directrix_angle.setter
+    def directrix_angle(self, value):
+        self._directrix_angle = self._set_parameter("directrix_angle", value)
+
+    @property
+    def apex_distance(self):
+        self._apex_distance = self._get_parameter("apex_distance")
+        return self._apex_distance
+
+    @apex_distance.setter
+    def apex_distance(self, value):
+        self._apex_distance = self._set_parameter("apex_distance", value)
+
+    def is_of_revolution(self):
+        return 1/self.curvature + self.apex_distance*np.sin(self.directix_angle) == 0
+
+
 class RevolutionQuadricMirror(OpticalElement):
     """
     Class for quadric mirrors. Inherits OpticalElement. Inherited by classes "ConicBaseCylindricalMirror" and
