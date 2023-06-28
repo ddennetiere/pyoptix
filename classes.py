@@ -645,15 +645,17 @@ class Beamline(object):
             print("WARNING : for radiate = True or multiple configurations, beamline will be modified after plot")
         if isinstance(wavelength, list):
             assert len(wavelength) == len(configurations)
+        else:
+            wavelength = [wavelength] * len(configurations)
         diags = []
-        for config in configurations:
+        for config, lamda in zip(configurations, wavelength):
             if radiate:
                 self.active_chain = config
                 for oe in self.active_chain:
                     oe.recording_mode = RecordingMode.recording_output
                 self.clear_impacts(clear_source=True)
-                self.align(wavelength, **kwargs)
-                self.generate(wavelength)
+                self.align(lamda, **kwargs)
+                self.generate(lamda)
                 self.radiate()
             for oe in self.active_chain:
                 if oe.recording_mode != RecordingMode.recording_none:
