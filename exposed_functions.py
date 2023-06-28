@@ -197,34 +197,45 @@ def init_optix():
         print("OptiX library initialized")
 
 
-def catch_c_error(function):
+def general_catch_c_error(function, authorized_returns):
+    check_return = True
+    show_non_one_return = True  # for debug
+    show_return = False  # for debug
+    if authorized_returns == "any":
+        check_return = False
+        show_non_one_return = False
+
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
-        confirm = True
-        confirm_ok = False
-        show_return = False
-        if "confirm" in kwargs:
-            confirm = kwargs["confirm"]
-        if "confirm_ok" in kwargs:
-            confirm_ok = kwargs["confirm_ok"]
-        if "show_return" in kwargs:
-            show_return = kwargs["show_return"]
         ret = function(*args)
+        if isinstance(ret, tuple):
+            return_c = ret[0]
+            if len(ret) > 2:
+                return_python = ret[1:]
+            else:
+                return_python = ret[1]
+        else:
+            return_c, return_python = (ret, None)
         if show_return:
             print(function.__name__, "returned", ret)
-        if not ret:
-            # buf = ctypes.create_string_buffer(256)  # create a 128 byte buffer
-            # optix.GetOptiXLastError(buf, 256)
-            buf = ctypes.c_char_p()
-            optix.GetOptiXError(ctypes.byref(buf))
-            print("In ", function.__name__, f"error {args[0]}:\n", buf.value.decode())
-            # print(function.__name__, args, kwargs, "error", buf.value)
-        else:
-            if confirm and confirm_ok:
-                print(function.__name__, "ok")
-        return ret
-
+        if check_return:
+            if return_c not in authorized_returns:
+                buf = ctypes.c_char_p()
+                optix.GetOptiXError(ctypes.byref(buf))
+                if show_non_one_return:
+                    print("return of c function ", function.__name__, " not in ", authorized_returns)
+                    print(function.__name__, "returned", ret)
+                    print(function.__name__, "C return is ", return_c)
+                    print(function.__name__, "Python return is ", return_python)
+                if "No error" not in buf.value.decode():
+                    raise ChildProcessError(f"In {function.__name__} error {args[0]}:\n" + buf.value.decode())
+        return return_python
     return wrapper
+
+
+authorize_bool_return = functools.partial(general_catch_c_error, authorized_returns=[0, 1])
+catch_c_error = functools.partial(general_catch_c_error, authorized_returns=[1])
+authorize_any_return = functools.partial(general_catch_c_error, authorized_returns="any")
 
 
 def load_optix():
@@ -242,25 +253,23 @@ def load_optix():
     optix.GetHologramPatternInfo.argtypes = (HANDLE, HANDLE, DOUBLE, DOUBLE)
     optix.GetHologramPatternInfo.restype = BOOLEAN
     optix.GetImpactsData.argtypes = (HANDLE,  HANDLE, INT)
-    optix.GetImpactsData.restype = INT
+    optix.GetImpactsData.restype = BYTE
     optix.GetSpotDiagram.argtypes = (HANDLE, HANDLE, DOUBLE)
-    optix.GetSpotDiagram.restype = INT
+    optix.GetSpotDiagram.restype = BYTE
     optix.GetSpotDiagram.argtypes = (HANDLE, HANDLE, DOUBLE)
-    optix.GetSpotDiagram.restype = INT
+    optix.GetSpotDiagram.restype = BYTE
     optix.FindElementID.argtypes = [LPCSTR, HANDLE]
-    optix.FindElementID.restype = INT
-    optix.GetElementID.argtypes = [LPCSTR]
-    optix.GetElementID.restype = HANDLE
+    optix.FindElementID.restype = BYTE
     optix.ChainElement_byID.argtypes = [HANDLE, HANDLE]
-    optix.ChainElement_byID.restype = INT
+    optix.ChainElement_byID.restype = BYTE
     optix.ChainElement_byName.argtypes = [LPCSTR, LPCSTR]
-    optix.ChainElement_byName.restype = INT
+    optix.ChainElement_byName.restype = BYTE
     optix.GetPreviousElement.argtypes = [HANDLE]
     optix.GetPreviousElement.restype = HANDLE
     optix.GetNextElement.argtypes = [HANDLE]
     optix.GetNextElement.restype = HANDLE
     optix.ClearImpacts.argtypes = [HANDLE]
-    optix.ClearImpacts.restype = INT
+    optix.ClearImpacts.restype = BYTE
     optix.SetRecording.argtypes = [HANDLE, INT]
     optix.SetRecording.restype = BOOLEAN
     optix.GetElementName.argtypes = [HANDLE, HANDLE, INT]
@@ -281,13 +290,13 @@ def load_optix():
     optix.GetParameterFlags.argtypes = [HANDLE, LPCSTR, ctypes.POINTER(ctypes.c_uint32)]
     optix.GetParameterFlags.restype = BYTE
     optix.GetArrayParameter.argtypes = [HANDLE, LPCSTR, HANDLE, ctypes.c_ulonglong]
-    optix.GetArrayParameter.restype = INT
+    optix.GetArrayParameter.restype = BYTE
     optix.GetParameter.argtypes = [HANDLE, LPCSTR, HANDLE]
-    optix.GetParameter.restype = INT
+    optix.GetParameter.restype = BYTE
     optix.EnumerateParameters.argtypes = [HANDLE, HANDLE, LPCSTR, INT, HANDLE]
-    optix.EnumerateParameters.restype = INT
+    optix.EnumerateParameters.restype = BYTE
     optix.EnumerateElements.argtypes = [HANDLE, HANDLE, LPCSTR, INT]
-    optix.EnumerateElements.restype = INT
+    optix.EnumerateElements.restype = BYTE
     optix.LoadSystemFromXml.argtypes = [LPCSTR]
     optix.LoadSystemFromXml.restype = BOOLEAN
     optix.SaveSystemAsXml.argtypes = [LPCSTR]
@@ -295,20 +304,20 @@ def load_optix():
     optix.Radiate.argtypes = [HANDLE]
     optix.Radiate.restype = BOOLEAN
     optix.GeneratePol.argtypes = [HANDLE, DOUBLE, ctypes.c_char]
-    optix.GeneratePol.restype = INT
+    optix.GeneratePol.restype = BYTE
     optix.Generate.argtypes = [HANDLE, DOUBLE]
-    optix.Generate.restype = INT
+    optix.Generate.restype = BYTE
     optix.Align.argtypes = [HANDLE, DOUBLE]
-    optix.Align.restype = INT
+    optix.Align.restype = BYTE
     optix.LoadSolemioFile.argtypes = [LPCSTR]
-    optix.LoadSolemioFile.restype = INT
+    optix.LoadSolemioFile.restype = BYTE
     ctypes.windll.kernel32.FreeLibrary.argtypes = [HMODULE]
     optix.GetStopNumber.argtypes = [HANDLE]
     optix.GetStopNumber.restype = HANDLE
     optix.GetStopType.argtypes = [HANDLE, HANDLE, ctypes.c_char_p, HANDLE]
     optix.GetStopType.restype = HANDLE
     optix.SetApertureActivity.argtypes = [HANDLE, BOOLEAN]
-    optix.SetApertureActivity.restype = HANDLE
+    optix.SetApertureActivity.restype = INT
     optix.GetApertureActivity.argtypes = [HANDLE, POINTER(BOOLEAN)]
     optix.GetApertureActivity.restype = HANDLE
     optix.GetPolygonParameters.argtypes = [HANDLE, HANDLE, HANDLE, POINTER(c_double), POINTER(BOOLEAN)]
@@ -320,7 +329,7 @@ def load_optix():
     optix.ReplaceStopByPolygon.argtypes = [HANDLE, HANDLE, HANDLE, POINTER(c_double), BOOLEAN]
     optix.ReplaceStopByPolygon.restype = HANDLE
     optix.AddRectangularStop.argtypes = [HANDLE, c_double, c_double, BOOLEAN, c_double, c_double, c_double]
-    optix.AddRectangularStop.restype = HANDLE
+    optix.AddRectangularStop.restype = INT
     optix.InsertRectangularStop.argtypes = [HANDLE, HANDLE, c_double, c_double, BOOLEAN, c_double, c_double, c_double]
     optix.InsertRectangularStop.restype = HANDLE
     optix.ReplaceStopByRectangle.argtypes = [HANDLE, HANDLE, c_double, c_double, BOOLEAN, c_double, c_double, c_double]
@@ -341,11 +350,15 @@ def load_optix():
     optix.ReplaceStopByCircle.argtypes = [HANDLE, HANDLE, c_double, BOOLEAN, c_double, c_double]
     optix.ReplaceStopByCircle.restype = HANDLE
     optix.SetAperturesActive.argtypes = [BOOLEAN]
+    optix.SetAperturesActive.restypes = INT
+    optix.GetAperturesActive.argtypes = [HANDLE]
+    optix.GetAperturesActive.restypes = INT
     optix.GetSurfaceFrame.argtypes = [HANDLE, POINTER(c_double)]
     optix.GetSurfaceFrame.restypes = BOOLEAN
-    optix.GetTransmissive.argtypes = [HANDLE]
-    optix.GetTransmissive.restypes = BOOLEAN
+    optix.GetTransmissive.argtypes = [HANDLE, HANDLE]
+    optix.GetTransmissive.restypes = INT
     optix.SetTransmissive.argtypes = [HANDLE, BOOLEAN]
+    optix.SetTransmissive.restypes = INT
     return optix
 
 
@@ -370,15 +383,17 @@ def align(source_id, lamda_align):
 
 @catch_c_error
 def generate(source_id, lamda):
-    ret = optix.Generate(source_id, lamda)
-    return ret
+    generated_rays = ctypes.c_long()
+    ret = optix.Generate(source_id, lamda, ctypes.byref(generated_rays))
+    return ret, generated_rays.value
 
 
 @catch_c_error
 def generate_polarized(source_id, lamda, pol):
+    generated_rays = ctypes.c_long()
     # ret = optix.GeneratePol(source_id, lamda, 0x53)
-    ret = optix.GeneratePol(source_id, lamda, ctypes.c_char(pol.encode()))
-    return ret
+    ret = optix.GeneratePol(source_id, lamda, ctypes.c_char(pol.encode()), ctypes.byref(generated_rays))
+    return ret, generated_rays.value
 
 
 @catch_c_error
@@ -498,8 +513,9 @@ def memory_dump(address, size):
 
 @catch_c_error
 def create_element(class_name, name):
-    elem_id = optix.CreateElement(class_name.encode(), name.encode())
-    return elem_id
+    element_id = HANDLE()
+    ret = optix.CreateElement(class_name.encode(), name.encode(), ctypes.byref(element_id))
+    return ret, element_id
 
 
 @catch_c_error
@@ -544,16 +560,11 @@ def chain_element_by_id(previous_id, next_id):
     return ret
 
 
-@catch_c_error
-def get_element_id(element_name):
-    ret = optix.GetElementID(element_name.encode())
-    return ret
-
-
-@catch_c_error
-def find_element_id(element_name, element_id):
+@authorize_bool_return
+def find_element_id(element_name, raise_error=False):  # this function is supposed to return 0 sometimes
+    element_id = HANDLE()
     ret = optix.FindElementID(element_name.encode(), ctypes.byref(element_id))
-    return ret
+    return ret, element_id.value
 
 
 @catch_c_error
@@ -582,8 +593,9 @@ def set_transmissive(element_id, is_transmissive):
 
 @catch_c_error
 def get_transmissive(element_id):
-    ret = optix.GetTransmissive(element_id)
-    return ret
+    is_transmissive = ctypes.c_bool()
+    ret = optix.GetTransmissive(element_id, ctypes.byref(is_transmissive))
+    return ret, is_transmissive
 
 
 @catch_c_error
@@ -606,43 +618,47 @@ def fit_surface_to_slopes(element_id, order_x, order_y, limits, slopes, sigma_x,
     return ret
 
 
-@catch_c_error
+@authorize_any_return
 def get_stop_number(element_id):
     """Retrieves the number of stop regions composing the ApertureStop of a given OpticalElement."""
-    return optix.GetStopNumber(element_id)
+    return 1, optix.GetStopNumber(element_id)
 
 
-@catch_c_error
+@authorize_any_return
 def get_stop_type(element_id, index):
     """Gets the runtime class name of the Region object."""
     buffer = ctypes.create_string_buffer(256)
-    optix.GetStopType(element_id, index, buffer, 256)
-    return buffer.value.decode()
+    nb_sides = optix.GetStopType(element_id, index, buffer, 256)
+    if nb_sides != -1:
+        return 1, nb_sides, buffer.value.decode()
+    else:
+        return 0, -1, ""
 
 
 def enumerate_stops(element_id):
     """Enumerates the stops of a given optical element"""
     stops = []
     for index in range(get_stop_number(element_id)):
-        stops.append(get_stop_type(element_id, index))
+        nb_vertex, shape = get_stop_type(element_id, index)
+        stops.append([nb_vertex, shape])
     return stops
 
 
-@catch_c_error
+@authorize_any_return
 def set_aperture_activity(element_id, status):
     """Sets the activity status of the aperture stop of the optical element."""
     return optix.SetApertureActivity(element_id, status)
 
 
-@catch_c_error
+@authorize_any_return
 def get_aperture_activity(element_id):
     """Gets the activity status of the aperture stop of the optical element."""
-    status = BOOLEAN()
-    result = optix.GetApertureActivity(element_id, status)
+    status = ctypes.c_bool()
+    result = optix.GetApertureActivity(element_id, ctypes.byref(status))
     return result, status.value
 
 
-@catch_c_error
+@authorize_any_return
 def get_polygon_parameters(element_id, index, array_width):
     """Returns the parameters defining a polygonal Region."""
     vertex_array = (c_double * array_width)()
@@ -651,46 +667,46 @@ def get_polygon_parameters(element_id, index, array_width):
     return result, list(vertex_array), opacity.value
 
 
-@catch_c_error
+@authorize_any_return
 def add_polygonal_stop(element_id, num_sides, vertex_array, opacity):
     """Append a new polygonal Region in the aperture stop list."""
     vertex_array = (c_double * len(vertex_array))(*vertex_array)
     return optix.AddPolygonalStop(element_id, num_sides, vertex_array, opacity)
 
 
-@catch_c_error
+@authorize_any_return
 def insert_polygonal_stop(element_id, index, num_sides, vertex_array, opacity):
     """Insert a new polygonal region in the aperture stop list."""
     vertex_array = (c_double * len(vertex_array))(*vertex_array)
     return optix.InsertPolygonalStop(element_id, index, num_sides, vertex_array, opacity)
 
 
-@catch_c_error
+@authorize_any_return
 def replace_stop_by_polygon(element_id, index, num_sides, vertex_array, opacity):
     """Replace a Region in the aperture stop list by a new Polygon."""
     vertex_array = (c_double * len(vertex_array))(*vertex_array)
     return optix.ReplaceStopByPolygon(element_id, index, num_sides, vertex_array, opacity)
 
 
-@catch_c_error
+@authorize_any_return
 def add_rectangular_stop(element_id, x_width, y_width, opacity, x_center, y_center, angle):
     """Add a new Rectangle at the end of the aperture stop list."""
     return optix.AddRectangularStop(element_id, x_width, y_width, opacity, x_center, y_center, angle)
 
 
-@catch_c_error
+@authorize_any_return
 def insert_rectangular_stop(element_id, index, x_width, y_width, opacity, x_center, y_center, angle):
     """Insert a new Rectangle at the given position in the aperture stop list."""
     return optix.InsertRectangularStop(element_id, index, x_width, y_width, opacity, x_center, y_center, angle)
 
 
-@catch_c_error
+@authorize_any_return
 def replace_stop_by_rectangle(element_id, index, x_width, y_width, opacity, x_center, y_center, angle):
     """Replace the Region at the given position in the aperture stop list by a new Rectangle."""
     return optix.ReplaceStopByRectangle(element_id, index, x_width, y_width, opacity, x_center, y_center, angle)
 
 
-@catch_c_error
+@authorize_any_return
 def get_ellipse_parameters(element_id, index):
     """Returns the parameters defining an elliptical Region."""
     x_axis = c_double()
@@ -705,37 +721,37 @@ def get_ellipse_parameters(element_id, index):
     return result, x_axis.value, y_axis.value, opacity.value, x_center.value, y_center.value, angle.value
 
 
-@catch_c_error
+@authorize_any_return
 def add_elliptical_stop(element_id, x_axis, y_axis, opacity, x_center, y_center, angle):
     """Adds a new elliptical Region at the end of the aperture stop list."""
     return optix.AddEllipticalStop(element_id, x_axis, y_axis, opacity, x_center, y_center, angle)
 
 
-@catch_c_error
+@authorize_any_return
 def insert_elliptical_stop(element_id, index, x_axis, y_axis, opacity, x_center, y_center, angle):
     """Inserts a new elliptical Region at the given position in the aperture stop list."""
     return optix.InsertEllipticalStop(element_id, index, x_axis, y_axis, opacity, x_center, y_center, angle)
 
 
-@catch_c_error
+@authorize_any_return
 def replace_stop_by_ellipse(element_id, index, x_axis, y_axis, opacity, x_center, y_center, angle):
     """Replace the Region at the given position in the aperture stop list by a new Ellipse."""
     return optix.ReplaceStopByEllipse(element_id, index, x_axis, y_axis, opacity, x_center, y_center, angle)
 
 
-@catch_c_error
+@authorize_any_return
 def add_circular_stop(element_id, radius, opacity, x_center, y_center):
     """Adds a new circular Region at the end of the aperture stop list."""
     return optix.AddCircularStop(element_id, radius, opacity, x_center, y_center)
 
 
-@catch_c_error
+@authorize_any_return
 def insert_circular_stop(element_id, index, radius, opacity, x_center, y_center):
     """Insert a new circular Region at the given position in the aperture stop list."""
     return optix.InsertCircularStop(element_id, index, radius, opacity, x_center, y_center)
 
 
-@catch_c_error
+@authorize_any_return
 def replace_stop_by_circle(element_id, index, radius, opacity, x_center, y_center):
     """Replace the Region at the given position in the aperture stop list by a new circle."""
     return optix.ReplaceStopByCircle(element_id, index, radius, opacity, x_center, y_center)
@@ -744,6 +760,13 @@ def replace_stop_by_circle(element_id, index, radius, opacity, x_center, y_cente
 def set_aperture_active(activity):
     """switch the global aperture activity flag """
     optix.SetAperturesActive(activity)
+
+
+def get_aperture_active():
+    """switch the global aperture activity flag """
+    activity = ctypes.c_bool()
+    optix.getAperturesActive(ctypes.byref(activity))
+    return activity
 
 
 @catch_c_error

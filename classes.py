@@ -18,7 +18,7 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
                                 replace_stop_by_polygon, insert_rectangular_stop, replace_stop_by_rectangle,
                                 get_ellipse_parameters, add_elliptical_stop, insert_elliptical_stop,
                                 replace_stop_by_ellipse, add_circular_stop, insert_circular_stop,
-                                replace_stop_by_circle, get_surface_frame, get_element_id)
+                                replace_stop_by_circle, get_surface_frame, find_element_id)
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
@@ -366,10 +366,11 @@ class Beamline(object):
          'L'(circular left)
         :return:
         """
-        self.n_generated_rays += self._active_chain[0].nrays
         if polarization:
-            return generate_polarized(self.active_chain[0].element_id, lambda_radiate, polarization)
-        return generate(self.active_chain[0].element_id, lambda_radiate)
+            n_generated_rays = generate_polarized(self.active_chain[0].element_id, lambda_radiate, polarization)
+        else:
+            n_generated_rays = generate(self.active_chain[0].element_id, lambda_radiate)
+        self.n_generated_rays += n_generated_rays
 
     def _add_element(self, new_element):
         if new_element not in self._elements:
@@ -735,7 +736,7 @@ class OpticalElement(metaclass=PostInitMeta):
         """
         super().__init__()
         self._recording_mode = RecordingMode.recording_none
-        self._element_id = get_element_id(name)
+        self._element_id = find_element_id(name)
         self._element_type = element_type
         if element_id is not None:
             self.from_element_id(element_id)
@@ -1031,7 +1032,7 @@ class OpticalElement(metaclass=PostInitMeta):
             rotations around X, Y and Z respectively
         :rtype: dict
         """
-        _, vectors = get_surface_frame(self.element_id)
+        vectors = get_surface_frame(self.element_id)
         x_vector, y_vector, z_vector, pos_vector = vectors
         mirror_frame = Rotation.from_matrix([[0, 1, 0], [0, 0, 1], [1, 0, 0]]).inv()
         surface_frame = Rotation.from_matrix([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
@@ -1428,15 +1429,15 @@ class OpticalElement(metaclass=PostInitMeta):
         stops_kind = enumerate_stops(self._element_id)
         for i, kind in enumerate(stops_kind):
             stops_details = {}
-            if kind == "Polygon":
-                stops_details["kind"] = kind
+            if kind[1] == "Polygon":
+                stops_details["kind"] = kind[1]
                 vertex, opacity = self.get_polygon_parameters(i, max_vertex)
                 vertex_x = vertex[::2]
                 vertex_y = vertex[1::2]
                 stops_details["vertex"] = list(zip(vertex_x, vertex_y))
                 stops_details["opacity"] = opacity
-            elif kind == "Ellipse":
-                stops_details["kind"] = kind
+            elif kind[1] == "Ellipse":
+                stops_details["kind"] = kind[1]
                 x_axis, y_axis, opacity, x_center, y_center, angle = self.get_elliptical_stop_parameters(i)
                 stops_details["x_axis"] = x_axis
                 stops_details["y_axis"] = y_axis
@@ -1445,7 +1446,7 @@ class OpticalElement(metaclass=PostInitMeta):
                 stops_details["angle"] = angle
                 stops_details["opacity"] = opacity
             else:
-                stops_details["kind"] = kind
+                stops_details["kind"] = kind[1]
             stops[str(i)] = stops_details
         return stops
 
@@ -1493,7 +1494,7 @@ class OpticalElement(metaclass=PostInitMeta):
         Returns:
             tuple: A tuple containing the parameters of the polygonal stop and the opacity of the polygon.
         """
-        return get_polygon_parameters(self.element_id, index, array_width)[1:]
+        return get_polygon_parameters(self.element_id, index, array_width)
 
     def add_polygonal_stop(self, num_sides, vertex_array, opacity=0):
         """
@@ -2896,7 +2897,7 @@ class PlanePoly1DGrating(Grating):
     ToroidalPoly1DGrating.
     """
 
-    def __init__(self, polynomial_degree=0, line_density=1e6, line_density_coeffs=[], order_align=1, order_use=1,
+    def __init__(self, polynomial_degree=0, line_density=1e6, line_density_coeffs=None, order_align=1, order_use=1,
                  **kwargs):
         """
         Constructor method for the class PlanePoly1DGrating.
