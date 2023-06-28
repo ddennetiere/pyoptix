@@ -222,11 +222,9 @@ class Beamline(object):
                     for param in params:
                         oe._set_parameter(param, params[param])
 
-
     def save_beamline(self, filename=None):
         if filename:
             save_as_xml(filename)
-
 
     def load_beamline(self, filename=None):
         if filename:
@@ -505,12 +503,12 @@ class Beamline(object):
         if not side_only:
             p.line(top_points[:-1, 0], top_points[:-1, 1], color="blue", legend_label="top view")
             labels_top = LabelSet(x='X', y='Y', text='names', angle=30,
-                                  x_offset=0, y_offset=-15, source=source_top)#, render_mode='canvas')
+                                  x_offset=0, y_offset=-15, source=source_top)  # , render_mode='canvas')
             p.add_layout(labels_top)
         if not top_only:
             p.line(side_points[:-1, 0], side_points[:-1, 1], color="red", legend_label="side view")
             labels_side = LabelSet(x='X', y='Y', text='names', angle=-30,
-                                   x_offset=0, y_offset=15, source=source_side)#, render_mode='canvas')
+                                   x_offset=0, y_offset=15, source=source_side)  # , render_mode='canvas')
             p.add_layout(labels_side)
         show(p)
 
@@ -563,6 +561,7 @@ class Beamline(object):
         else:
             raise AttributeError("Unknown orientation")
         spd = mono_slit.get_diagram()
+        spd = spd[spd["Intensity"] != 0]
         if show_spd:
             print(spd)
             mono_slit.show_diagram()
@@ -597,7 +596,7 @@ class Beamline(object):
 
         if return_all:
             return {criterion: mono_chr_fwhm * 1e6, "dispersion_on_screen": distance * 1e6, "wavelength": wavelength,
-                    "dlambda": wavelength*dlambda_over_lambda}
+                    "dlambda": wavelength * dlambda_over_lambda}
         else:
             return resolution
 
@@ -841,7 +840,8 @@ class OpticalElement(metaclass=PostInitMeta):
                 value = float(value)
                 param.value = DOUBLE(value)
             except TypeError:
-                raise AttributeError("value of parameter must be castable in a float, an numpy.ndarray or a dictionnary")
+                raise AttributeError(
+                    "value of parameter must be castable in a float, an numpy.ndarray or a dictionnary")
         else:
             raise AttributeError("Unknown value type")
         if param_name in array_parameter_list:
@@ -857,7 +857,7 @@ class OpticalElement(metaclass=PostInitMeta):
         else:
             self.__getattribute__(pyoptix_param_name)  # update of internal variable
         updated_parameter = self._get_c_parameter(param_name)
-        if updated_parameter.flags & (1<<3):  # parameter is an array parameter
+        if updated_parameter.flags & (1 << 3):  # parameter is an array parameter
             # print(f"updated {param_name}:\n", updated_parameter)
             return updated_parameter.array
         else:
@@ -1094,9 +1094,9 @@ class OpticalElement(metaclass=PostInitMeta):
             print("Warning empty diagram:\n", spots)
             return None, None
         if self.recording_mode == RecordingMode.recording_output:
-            oe_name = "after "+self._name
+            oe_name = "after " + self._name
         else:
-            oe_name = "before "+self._name
+            oe_name = "before " + self._name
         datasources = {"xy": ColumnDataSource(spots), "xxp": ColumnDataSource(spots), "yyp": ColumnDataSource(spots)}
         figs = []
         if display == "all":
@@ -1233,7 +1233,7 @@ class OpticalElement(metaclass=PostInitMeta):
             x_axis, y_axis = plot
             figs.append(plot_spd(coldatasource, x_key=x_axis, y_key=y_axis,
                                  beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
-                                 oe_name="on "+self._name, **kwargs))
+                                 oe_name="on " + self._name, **kwargs))
         handles = []
         for fig in figs:
             handles.append(show(fig, notebook_handle=True))
@@ -1640,7 +1640,7 @@ class OpticalElement(metaclass=PostInitMeta):
 
         add_circular_stop(self.element_id, radius, opacity, x_center, y_center)
 
-    def insert_circular_stop(self, index, radius, opacity=0, x_center=0,  y_center=0):
+    def insert_circular_stop(self, index, radius, opacity=0, x_center=0, y_center=0):
         """
         Insert a circular stop at the specified index in the aperture.
 
@@ -1654,7 +1654,7 @@ class OpticalElement(metaclass=PostInitMeta):
         """
         insert_circular_stop(self.element_id, index, radius, opacity, x_center, y_center)
 
-    def replace_stop_by_circle(self, index, radius, opacity=0,  x_center=0, y_center=0):
+    def replace_stop_by_circle(self, index, radius, opacity=0, x_center=0, y_center=0):
         """
         Replace a stop in the aperture with a circular stop.
 
@@ -1703,6 +1703,7 @@ class BMSource(OpticalElement):
     """
     Class for Bending magnet sources
     """
+
     def __init__(self, sigma_x=0, sigma_y=0, aperture_x=0, sigma_y_div=0, trajectory_radius=5.36, nrays=0, **kwargs):
         """
         Constructor of a gaussian source type element of size sigma_x*sigma_y and divergence aperture_x*sigma_y_div.
@@ -2005,6 +2006,7 @@ class NaturalPolynomialMirror(PolynomialOpticalElement):
     """
     Class for mirrors whose surface is defined by a polynomial.
     """
+
     def __init__(self, **kwargs):
         """
         Constructor for the NaturalPolynomialMirror class
@@ -2021,6 +2023,7 @@ class LegendrePolynomialMirror(PolynomialOpticalElement):
     """
     Class for mirrors whose surface is defined by a polynomial.
     """
+
     def __init__(self, **kwargs):
         """
         Constructor for the LegendrePolynomialMirror class
@@ -2101,7 +2104,7 @@ class ConicalMirror(OpticalElement):
         self._apex_distance = self._set_parameter("apex_distance", value)
 
     def is_of_revolution(self):
-        return 1/self.curvature + self.apex_distance*np.sin(self.directix_angle) == 0
+        return 1 / self.curvature + self.apex_distance * np.sin(self.directix_angle) == 0
 
 
 class RevolutionQuadricMirror(OpticalElement):
@@ -2397,6 +2400,7 @@ class Grating(OpticalElement):
     """
     Abstract class to be inherited by all grating type Optical Element
     """
+
     def __init__(self, line_density=1e6, order_use=1, order_align=1, **kwargs):
         super().__init__(**kwargs)
         self.order_align = order_align
@@ -2488,8 +2492,8 @@ class PlaneHoloGrating(Grating):
         self.construction_point_1 = SphericalPoint(-1 / inverse_distance1, pi / 2 - elevation_angle1, 0)
         self.construction_point_2 = SphericalPoint(-1 / inverse_distance2,
                                                    pi / 2 - arccos(
-                                                                   cos(elevation_angle1) -
-                                                                   line_density * recording_wavelength),
+                                                       cos(elevation_angle1) -
+                                                       line_density * recording_wavelength),
                                                    0)
 
     @property
@@ -2595,7 +2599,7 @@ class PlaneHoloGrating(Grating):
         VLS_coeffs = self.get_vls_law(100e-3, 3)
         VLS_poly = np.polynomial.polynomial.Polynomial(VLS_coeffs[::-1])
         print(f"line density computed from solemio definition : {VLS_poly} /mm")
-        print("angle ", self.elevation_angle1/degree, "deg")
+        print("angle ", self.elevation_angle1 / degree, "deg")
         print("inv1 ", self.inverse_distance1)
         print("inv2 ", self.inverse_distance2)
 
@@ -2617,17 +2621,17 @@ class PlaneHoloGrating(Grating):
         :rtype: Nonetype
         """
         if abs(angle1) < abs(angle2):
-            self.inverse_distance1 = 1/dist1
-            self.inverse_distance2 = 1/dist2
-            self.elevation_angle1 = -(angle1 + pi/2)
+            self.inverse_distance1 = 1 / dist1
+            self.inverse_distance2 = 1 / dist2
+            self.elevation_angle1 = -(angle1 + pi / 2)
         else:
-            self.inverse_distance1 = 1/dist2
-            self.inverse_distance2 = 1/dist1
-            self.elevation_angle1 = -(angle2 + pi/2)
+            self.inverse_distance1 = 1 / dist2
+            self.inverse_distance2 = 1 / dist1
+            self.elevation_angle1 = -(angle2 + pi / 2)
         if lamda:
             self.recording_wavelength = lamda
-        self.line_density = abs(sin(angle1)-sin(angle2))/self.recording_wavelength
-        print(f"line density at center computed from solemio definition : {self.line_density/1000} /mm")
+        self.line_density = abs(sin(angle1) - sin(angle2)) / self.recording_wavelength
+        print(f"line density at center computed from solemio definition : {self.line_density / 1000} /mm")
         print(self.elevation_angle1)
         print(self.inverse_distance1)
         print(self.inverse_distance2)
@@ -2651,7 +2655,7 @@ class PlaneHoloGrating(Grating):
         print(f"angle2 = {theta2} deg")
         print(f"phi2 = {phi2} deg")
         return self.construction_point_1.get_coord_pyoptix(), self.construction_point_2.get_coord_pyoptix(), \
-               self.recording_wavelength
+            self.recording_wavelength
 
     def get_pyoptix_coords(self):
         """
@@ -2674,7 +2678,7 @@ class PlaneHoloGrating(Grating):
         print("phi2 = ", phi2)
         print("tpm = ", self.get_tpmm(0))
         return self.construction_point_1.get_coord_pyoptix(), self.construction_point_2.get_coord_pyoptix(), \
-               self.recording_wavelength, self.get_tpmm(0)
+            self.recording_wavelength, self.get_tpmm(0)
 
     def get_solemio_coords(self):
         """
@@ -2693,8 +2697,8 @@ class PlaneHoloGrating(Grating):
         print("dcos = ", dcos)
         print("phi2 = ", phi)
         return self.construction_point_1.get_coord_solemio(), \
-               self.construction_point_2.get_coord_solemio(point1=self.construction_point_1), \
-               self.recording_wavelength
+            self.construction_point_2.get_coord_solemio(point1=self.construction_point_1), \
+            self.recording_wavelength
 
     def get_tpmm(self, point_m):
         """
@@ -2750,7 +2754,7 @@ class PlaneHoloGrating(Grating):
         tpm = np.array(tpm, dtype=np.float64)
         if not return_tpm:
             return np.polyfit(np.linspace(-x_span / 2, x_span / 2, sample_number, dtype=np.float64), tpm, order) * \
-                   np.array([milli ** (n + 1) for n in range(order + 1)][::-1], dtype=np.float64)
+                np.array([milli ** (n + 1) for n in range(order + 1)][::-1], dtype=np.float64)
         else:
             return (np.polyfit(np.linspace(-x_span / 2, x_span / 2, sample_number, dtype=np.float64), tpm, order) *
                     np.array([milli ** (n + 1) for n in range(order + 1)][::-1], dtype=np.float64), tpm)
@@ -2775,8 +2779,9 @@ class PlaneHoloGrating(Grating):
         plt = figure(width=1000, height=300)
         plt.xaxis.axis_label = "Distance from center (m)"
         plt.yaxis.axis_label = "Number of groove per meter"
-        plt.line(np.linspace(-x_span/2, x_span/2, sample_number), np.array(tpm), legend_label="local #groove/m")
-        plt.line(np.linspace(-x_span/2, x_span/2, sample_number), fit(np.linspace(-x_span/2, x_span/2, sample_number)),
+        plt.line(np.linspace(-x_span / 2, x_span / 2, sample_number), np.array(tpm), legend_label="local #groove/m")
+        plt.line(np.linspace(-x_span / 2, x_span / 2, sample_number),
+                 fit(np.linspace(-x_span / 2, x_span / 2, sample_number)),
                  legend_label=f"fit (mm-1) : {coeffs * np.array([milli ** (n + 1) for n in range(order + 1)][::-1])}",
                  color="red")
         show(plt)
