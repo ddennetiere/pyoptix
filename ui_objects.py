@@ -151,13 +151,16 @@ def display_parameter_sheet(oe):
 
 
 def general_FWHM(x):
-    x_dist = x - x.mean()
-    x_dist = np.sort(x_dist)
-    x_integral_dist_pos = np.cumsum(np.where(x_dist > 0, 1, 0))
-    x_fwhm_pos = x_dist[x_integral_dist_pos > 0.87 * x_integral_dist_pos.max()][0]
-    x_integral_dist_neg = np.cumsum(np.where(x_dist[::-1] < 0, 1, 0))
-    x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87 * x_integral_dist_neg.max()][0]
-    return x_fwhm_pos - x_fwhm_neg
+    # x_dist = x - x.mean()
+    # x_dist = np.sort(x_dist)
+    # x_integral_dist_pos = np.cumsum(np.where(x_dist > 0, 1, 0))
+    # x_fwhm_pos = x_dist[x_integral_dist_pos > 0.87 * x_integral_dist_pos.max()][0]
+    # x_integral_dist_neg = np.cumsum(np.where(x_dist[::-1] < 0, 1, 0))
+    # x_fwhm_neg = x_dist[::-1][x_integral_dist_neg > 0.87 * x_integral_dist_neg.max()][0]
+    # return x_fwhm_pos - x_fwhm_neg
+    hist, bin_edges = np.histogram(x, bins="auto", density=True)
+    top_half = bin_edges[:-1][hist > hist.max() / 2]
+    return np.abs(top_half[-1] - top_half[0])
 
 
 def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
@@ -289,7 +292,8 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
         # p.circle(x, y, size=radius, color=colors_jet, alpha=0.1)
 
     # create the horizontal histogram
-    hhist, hedges = np.histogram(x, bins=max(20, int(x.shape[0] / 100)))
+    # hhist, hedges = np.histogram(x, bins=max(20, int(x.shape[0] / 100)))
+    hhist, hedges = np.histogram(x, bins="doane")
     hzeros = np.zeros(len(hedges) - 1)
     hmax = max(hhist) * 1.1
 
@@ -320,7 +324,8 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
     ph.add_layout(mytext)
 
     # create the vertical histogram
-    vhist, vedges = np.histogram(y, bins=max(20, int(y.shape[0] / 100)))
+    # vhist, vedges = np.histogram(y, bins=max(20, int(y.shape[0] / 100)))
+    vhist, vedges = np.histogram(y, bins="doane", density=True)
     vzeros = np.zeros(len(vedges) - 1)
     vmax = max(vhist) * 1.1
 
