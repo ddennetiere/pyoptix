@@ -23,7 +23,7 @@ from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
 from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet, \
-    plot_beamline, plot_aperture
+    plot_beamline, plot_aperture, general_FWHM
 from numpy import pi, cos, sin, tan, arccos, arcsin, arctan
 from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import minimize
@@ -513,7 +513,8 @@ class Beamline(object):
         show(p)
 
     def get_resolution(self, mono_slit=None, wavelength=None, orientation="vertical", dlambda_over_lambda=1 / 5000,
-                       show_spd=False, verbose=0, nrays=5000, criterion="fwhm", return_all=False, **kwargs):
+                       show_spd=False, verbose=0, nrays=5000, criterion="fwhm", return_all=False, distance_from_slit=0,
+                       **kwargs):
         """
         Computes the resolution of a beamline in its `mono_slit` plane at a given `wavelength`. An a priori resolution
         must be given as `dlambda_over_lambda` for calculation purposes and the orientation of deviation relative
@@ -522,6 +523,8 @@ class Beamline(object):
         depending on parameter criterion).
         Resolution is then the lambda/dlambda such as the two spots don't overlap.
 
+        :param distance_from_slit: offset along incoming beam at which to measure resolution from mono_slit position
+        :type distance_from_slit: float
         :param criterion: Criterion for resolution computation either rms or fwhm.
         :type criterion: str
         :param mono_slit: Slit plane
@@ -560,37 +563,44 @@ class Beamline(object):
             dim = "X"
         else:
             raise AttributeError("Unknown orientation")
-        spd = mono_slit.get_diagram()
+        spd = mono_slit.get_diagram(distance_from_slit)
         spd = spd[spd["Intensity"] != 0]
         if show_spd:
             print(spd)
-            mono_slit.show_diagram()
+            mono_slit.show_diagram(distance_from_slit)
         projection = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim])
         projection_dl = np.array(
             spd.where(spd["Lambda"] == (wavelength + wavelength * dlambda_over_lambda)).dropna()[dim])
         if criterion == "fwhm":
-            vhist, vedges = np.histogram(spd.where(spd["Lambda"] == wavelength).dropna()[dim], bins=100)
-            peaks, _ = find_peaks(vhist, height=vhist.max())
-            res_half = peak_widths(vhist, peaks, rel_height=0.5)
-            mono_chr_fwhm = (res_half[0] * (vedges[1] - vedges[0]))[0]
+            # vhist, vedges = np.histogram(spd.where(spd["Lambda"] == wavelength).dropna()[dim], bins=100)
+            # peaks, _ = find_peaks(vhist, height=vhist.max())
+            # res_half = peak_widths(vhist, peaks, rel_height=0.5)
+            # mono_chr_fwhm = (res_half[0] * (vedges[1] - vedges[0]))[0]
+            mono_chr_fwhm = general_FWHM(spd.where(spd["Lambda"] == wavelength).dropna()[dim])
         else:
-            mono_chr_fwhm = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim]).std() * 2.35
+            mono_chr_fwhm = np.array(spd.where(spd["Lambda"] == wavelength).dropna()[dim]).std()
         if show_spd and criterion == "fwhm":
             import matplotlib.pyplot as plt
-            plt.plot(vedges[1:], vhist)
-            plt.plot(vedges[peaks], vhist[peaks], "x")
-            h, left, right = res_half[1:]
-            widths = (h, vedges[int(left[0])], vedges[int(right[0])])
-            plt.hlines(*widths, color="C2")
+            vhist, vedges = np.histogram(spd.where(spd["Lambda"] == wavelength).dropna()[dim], bins="auto")
+            plt.plot(vedges[:-1], vhist)
+            # plt.plot(vedges[1:], vhist)
+            # plt.plot(vedges[peaks], vhist[peaks], "x")
+            # h, left, right = res_half[1:]
+            # widths = (h, vedges[int(left[0])], vedges[int(right[0])])
+            # plt.hlines(*widths, color="C2")
             plt.show()
         distance = abs(np.mean(projection) - np.mean(projection_dl))
         resolution = (1 / dlambda_over_lambda) * distance / mono_chr_fwhm
         if verbose:
-            print(f"FWHM monochromatique : {mono_chr_fwhm * 1e6:.2f} µm")
-            print(f"dispersion dans le plan (m) : {distance * 1e6:.2f} µm")
-            print(f"Lambda = {wavelength * 1e9:.5f} nm")
-            print("lambda_over_dlambda for calculation :", 1 / dlambda_over_lambda)
-            print("calculated resolution :", resolution)
+            if verbose >1:
+                print(f"FWHM monochromatique : {mono_chr_fwhm * 1e6:.2f} µm")
+                print(f"dispersion dans le plan (m) : {distance * 1e6:.2f} µm")
+                print(f"Lambda = {wavelength * 1e9:.5f} nm")
+                print("lambda_over_dlambda for calculation :", 1 / dlambda_over_lambda)
+                print("calculated resolution :", resolution)
+            else:
+                print(f"FWHM @ {1239.842e-9/wavelength:.2f} eV : {mono_chr_fwhm * 1e6:.2f} µm, dispersion :"
+                      f"{distance * 1e6:.2f} µm, resolution : {resolution}")
         self.active_chain[0].nrays = stored_nrays
         mono_slit.next = slit_next_OE
 
