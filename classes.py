@@ -1478,7 +1478,7 @@ class OpticalElement(metaclass=PostInitMeta):
         Returns:
         bool: The activity state of the aperture.
         """
-        return get_aperture_activity(self.element_id)[1]
+        return get_aperture_activity(self.element_id)
 
     def add_rectangular_stop(self, x_width, y_width, opacity=0, x_center=0, y_center=0, angle=0):
         """
