@@ -1050,11 +1050,11 @@ class OpticalElement(metaclass=PostInitMeta):
         surface_frame = Rotation.from_matrix([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
         mat = np.array([x_vector, y_vector, z_vector])
         if "film" in self._element_type.lower() or "source" in self._element_type.lower():
-            pitch, roll, yaw = Rotation.from_matrix(mat).as_euler("xyz", degrees=True)
+            pitch, roll, yaw = Rotation.from_matrix(mat).as_euler("xyz", degrees=degrees)
             mat = surface_frame.apply(mat)
         else:
             mat = mirror_frame.apply(mat)
-            roll, pitch, yaw = Rotation.from_matrix(mat).as_euler("xyz", degrees=True)
+            roll, pitch, yaw = Rotation.from_matrix(mat).as_euler("xyz", degrees=degrees)
         mat = Rotation.from_matrix(mat)
         if verbose:
             print("Orientation of", self.name)
