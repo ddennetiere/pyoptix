@@ -18,7 +18,7 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
                                 replace_stop_by_polygon, insert_rectangular_stop, replace_stop_by_rectangle,
                                 get_ellipse_parameters, add_elliptical_stop, insert_elliptical_stop,
                                 replace_stop_by_ellipse, add_circular_stop, insert_circular_stop,
-                                replace_stop_by_circle, get_surface_frame, find_element_id)
+                                replace_stop_by_circle, get_surface_frame, find_element_id, get_exit_frame)
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
@@ -1064,6 +1064,45 @@ class OpticalElement(metaclass=PostInitMeta):
         mat = Rotation.from_matrix(mat)
         if verbose:
             print("Orientation of", self.name)
+            print(list(zip(["roll", "pitch", "yaw"], [roll, pitch, yaw])))
+            print("X:", list(zip("SXZ", mat.as_matrix()[0])))
+            print("Y:", list(zip("SXZ", mat.as_matrix()[1])))
+            print("Z:", list(zip("SXZ", mat.as_matrix()[2])))
+        return {"X_pyoptix": x_vector, "Y_pyoptix": y_vector, "Z_pyoptix": z_vector, "Center_pyoptix": pos_vector,
+                "X_soleil": mat.as_matrix()[0], "Y_soleil": mat.as_matrix()[1], "Z_soleil": mat.as_matrix()[2],
+                "Center_soleil": surface_frame.apply(pos_vector),
+                "pitch": pitch, "yaw": yaw, "roll": roll}
+
+    def get_exit_frame(self, verbose=0, degrees=True):
+        """
+        Returns the beam frame orientation and position after the given element in the absolute frame
+
+        This method return an array of four vectors of size 3, in the location pointed by frame_vectors.
+        They are respectively and in this order, the unit vectors in X, Y, and Z, followed by the position of the
+        frame origin in the absolute frame, where Z in normal to the surface at it center, Y tangent to the length
+        of the surface, X tangent to the width of the surface.
+        The PyOptix reference frame (X,Y,Z) translates in the SOLEIL
+        frame as (-X, Z, S), ie the SOLEIL frame (S, X, Z) has a PyOptix matrix of [[0,0,1], [-1,0,0], [0,1,0]]
+
+        :return: dictionnary containing the coordinate of each local axis of the exit frame in the reference frame,
+            a 3 float array describing its center and the pitch, roll and yaw angle of the surface frame relative to
+            rotations around X, Y and Z respectively
+        :rtype: dict
+        """
+        vectors = get_exit_frame(self.element_id)
+        x_vector, y_vector, z_vector, pos_vector = vectors
+        # mirror_frame = Rotation.from_matrix([[0, 1, 0], [0, 0, 1], [1, 0, 0]]).inv()
+        surface_frame = Rotation.from_matrix([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
+        mat = np.array([x_vector, y_vector, z_vector])
+        # if "film" in self._element_type.lower() or "source" in self._element_type.lower():
+        pitch, roll, yaw = Rotation.from_matrix(mat).as_euler("xyz", degrees=degrees)
+        mat = surface_frame.apply(mat)
+        # else:
+        #     mat = mirror_frame.apply(mat)
+        #     roll, pitch, yaw = Rotation.from_matrix(mat).as_euler("xyz", degrees=degrees)
+        mat = Rotation.from_matrix(mat)
+        if verbose:
+            print("Orientation exit frame after", self.name)
             print(list(zip(["roll", "pitch", "yaw"], [roll, pitch, yaw])))
             print("X:", list(zip("SXZ", mat.as_matrix()[0])))
             print("Y:", list(zip("SXZ", mat.as_matrix()[1])))

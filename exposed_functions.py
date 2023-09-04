@@ -356,6 +356,8 @@ def load_optix():
     optix.GetAperturesActive.restypes = INT
     optix.GetSurfaceFrame.argtypes = [HANDLE, POINTER(c_double)]
     optix.GetSurfaceFrame.restypes = BOOLEAN
+    optix.GetExitFrame.argtypes = [HANDLE, POINTER(c_double)]
+    optix.GetExitFrame.restypes = BOOLEAN
     optix.GetTransmissive.argtypes = [HANDLE, HANDLE]
     optix.GetTransmissive.restypes = INT
     optix.SetTransmissive.argtypes = [HANDLE, BOOLEAN]
@@ -781,6 +783,15 @@ def get_surface_frame(element_id):
     pointer = frame_vectors.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
     # pointer, read_only_flag = frame_vectors.__array_interface__['data']
     result = optix.GetSurfaceFrame(element_id, pointer)
+    return result, frame_vectors
+
+
+@catch_c_error
+def get_exit_frame(element_id):
+    frame_vectors = np.empty((4, 3), dtype=float)
+    pointer = frame_vectors.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    # pointer, read_only_flag = frame_vectors.__array_interface__['data']
+    result = optix.GetExitFrame(element_id, pointer)
     return result, frame_vectors
 
 
