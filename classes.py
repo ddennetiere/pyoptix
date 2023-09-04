@@ -2491,6 +2491,29 @@ class Grating(OpticalElement):
     def line_density(self, value):
         self._line_density = self._set_parameter("lineDensity", value)
 
+    def get_angles(self, degree=True):
+        """
+        Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
+        :param degree: if True angles are returned in degrees
+        :type degree: bool
+        :return: dictionnary containing alpha, beta and theta
+        :rtype: dict
+        """
+        def unit_vector(vector):
+            return vector / np.linalg.norm(vector)
+
+        v1 = self.get_local_frame()["Z_pyoptix"]
+        v2 = self.get_exit_frame()["Y_pyoptix"]
+        v1_u = unit_vector(v1)
+        v2_u = unit_vector(v2)
+        beta = np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+        alpha = self.theta * 2 - np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+        theta = self.theta
+        if degree:
+            return dict(beta=np.degrees(beta), alpha=np.degrees(alpha), theta=np.degrees(self.theta))
+        else:
+            return dict(beta=beta, alpha=alpha, theta=theta)
+
 
 class PlaneHoloGrating(Grating):
     """
