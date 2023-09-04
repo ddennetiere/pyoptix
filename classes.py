@@ -610,7 +610,7 @@ class Beamline(object):
         else:
             return resolution
 
-    def draw_to_scale(self, wavelength=300e-9, radiate=False, configurations=[], plot3D=False,
+    def draw_to_scale(self, wavelength=300e-9, radiate=False, configurations=[], plot3D=False, beamline_walls=None,
                       **kwargs):
         """
         Generate and plot the beamline spot diagram to scale for each recording optical element
@@ -627,6 +627,12 @@ class Beamline(object):
             Set to True if multiple configurations are provided
         configurations : list of str, optional
             Configurations to be plotted (default is []). If [], the current configuration of the beamline is used
+        plot3D : bool
+            If True, the spots are plotted in 3 dimensions. Beware if the beamline is long,
+            the plot is hard to navigate
+        beamline_walls : numpy.array
+            Array of (X,S) pair of coordinates representing the physical beamline corners that gets plotted in the top
+            view diagram
         kwargs : keyword arguments, optional
             Keyword arguments passed to beamline align_steps method
 
@@ -679,7 +685,7 @@ class Beamline(object):
                     impacts["X"] *= -1
                     diags.append(impacts)
         spots = pd.concat(diags)
-        plot_beamline(spots, plot_3D=plot3D)
+        plot_beamline(spots, plot_3D=plot3D, beamline_walls=beamline_walls)
         return spots
 
 

@@ -524,7 +524,7 @@ def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_s
     return fig
 
 
-def plot_beamline(spots, plot_3D=False):
+def plot_beamline(spots, plot_3D=False, beamline_walls=None):
     spots = spots.loc[spots['Intensity'] != 0]
     spots["size"] = 0.1
     if len(list(spots["configuration"].unique())) == 1:
@@ -546,8 +546,12 @@ def plot_beamline(spots, plot_3D=False):
                              "X": "X",
                              "Y": "Z"},
                          hover_data=['name', "configuration", "center_s", "center_x"], title="Top view")
+        if beamline_walls is not None:
+            beamline_walls_fig = px.line({"Z": beamline_walls[:, 1],
+                                          "X": beamline_walls[:, 0]}, x="Z", y="X")
+            fig.add_trace(beamline_walls_fig.data[0])
         fig.update_layout(scene=dict(xaxis_title='X',
-                                     yaxis_title='Z', ))
+                                     yaxis_title='Z', ), title="Top view")
         fig.show()
         fig = px.scatter(spots, x="Z", y="Y", color=color_by,
                          labels={
