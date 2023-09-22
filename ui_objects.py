@@ -526,7 +526,8 @@ def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_s
 
 def plot_beamline(spots, plot_3D=False, beamline_walls=None):
     spots = spots.loc[spots['Intensity'] != 0]
-    spots["size"] = 0.1
+    if "size" not in spots.columns:
+        spots.assign(size=0.1)
     if len(list(spots["configuration"].unique())) == 1:
         color_by = "name"
     else:
