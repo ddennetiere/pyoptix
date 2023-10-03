@@ -178,7 +178,7 @@ class Beamline(object):
         self.active_chain_name = None
         self.name = name
         self.optical_distances = None
-        self.align_steps = lambda lambda_align: None
+        self.align_steps = lambda lambda_align, lambda_radiate: None
         self.n_generated_rays = 0
 
     def save_configuration(self, filename=None):
@@ -270,12 +270,15 @@ class Beamline(object):
         ret_str += self._active_chain.__repr__()
         print(ret_str)
 
-    def align(self, lambda_align, from_element=None, **kwargs):
+    def align(self, lambda_align, lambda_radiate, from_element=None, **kwargs):
         """
         Computes the absolute positions of the optics using the optics parameters. To be called before radiate.
 
         :param lambda_align: Wavelength to be used for coordinate calculations in m. Can be different from actual
             radiated wavelength
+        :type lambda_align: float
+        :param lambda_radiate: Wavelength to be used for setting source in m. Can be different from
+            alignment wavelength
         :type lambda_align: float
         :param from_element: Source element from which to compute the coordinates. Default is first element of
             active_chain
@@ -287,11 +290,11 @@ class Beamline(object):
 
         self.get_distance_between_oe(None, None)
         try:
-            self.align_steps(lambda_align, **kwargs)
+            self.align_steps(lambda_align, lambda_radiate, **kwargs)
         except AttributeError:
-            raise AttributeError("Beamline's method align_steps must have one positional argument which is the "
-                                 "wavelength of alignment and can have as many keyword argument as needed."
-                                 "Default is lambda wavelength: None. ")
+            raise AttributeError("Beamline's method align_steps must have two positional arguments which are the "
+                                 "wavelength of alignment and radiation and can have as many keyword argument as "
+                                 "needed.")
         if from_element is not None:
             ret = align(from_element.element_id, lambda_align)
         else:
@@ -553,7 +556,7 @@ class Beamline(object):
         slit_next_OE = mono_slit.next
         mono_slit.next = None
         self.active_chain[0].nrays = nrays
-        self.align(wavelength, **kwargs)
+        self.align(wavelength, wavelength, **kwargs)
         self.generate(wavelength)
         self.generate(wavelength + wavelength * dlambda_over_lambda)
         self.radiate()
@@ -670,7 +673,7 @@ class Beamline(object):
                 for oe in self.active_chain:
                     oe.recording_mode = RecordingMode.recording_output
                 self.clear_impacts(clear_source=True)
-                self.align(lamda, **kwargs)
+                self.align(lamda, lamda, **kwargs)
                 self.generate(lamda)
                 self.radiate()
             for oe in self.active_chain:
