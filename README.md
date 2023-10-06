@@ -11,10 +11,10 @@ Installing
 
    Installation page pf miniconda: https://docs.conda.io/en/latest/miniconda.html
 
-2. Create a python 3.8.10 dedicated environment and install required packages
+2. Create a python 3.9 dedicated environment and install required packages
 
    ```bash
-   conda create PyOptiX python=3.8.10
+   conda create PyOptiX python=3.9
    conda activate PyOptiX
    conda install lxml
    ```
@@ -22,7 +22,7 @@ Installing
 3. Install Jupyterlab (recommended scripting environment )
 
    ```bash
-   conda install jupyterlab bokeh pandas
+   conda install jupyterlab bokeh pandas plotly
    ```
 
    Create jupyter configuration file

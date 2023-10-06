@@ -31,11 +31,11 @@ Installing PyOptiX
 
    Installation page pf miniconda: https://docs.conda.io/en/latest/miniconda.html
 
-#. Create a python 3.8.10 dedicated environment and install required packages
+#. Create a python 3.9 dedicated environment and install required packages
 
    .. code-block:: Python
 
-      conda create PyOptiX python=3.8.10
+      conda create PyOptiX python=3.9
       conda activate PyOptiX
       conda install lxml
 
@@ -43,7 +43,7 @@ Installing PyOptiX
 
    .. code-block:: Python
 
-      conda install jupyterlab bokeh pandas
+      conda install jupyterlab bokeh pandas plotly
 
    Create jupyter configuration file
 

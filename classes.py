@@ -1305,7 +1305,7 @@ class OpticalElement(metaclass=PostInitMeta):
         MCPL (see https://mctools.github.io/mcpl/) in the frame
         of reference given in parameter reference_frame (see doc of OpticalElement.get_impacts)
 
-        :param reference_frame:reference frame for coordinates see  OpticalElement.get_impacts
+        :param reference_frame: reference frame for coordinates see  OpticalElement.get_impacts
         :type reference_frame: str
         :return: None
         :rtype: Nonetype
@@ -1471,9 +1471,8 @@ class OpticalElement(metaclass=PostInitMeta):
         while adding a transparent Region opens an aperture though all the stacked stops &nd still does not change
         the outside
 
-
         - The logical stack should define reducing region sizes from bottom to top. This is intended to allow rounding
-        of squared apertures and stops.
+            of squared apertures and stops.
 
         All functions of the Aperture API are returning a size_t value. A negative return value, actually -1, means an
         error occurred and the GetOptiXLastError can be checked for a reason.
@@ -1515,7 +1514,7 @@ class OpticalElement(metaclass=PostInitMeta):
         Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.
 
         Parameters:
-        active (bool): The activity state of the aperture. Default is True.
+            active (bool): The activity state of the aperture. Default is True.
         """
         set_aperture_activity(self.element_id, active)
 
@@ -1524,7 +1523,7 @@ class OpticalElement(metaclass=PostInitMeta):
         Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.
 
         Returns:
-        bool: The activity state of the aperture.
+            bool: The activity state of the aperture.
         """
         return get_aperture_activity(self.element_id)
 
@@ -1533,13 +1532,13 @@ class OpticalElement(metaclass=PostInitMeta):
         Add a rectangular region to the aperture. X axis is along the length of the optical element.
 
         Parameters:
-        x_width (float): Width of the rectangular region.
-        y_width (float): Height of the rectangular region.
-        opacity (float): Opacity of the rectangular stop. Default is 0 meaning transparent inside the rectangle,
-            absorbant outside of it.
-        x_center (float): X-coordinate of the center of the rectangular stop. Default is 0.
-        y_center (float): Y-coordinate of the center of the rectangular stop. Default is 0.
-        angle (float): Rotation angle of the rectangular stop in radians. Default is 0.
+            x_width (float): Width of the rectangular region.
+            y_width (float): Height of the rectangular region.
+            opacity (float): Opacity of the rectangular stop. Default is 0 meaning transparent inside the rectangle,
+                absorbant outside of it.
+            x_center (float): X-coordinate of the center of the rectangular stop. Default is 0.
+            y_center (float): Y-coordinate of the center of the rectangular stop. Default is 0.
+            angle (float): Rotation angle of the rectangular stop in radians. Default is 0.
         """
         add_rectangular_stop(self.element_id, x_width, y_width, opacity, x_center, y_center, angle)
 
@@ -1635,7 +1634,7 @@ class OpticalElement(metaclass=PostInitMeta):
 
         Returns:
             tuple: A tuple containing the parameters of the elliptical stop : boolean=1 if parameters have been
-                successfully retrieved + parameters in the order defined in add_elliptical_stop
+            successfully retrieved + parameters in the order defined in add_elliptical_stop
         """
         return get_ellipse_parameters(self.element_id, index)
 
@@ -1751,6 +1750,7 @@ class Source(OpticalElement):
         Constructor of a Source type element. Inherits OpticalElement class.
         Acceptable element_types are "GaussianSource", "RadialSource" or
         "XYGridSource"
+
         :param kwargs: See OpticalElement doc for other parameters
         """
         if "element_type" in kwargs:

@@ -712,8 +712,11 @@ def config_forge(beamline, lambda_align, lambda_radiate, names=None):
     ["source name","grating","endstation"], otherwise widget will be names "Configuration element 1" and so on.
 
     Use example :
-    >> display(config_forge(beamline=Hermes, lambda_align=lambda_align, lambda_radiate=lambda_radiate,
-               names=["Ondulator","End station","Grating"]))
+
+    .. code-block:: python
+
+        >> display(config_forge(beamline=Hermes, lambda_align=lambda_align, lambda_radiate=lambda_radiate,
+            names=["Ondulator","End station","Grating"]))
 
     :param beamline: beamline to be configured
     :type beamline: pyoptix.classes.Beamline
