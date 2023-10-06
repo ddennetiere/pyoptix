@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 from bokeh.plotting import figure, show
 from bokeh.io import export_png
@@ -12,10 +13,12 @@ from bokeh.transform import linear_cmap
 from bokeh.models import PolyAnnotation, ColumnDataSource, LabelSet
 import ipysheet as ipys  # sheet, cell, s_row, s_column, cell_range
 import ipywidgets
-from IPython.display import display
+from IPython.display import display, clear_output
 import plotly.express as px
 import pandas as pd
 import plotly.graph_objs as go
+from scipy.constants import h, c, eV
+import inspect
 from numpy.polynomial import Polynomial
 
 
@@ -491,7 +494,7 @@ def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_s
 
     """
     # Generate a grid of values for x and y
-    x = np.linspace(-1, 1, mesh) # axes are scaled later because the polynomials of legval2d are defined over [-1,1]
+    x = np.linspace(-1, 1, mesh)  # axes are scaled later because the polynomials of legval2d are defined over [-1,1]
     y = np.linspace(-1, 1, mesh)
     X, Y = np.meshgrid(x, y)
 
@@ -501,8 +504,8 @@ def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_s
     else:
         Z = legval2d(X, Y, coeffs)
 
-    x_scaled = (x + xy_limits[0])*(xy_limits[1] - xy_limits[0])
-    y_scaled = (y + xy_limits[2])*(xy_limits[3] - xy_limits[2])
+    x_scaled = (x + xy_limits[0]) * (xy_limits[1] - xy_limits[0])
+    y_scaled = (y + xy_limits[2]) * (xy_limits[3] - xy_limits[2])
     X, Y = np.meshgrid(x_scaled, y_scaled)
     # Create the 3D surface using Plotly
     fig = go.Figure(data=[go.Surface(x=X, y=Y, z=Z)])
@@ -513,11 +516,11 @@ def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_s
                                  yaxis_title='Y',
                                  zaxis_title='Z'))
     if probe_stat:
-        Z_y = Z[np.abs(Y) < probe_stat/2]
-        Z_x = Z[np.abs(X) < probe_stat/2]
+        Z_y = Z[np.abs(Y) < probe_stat / 2]
+        Z_x = Z[np.abs(X) < probe_stat / 2]
 
-        Zp_y = np.diff(Z_y)/np.diff(Y[np.abs(X) < probe_stat/2])
-        Zp_x = np.diff(Z_x) / np.diff(X[np.abs(Y) < probe_stat/2])
+        Zp_y = np.diff(Z_y) / np.diff(Y[np.abs(X) < probe_stat / 2])
+        Zp_x = np.diff(Z_x) / np.diff(X[np.abs(Y) < probe_stat / 2])
 
         print(f"Along X : \n\tshape error = {Z_x.std()} m RMS\n\tslope error = {Zp_x.std()} rad RMS")
         print(f"Along Y : \n\tshape error = {Z_y.std()} m RMS\n\tslope error = {Zp_y.std()} rad RMS")
@@ -538,7 +541,7 @@ def plot_beamline(spots, plot_3D=False, beamline_walls=None):
                             hover_data=['name', "configuration", "center_s", "center_x"], title="3D View",
                             height=800, size="size"
                             )
-        fig.update_layout(scene={'aspectmode':'data'})
+        fig.update_layout(scene={'aspectmode': 'data'})
         fig.show()
     else:
         fig = px.scatter(spots, x="Z", y="X", color=color_by,
@@ -646,3 +649,151 @@ def plot_beamline_normals(beamline, enlarge_normals=True, orthonormal=True):
         #                              zaxis_range=[-length_bl / 2, length_bl / 2]))
         fig.update_layout(scene={'aspectmode': 'data'}, )
     fig.show()
+
+
+def generate_widget_for_callable_argument(callable_func):
+    """
+    Generate JupyterLab widgets to set the argument of a callable function.
+
+    Parameters:
+        callable_func (callable): The function for which you want to create widgets.
+
+    Returns:
+        widgets.VBox: A VBox widget containing input widgets for the callable's arguments.
+    """
+
+    # Get the names of the callable's arguments and their default values
+    argspec = inspect.getfullargspec(callable_func)
+    arg_names = argspec.args
+    defaults = argspec.defaults
+    print((arg_names, defaults))
+
+    # Create input widgets for each argument
+    input_widgets = []
+
+    for arg_name, default_value in zip(arg_names[2:], defaults):
+        # Use text widgets for simplicity, but you can use other widgets as needed
+        print(arg_name, default_value)
+        if callable(default_value):
+            print(default_value)
+            lambda_pattern = r'lambda\s+([\w\s]+):[\w\s\.\+\-\/\*]+'
+            # Search for lambda functions in the code
+            match = re.search(lambda_pattern, inspect.getsource(default_value))
+            if match:
+                print(match[0])
+                default_value = match[0]
+            else:
+                default_value = inspect.getsource(default_value)
+            widget = ipywidgets.Text(
+                value=str(default_value),
+                description=arg_name,
+                disabled=False,
+                style={'description_width': 'initial'}
+            )
+
+        else:
+            widget = ipywidgets.Text(
+                value=str(default_value),
+                description=arg_name,
+                disabled=False,
+                style={'description_width': 'initial'}
+            )
+        input_widgets.append(widget)
+
+    return input_widgets, arg_names[2:]
+
+
+def config_forge(beamline, lambda_align, lambda_radiate, names=None):
+    """
+    Creates interactive Jupyterlab widgets that sets up the simulation using alignment parameters and entropy from
+    beamline.chains names so that a user friendly selection can be made. Since the meaning of the names of the
+    configuration are user dependent, the names can be given in argument. For example, if configuration are names
+    in a pattern "<source name>_<grating name>_<endstation name>", names should be
+    ["source name","grating","endstation"], otherwise widget will be names "Configuration element 1" and so on.
+
+    Use example :
+    >> display(config_forge(beamline=Hermes, lambda_align=lambda_align, lambda_radiate=lambda_radiate,
+               names=["Ondulator","End station","Grating"]))
+
+    :param beamline: beamline to be configured
+    :type beamline: pyoptix.classes.Beamline
+    :param lambda_align: wavelength at which to align the optical elements in m
+    :type lambda_align: float
+    :param lambda_radiate: wavelength to radiate from source in m
+    :type lambda_radiate: float
+    :param names: list of names indexing beamline.chains names, see above.
+    :type names: list
+    :return: layout containing widgets to display
+    :rtype: ipywidgets.VBox
+    """
+    config_variables = [list(set([config.split("_")[i] for config in beamline.chains.keys()])) for i in
+                        range(len(beamline.active_chain_name.split("_")))]
+    hc = h * c / eV
+    output = ipywidgets.Output()
+    widgets_config = []
+    invariable = []
+    if names is not None:
+        names = iter(names)
+    else:
+        names = iter([f"Configuration element {i}:" for i in range(len(config_variables))])
+    for i, variable in enumerate(config_variables):
+        if len(variable) > 1:
+            widgets_config.append(ipywidgets.Dropdown(options=variable,
+                                                      value=beamline.active_chain_name.split("_")[i],
+                                                      description=next(names),
+                                                      disabled=False,
+                                                      style={'description_width': 'initial'})
+                                  )
+        else:
+            invariable.append((i, variable[0]))
+
+    def run_simulation():
+        clear_output()
+        conf_list = [widget.value for widget in widgets_config]
+        for invar in invariable:
+            conf_list.insert(*invar)
+
+        lambda_align = hc / E_align.value
+        lambda_radiate = hc / E_radiate.value
+        beamline.active_chain[0].nrays = N_rays.value
+        print(f"Running {N_rays.value} rays of {E_radiate.value:.2f} eV through ", "_".join(conf_list),
+              f" aligned for {E_align.value:.2f} eV ")
+        try:
+            assert "_".join(conf_list) in beamline.chains.keys()
+        except AssertionError:
+            raise AttributeError("This combination of parameters leads to a non existant configuration")
+        beamline.active_chain = "_".join(conf_list)
+
+        beamline.align(lambda_align, lambda_radiate,
+                       **{name: eval(widget.value) for name, widget in zip(align_arg_names,
+                                                                           align_widgets)})
+        beamline.clear_impacts(clear_source=True)
+        beamline.generate(lambda_radiate)
+        beamline.radiate()
+
+    button = ipywidgets.Button(description="Rerun")
+
+    E_align = ipywidgets.FloatText(
+        value=hc / lambda_align,
+        description='E_align:',
+        disabled=False
+    )
+    E_radiate = ipywidgets.FloatText(
+        value=hc / lambda_radiate,
+        description='E_radiate:',
+        disabled=False
+    )
+    N_rays = ipywidgets.IntText(
+        value=beamline.active_chain[0].nrays,
+        description='N rays:',
+        disabled=False
+    )
+    align_widgets, align_arg_names = generate_widget_for_callable_argument(beamline.align_steps)
+
+    def on_button_clicked(b):
+        with output:
+            run_simulation()
+
+    button.on_click(on_button_clicked)
+    show_widget = widgets_config + align_widgets + [E_align, E_radiate, N_rays, button, output]
+    return ipywidgets.VBox(show_widget)
