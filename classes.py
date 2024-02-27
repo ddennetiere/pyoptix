@@ -3154,20 +3154,61 @@ def save_beamline(beamline, active_chain_name, filename):
         pickle.dump(data, fileout)
 
 
-def align_as_pseudo_petersen(grating: PlaneHoloGrating, mirror: PlaneMirror):
-    raise NotImplementedError
-    mirror.distance_from_previous = 0
-    mirror.theta = 0
+def align_as_pseudo_petersen(grating: Grating, mirror: PlaneMirror, lambda_align: float,
+                             condition: str = "cff", condition_value=lambda l: 0.72 + 1e-9 * l, verbose: int = 0,
+                             dz: float = 15e-3):
+    """
+    The mirror associated to the grating turns around a point located at (0,-dz/2) from the grating center
+    and is at an angle compensating the grating deviation.
+    In the grating frame of reference, the mirror is therefore tangent to the circle C centered at (0,-dz/2) and
+    intersects it at (-dz*np.sin(theta), dz/2-dz*(1-np.cos(theta))) and is directed by the vector
+    (cos(theta), sin(theta)).
+    That behaviour is equivalent to a shift normal to the perfect mirror of
+    -dz*np.abs(-1+3*cos(theta)/2-sin(theta)/tan(2*theta)) and leads to a vertical shift of the exit beam of that
+    quantity times sin(2*theta)/sin(theta).
+    This script aligns the grating and the mirror in such a configuration
 
 
-def align_grating(grating: Grating, verbose: int = 0, apply_alignment: bool = True,
+    :param grating: grating instance to be aligned
+    :type grating: pyoptix.Grating or inherited
+    :param verbose: verbose level
+    :type verbose: int
+    :param mirror: mirror instance of the monochromator to be aligned
+    :type mirror: pyoptix.PlaneMirror or inherited
+    :param lambda_align: wavelength in m at which to perform computation
+    :type lambda_align: float
+    :param condition: second condition for angle computations, can be 'cff', 'omega', 'alpha' or 'deviation'
+    :type condition: str
+    :param condition_value: values that the condition takes. can be either a float for condition=cst or a callable
+        that returns a value of condition for a given wavelength
+    :type condition_value: float or callable
+    :param dz: Offset between incoming and outgoing beam in the monochromator in m
+    :type dz: float
+    :return:
+    :rtype:
+    """
+    # TODO: make it so that we get the position of intersect along the mirror surface relative to the projected grating center
+    grating_parameters = align_grating(grating, apply_alignment=True, return_parameters=True, condition=condition,
+                                       condition_value=condition_value, lambda_align=lambda_align, verbose=verbose)
+    theta = grating_parameters["theta"]
+    mirror.distance_from_previous = dz/np.sin(2*theta)
+    mirror.theta = theta/2
+    mirror.d_z = -dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
+
+
+def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bool = True,
                   return_parameters: bool = False, condition: str = "cff",
-                  condition_value=lambda l: 0.72 + 1e-9 * l, lambda_align: float = 1e-9):
+                  condition_value=lambda l: 0.72 + 1e-9 * l, lambda_align: float = 1e-9, order: int = 1,
+                  line_density:float = 450e3):
     """
     Method for aligning a grating using a relation between alpha and beta grazing angles such as their sum is known
     (known deviation), their difference is known (known omega), alpha is known (known incidence) or in the
     constant focal position condition (known cff=sin(beta)/sin(alpha)).
 
+    :param order: diffraction order on which the grating is aligned. Ignored if grating is not None.
+    :type order: int
+    :param line_density: line density of the grating at its center. Ignored if grating is not None
+    :type line_density: float
     :param grating: grating instance to be aligned
     :type grating: pyoptix.Grating or inherited
     :param verbose: verbose level
@@ -3193,27 +3234,31 @@ def align_grating(grating: Grating, verbose: int = 0, apply_alignment: bool = Tr
     else:
         condition_function = condition_value
     deviation = np.nan
+    alpha = np.nan
+    beta = np.nan
+    if grating is None:
+        order_align = order
+        line_density = line_density
+    else:
+        order_align = grating.order_align
+        line_density = grating.line_density
 
     assert condition in ["omega", "cff", "alpha", "deviation"], AttributeError("Unknown condition")
-    if grating.order_align != 0:
+    if order_align != 0:
         if condition == "omega":  # cas omega constant
-
             omega = condition_function(lambda_align)
-            # deviation = np.arcsin(# TODO : check where that formula comes from
-            #     grating.order_align * lambda_align * grating.line_density / (2 * np.sin(omega)))
-            # alpha = deviation / 2 + omega
-            # beta = deviation / 2 - omega
-            alpha = np.arcsin(grating.order_align*grating.line_density*lambda_align / (2 * np.sin(omega))) + omega
-            beta = np.arccos(np.cos(alpha) + grating.order_align * lambda_align * grating.line_density)
+            # The next formula is benchmarked against CARPEM :
+            alpha = np.arcsin(order_align*line_density*lambda_align / (2 * np.sin(omega))) + omega
+            beta = np.arccos(np.cos(alpha) + order_align * lambda_align * line_density)
             deviation = alpha + beta
         elif condition == "cff":
-            if grating.order_align > 0 and condition_function(lambda_align) > 1:
+            if order_align > 0 and condition_function(lambda_align) > 1:
                 if isinstance(condition_value, float):
                     condition_function = lambda l: 1/condition_value
                 else:
                     condition_function = lambda l: 1/condition_value(l)
             cff = condition_function(lambda_align)
-            nu = grating.order_align * lambda_align * grating.line_density
+            nu = order_align * lambda_align * line_density
             k = 1 - cff ** 2
             X = (np.sqrt(k ** 2 + nu ** 2 * cff ** 2) - nu) / k
             alpha = np.arccos(X)
@@ -3223,16 +3268,16 @@ def align_grating(grating: Grating, verbose: int = 0, apply_alignment: bool = Tr
                 print(f"\t k={k}, nu={nu}, alpha={alpha}, beta={beta}")
         elif condition == "deviation":
             deviation = condition_function(lambda_align)
-            alpha = np.arcsin(lambda_align*grating.order_align*grating.line_density/(2*np.sin(deviation/2)))+deviation/2
+            alpha = np.arcsin(lambda_align*order_align*line_density/(2*np.sin(deviation/2)))+deviation/2
             beta = deviation - alpha
         elif condition == "alpha":
             alpha = condition_function(lambda_align)
-            beta = np.arccos(np.cos(alpha)+grating.order_align*lambda_align*grating.line_density)
+            beta = np.arccos(np.cos(alpha)+order_align*lambda_align*line_density)
             deviation = alpha + beta
     else:
         if condition == "omega":
             omega = condition_value(lambda_align)
-            deviation = np.arcsin(1.0 * lambda_align * grating.line_density / (2 * np.sin(omega * degree)))
+            deviation = np.arcsin(1.0 * lambda_align * line_density / (2 * np.sin(omega * degree)))
         elif condition == "alpha":
             alpha = condition_value(lambda_align)
             deviation = 2*alpha
@@ -3244,28 +3289,43 @@ def align_grating(grating: Grating, verbose: int = 0, apply_alignment: bool = Tr
         beta = deviation / 2
 
     if apply_alignment:
+        assert grating is not None
         grating.theta = deviation / 2
+
+    # Sanity checks
+    try:
+        assert np.cos(alpha) - np.cos(beta) + order_align*lambda_align*line_density < 1e-6
+    except AssertionError:
+        raise AssertionError(f"Angles {alpha} ({alpha / degree}deg), {beta} ({beta / degree}deg) "
+                             f"violate the gratings angle laws")
+    try:
+        cond_dict = dict(cff=np.sin(beta) / np.sin(alpha), deviation=deviation, alpha=alpha, omega=(alpha - beta) / 2)
+        assert cond_dict[condition] - condition_function(lambda_align) < 1e-6  # second equation
+    except AssertionError:
+        raise AssertionError(f"Angles {alpha} ({alpha / degree}deg), {beta} ({beta / degree}deg) violate "
+                             f"the condition equations")
+
     if verbose > 0:
         print(f"\t Lambda = {lambda_align} m,")
-        print(f"\t Groove density = {grating.line_density/1000} mm-1,")
-        print(f"\t Alignment order = {grating.order_align} ,")
+        print(f"\t Groove density = {line_density/1000} mm-1,")
+        print(f"\t Alignment order = {order_align} ,")
         print(f"\t Alpha = {alpha / degree} deg,")
         print(f"\t Beta = {beta / degree} deg")
         print(f"\t Cff = {np.sin(beta) / np.sin(alpha)}")
         print(f"\t Omega = {(alpha-beta)/2/degree} deg")
         print(f"\t Deviation = {deviation / degree} deg")
-        print(f"\t Theta grating = {grating.theta / degree} deg")
+        print(f"\t Theta grating = {deviation/2 / degree} deg")
     if return_parameters:
         return dict(
             lamda=lambda_align,
-            groove_density=grating.line_density,
-            align_order=grating.order_align,
+            groove_density=line_density,
+            align_order=order_align,
             alpha_deg=alpha / degree,
             beta_deg=beta / degree,
             alpha=alpha,
             beta=beta,
-            deviation=deviation / degree,
-            theta=deviation / 2 / degree,
+            deviation=deviation,
+            theta=deviation / 2,
             omega=(alpha-beta)/2,
             omega_deg=(alpha-beta)/2/degree,
             cff=np.sin(beta) / np.sin(alpha)
