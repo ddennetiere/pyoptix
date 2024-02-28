@@ -3156,7 +3156,7 @@ def save_beamline(beamline, active_chain_name, filename):
 
 def align_as_pseudo_petersen(grating: Grating, mirror: PlaneMirror, lambda_align: float,
                              condition: str = "cff", condition_value=lambda l: 0.72 + 1e-9 * l, verbose: int = 0,
-                             dz: float = 15e-3):
+                             dz: float = 15e-3, offset_mirror_center: bool = False, return_parameters: bool = False):
     """
     The mirror associated to the grating turns around a point located at (0,-dz/2) from the grating center
     and is at an angle compensating the grating deviation.
@@ -3169,6 +3169,9 @@ def align_as_pseudo_petersen(grating: Grating, mirror: PlaneMirror, lambda_align
     This script aligns the grating and the mirror in such a configuration
 
 
+    :param offset_mirror_center: If True, the center of the mirror is set above th grating center so as to measure
+        the necessary length of the mirror. Will raise a warning since that all next optical element will be offset
+    :type offset_mirror_center: bool
     :param grating: grating instance to be aligned
     :type grating: pyoptix.Grating or inherited
     :param verbose: verbose level
@@ -3184,16 +3187,28 @@ def align_as_pseudo_petersen(grating: Grating, mirror: PlaneMirror, lambda_align
     :type condition_value: float or callable
     :param dz: Offset between incoming and outgoing beam in the monochromator in m
     :type dz: float
+    :param return_parameters: if True all alignment values are return by the function in a dict
+    :type return_parameters: bool
     :return:
     :rtype:
     """
-    # TODO: make it so that we get the position of intersect along the mirror surface relative to the projected grating center
-    grating_parameters = align_grating(grating, apply_alignment=True, return_parameters=True, condition=condition,
-                                       condition_value=condition_value, lambda_align=lambda_align, verbose=verbose)
+    # TODO: the alignment computation is fine but seems uneffective, check bugs in optix
+    params = grating_parameters = align_grating(grating, apply_alignment=True, return_parameters=return_parameters,
+                                                condition=condition, condition_value=condition_value,
+                                                lambda_align=lambda_align, verbose=verbose)
     theta = grating_parameters["theta"]
-    mirror.distance_from_previous = dz/np.sin(2*theta)
+    if offset_mirror_center:
+        mirror.distance_from_previous = 0
+        mirror.d_z = -dz/(2*np.cos(theta)) + dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
+    else:
+        mirror.distance_from_previous = dz/np.sin(2*theta)
+        mirror.d_z = dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
     mirror.theta = theta/2
-    mirror.d_z = -dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
+    params["mirror_d_z"] = mirror.d_z
+    if verbose:
+        print(f"\t mirror d_z = {mirror.d_z/milli} mm")
+    if return_parameters:
+        return params
 
 
 def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bool = True,
