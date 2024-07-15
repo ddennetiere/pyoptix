@@ -773,9 +773,14 @@ def config_forge(beamline, lambda_align, lambda_radiate, names=None):
             raise AttributeError("This combination of parameters leads to a non existant configuration")
         beamline.active_chain = "_".join(conf_list)
 
+        align_args = dict()
+        for name, widget in zip(align_arg_names, align_widgets):
+            try:
+                align_args[name] = eval(widget.value)
+            except NameError:  # case of string value parameter
+                align_args[name] = widget.value
         beamline.align(lambda_align, lambda_radiate,
-                       **{name: eval(widget.value) for name, widget in zip(align_arg_names,
-                                                                           align_widgets)})
+                       **align_args)
         beamline.clear_impacts(clear_source=True)
         beamline.generate(lambda_radiate)
         beamline.radiate()
