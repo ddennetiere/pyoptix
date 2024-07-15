@@ -618,7 +618,7 @@ class Beamline(object):
             return resolution
 
     def draw_to_scale(self, wavelength=300e-9, radiate=False, configurations=[], plot3D=False, beamline_walls=None,
-                      **kwargs):
+                      orthonorm=False, **kwargs):
         """
         Generate and plot the beamline spot diagram to scale for each recording optical element
         for the specified wavelength(s) and configurations.
@@ -626,6 +626,8 @@ class Beamline(object):
 
         Parameters
         ----------
+        orthonorm : bool
+            If True, the drawing will be done with othonormal axes
         wavelength : float or list of floats, optional
             Wavelength(s) for which to generate the beamline diagram (default is 300e-9). If list, length must match
             the number of configuration.
@@ -692,7 +694,7 @@ class Beamline(object):
                     impacts["X"] *= -1
                     diags.append(impacts)
         spots = pd.concat(diags)
-        plot_beamline(spots, plot_3D=plot3D, beamline_walls=beamline_walls)
+        plot_beamline(spots, plot_3D=plot3D, beamline_walls=beamline_walls, orthonorm=orthonorm)
         return spots
 
 
