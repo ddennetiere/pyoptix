@@ -271,7 +271,7 @@ class Beamline(object):
         ret_str += self._active_chain.__repr__()
         print(ret_str)
 
-    def align(self, lambda_align, lambda_radiate, from_element=None, **kwargs):
+    def align(self, lambda_align, lambda_radiate=None, from_element=None, **kwargs):
         """
         Computes the absolute positions of the optics using the optics parameters. To be called before radiate.
 
@@ -288,7 +288,8 @@ class Beamline(object):
         :type kwargs: Keyword arguments
         :return: code result from relative optix function
         """
-
+        if lambda_radiate is None:
+            lambda_radiate = lambda_align
         self.get_distance_between_oe(None, None)
         try:
             self.align_steps(lambda_align, lambda_radiate, **kwargs)
