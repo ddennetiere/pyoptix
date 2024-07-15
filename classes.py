@@ -553,6 +553,8 @@ class Beamline(object):
         :return: Resolution in lambda/dlambda of dict (see return_all)
         :rtype: float
         """
+        if mono_slit.get_aperture_activity():
+            print("Warning apertures are active and results might be inconsistent")
         self.clear_impacts(clear_source=True)
         stored_nrays = self.active_chain[0].nrays
         slit_next_OE = mono_slit.next
