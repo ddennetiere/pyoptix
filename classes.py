@@ -1,5 +1,6 @@
 # coding: utf-8
 import ctypes
+from typing import Callable
 import numpy as np
 from ctypes import (Union, Structure, c_int, c_double, c_uint32, c_int32, POINTER, c_void_p, cast, c_ulong,
                     create_string_buffer, c_int64, pointer)
@@ -3249,7 +3250,7 @@ def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bo
     """
     if verbose:
         print("Grating alignment")
-    if isinstance(condition_value, float):
+    if not isinstance(condition_value, Callable):
         condition_function = lambda l: condition_value
     else:
         condition_function = condition_value
