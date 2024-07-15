@@ -838,6 +838,9 @@ class OpticalElement(metaclass=PostInitMeta):
         else:
             pyoptix_param_name = param_name
         param = self._get_c_parameter(param_name)
+        if isinstance(value, np.ndarray):
+            if value.ndim == 1 and value.shape[0] == 1:
+                value = value[0]
         if isinstance(value, dict):  # value is a dictionnary
             for key in value:
                 assert key in ("value", "bounds", "multiplier", "type", "group", "flags")
@@ -858,7 +861,9 @@ class OpticalElement(metaclass=PostInitMeta):
                     param.bounds = bounds
             set_parameter(self._element_id, param_name, param)
         elif isinstance(value, np.ndarray):  # value is an array
-            assert param_name in array_parameter_list
+            print(value, value.ndim)
+            assert param_name in array_parameter_list, (f"{param_name} is not an array attribute of {self.name}, "
+                                                        f"array attributes are {array_parameter_list}")
             # print(f"setting {param_name} with array {value}")
             param.array = value
             # dump_arg_parameter(param)
