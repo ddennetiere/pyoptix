@@ -17,7 +17,7 @@ from IPython.display import display, clear_output
 import plotly.express as px
 import pandas as pd
 import plotly.graph_objs as go
-from scipy.constants import h, c, eV
+from scipy.constants import h, c, eV, degree
 import inspect
 from numpy.polynomial import Polynomial
 
@@ -527,7 +527,7 @@ def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_s
     return fig
 
 
-def plot_beamline(spots, plot_3D=False, beamline_walls=None):
+def plot_beamline(spots, plot_3D=False, beamline_walls=None, orthonorm=False):
     spots = spots.loc[spots['Intensity'] != 0]
     if "size" not in spots.columns:
         spots.assign(size=0.1)
@@ -556,6 +556,9 @@ def plot_beamline(spots, plot_3D=False, beamline_walls=None):
             fig.add_trace(beamline_walls_fig.data[0])
         fig.update_layout(scene=dict(xaxis_title='X',
                                      yaxis_title='Z', ), title="Top view")
+        if orthonorm:
+            fig.update_layout(xaxis=dict(scaleanchor='y', scaleratio=1),
+                              yaxis=dict(scaleanchor='x', scaleratio=1))
         fig.show()
         fig = px.scatter(spots, x="Z", y="Y", color=color_by,
                          labels={
@@ -565,6 +568,9 @@ def plot_beamline(spots, plot_3D=False, beamline_walls=None):
                          hover_data=['name', "configuration", "center_s", "center_z"], title="Side view")
         fig.update_layout(scene=dict(xaxis_title='S',
                                      yaxis_title='Z', ))
+        if orthonorm:
+            fig.update_layout(xaxis=dict(scaleanchor='y', scaleratio=1),
+                              yaxis=dict(scaleanchor='x', scaleratio=1))
         fig.show()
 
 
