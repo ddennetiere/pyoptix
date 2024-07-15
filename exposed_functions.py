@@ -4,9 +4,11 @@ import os
 from ctypes import ARRAY, c_voidp, c_double, Structure, c_int64, c_int32, POINTER, Union, pointer, c_int, cast
 from ctypes.wintypes import BYTE, INT, HMODULE, LPCSTR, HANDLE, DOUBLE, BOOLEAN, LARGE_INTEGER, LPVOID, UINT
 import numpy as np
-
+import logging
 global optix
 
+
+logger = logging.getLogger(__name__)
 
 class Bounds(Structure):
     """
@@ -76,7 +78,8 @@ class Parameter(Structure):
         :rtype: Nonetype
         """
         if not isinstance(np_array, np.ndarray):
-            print("a 'ndarray' argument was expected ,but the received argument type is ", type(np_array).__name__)
+            logger.error("a 'ndarray' argument was expected ,but the received argument type is "
+                         + type(np_array).__name__)
             return
         if np_array.dtype.name == 'float64':
             self._array = np_array
@@ -192,10 +195,10 @@ def init_optix():
     # initialisation auto
     try:
         test = optix
-        print(test, "already initialized")
+        logger.info(f"{test} already initialized")
     except NameError:
         load_optix()
-        print("OptiX library initialized")
+        logger.info("OptiX library initialized")
 
 
 def general_catch_c_error(function, authorized_returns):
@@ -218,16 +221,16 @@ def general_catch_c_error(function, authorized_returns):
         else:
             return_c, return_python = (ret, None)
         if show_return:
-            print(function.__name__, "returned", ret)
+            logger.info(f"{function.__name__} returned {ret}")
         if check_return:
             if return_c not in authorized_returns:
                 buf = ctypes.c_char_p()
                 optix.GetOptiXError(ctypes.byref(buf))
                 if show_non_one_return:
-                    print("return of c function ", function.__name__, " not in ", authorized_returns)
-                    print(function.__name__, "returned", ret)
-                    print(function.__name__, "C return is ", return_c)
-                    print(function.__name__, "Python return is ", return_python)
+                    logger.warning(f"return of c function {function.__name__}  not in {authorized_returns}")
+                    logger.warning(f"{function.__name__} returned {ret}")
+                    logger.warning(f"{function.__name__} C return is  {return_c}")
+                    logger.warning(f"{function.__name__} Python return is {return_python}")
                 if "No error" not in buf.value.decode():
                     raise ChildProcessError(f"In {function.__name__} error {args[0]}:\n" + buf.value.decode())
         return return_python
@@ -241,7 +244,7 @@ authorize_any_return = functools.partial(general_catch_c_error, authorized_retur
 
 def load_optix():
     global optix
-    print("initializing optix library")
+    logger.info("initializing optix library")
     # os.add_dll_directory(r'D:\Dennetiere\optix\release')
     optix = ctypes.cdll.LoadLibrary(r'D:\Dennetiere\optix\release\OptiX.dll')
     # optix = ctypes.CDLL(r'D:\Dennetiere\optix\release\OptiX.dll', winmode=0)
@@ -366,7 +369,7 @@ def load_optix():
     optix.GetTransmissive.restypes = INT
     optix.SetTransmissive.argtypes = [HANDLE, BOOLEAN]
     optix.SetTransmissive.restypes = INT
-    print("optix loaded, library version:", version())
+    logger.info(f"optix loaded, library version: {version()}")
     return optix
 
 
@@ -640,7 +643,7 @@ def get_stop_type(element_id, index):
     buffer = ctypes.c_char_p()
     nb_sides = INT(0)
     ret = optix.GetStopType(element_id, index, ctypes.byref(buffer), ctypes.byref(nb_sides))
-    print(ret, nb_sides.value, buffer)
+    logger.debug(f"get stop value returned {ret}, for {nb_sides.value} sides, buffer is {buffer}")
     return ret, nb_sides.value, buffer.value.decode()
 
 
@@ -777,7 +780,7 @@ def set_aperture_active(activity):
 def get_aperture_active():
     """switch the global aperture activity flag """
     activity = ctypes.c_bool()
-    optix.getAperturesActive(ctypes.byref(activity))
+    optix.GetAperturesActive(ctypes.byref(activity))
     return activity
 
 
