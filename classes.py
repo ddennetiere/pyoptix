@@ -3192,17 +3192,22 @@ def align_as_pseudo_petersen(grating: Grating, mirror: PlaneMirror, lambda_align
     :return:
     :rtype:
     """
-    # TODO: the alignment computation is fine but seems uneffective, check bugs in optix
+    # TODO: nope actually d_x d_y d_z are applied to the mirror in the global reference frame on the axes defines by optix
+    print("WARNING : using this method of alignment will result in off alignment on the optics downstream of the "
+          "monochromator")
     params = grating_parameters = align_grating(grating, apply_alignment=True, return_parameters=return_parameters,
                                                 condition=condition, condition_value=condition_value,
                                                 lambda_align=lambda_align, verbose=verbose)
     theta = grating_parameters["theta"]
     if offset_mirror_center:
         mirror.distance_from_previous = 0
-        mirror.d_z = -dz/(2*np.cos(theta)) + dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
+        # TODO: deal with pyoptix/optix axes ambiguity
+        # mirror.d_z = -dz/(2*np.cos(theta)) + dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
+        mirror.d_y = -dz*(0.5-np.cos(theta)) +dz*np.sin(theta)*np.tan(theta)
     else:
         mirror.distance_from_previous = dz/np.sin(2*theta)
-        mirror.d_z = dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
+        # mirror.d_z = dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
+        mirror.d_y = dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))*np.sin(2*theta)/np.sin(theta)
     mirror.theta = theta/2
     params["mirror_d_z"] = mirror.d_z
     if verbose:
