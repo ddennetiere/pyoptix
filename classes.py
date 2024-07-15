@@ -717,8 +717,8 @@ class OpticalElement(metaclass=PostInitMeta):
         Explicit method `OpticalElement.parameter = {"key":value,...}` sets any parameter field without changing those
         not in the provided dictionary keys.
 
-        Positioning referential of OpticalElement is linked to its surface : Z is normal to the surface,
-        X is along it width, Z along its height. For optical elements in normal incidence such as films usually, this
+        Positioning referential of OpticalElement is linked to its surface : Y is normal to the surface,
+        X is along it width, Z along its length. For optical elements in normal incidence such as films usually, this
         convention makes Y vertical in absence of phi modifier. Warning : referentials are inherited from an element
         to the next. A horizontally deflecting mirror should have phi=pi/2, but the next mirror if deflecting
         horizontally towards the other side should have phi=pi. See provided examples and use method
