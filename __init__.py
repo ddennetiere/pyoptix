@@ -1,7 +1,7 @@
 # coding: utf-8
 from .exposed_functions import load_optix, set_aperture_active
 from bokeh.io import output_notebook as bok_on
-from .classes import save_beamline, load_beamline
+from .classes import save_beamline, load_beamline, set_backend
 import logging
 
 global optix

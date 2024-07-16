@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+import pyoptix.classes
 from bokeh.plotting import figure, show
 from bokeh.io import export_png
 import numpy as np
@@ -194,13 +195,12 @@ def plot_spd(columndatasource, x_key="x", y_key="y", oe_name="", **kwargs):
     title = f"{y_key} vs {x_key}"
     if oe_name != "":
         title += f" {oe_name}"
-    if "beamline_name" in kwargs and "chain_name" in kwargs:
-        beamline_name = kwargs.pop("beamline_name")
-        chain_name = kwargs.pop("chain_name")
-        if beamline_name is not None:
-            title += f" of {beamline_name}"
-        if chain_name is not None:
-            title += f" in config. {chain_name}"
+    beamline_name = kwargs.get("beamline_name")
+    chain_name = kwargs.get("chain_name")
+    if beamline_name is not None:
+        title += f" of {beamline_name}"
+    if chain_name is not None:
+        title += f" in config. {chain_name}"
     title += f" at E = {1239.842e-9 / columndatasource.data['Lambda'].mean():.1f} eV"
     layout = scatter_plot_2d(columndatasource, x_key, y_key, title=title,
                              x_label=x_key, x_unit=x_unit, y_label=y_key, y_unit=y_unit, **kwargs)
@@ -399,11 +399,15 @@ def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_
     :return: layout of the plot to be used as parameter of bokeh.plotting.show
     :rtype: bokeh.models.layouts.LayoutDOM
     """
-    if not isinstance(df, pd.DataFrame):
+    if isinstance(df, pyoptix.classes.OpticalElement):
         kwargs["chain_name"] = df.beamline.active_chain_name
         kwargs["beamline_name"] = df.beamline.name
         oe_name = df.name
         df = df.get_diagram()
+    elif isinstance(df, ColumnDataSource):
+        df = df.data
+    else:
+        assert isinstance(df, pd.DataFrame)
     if x_key[0] == "d":
         x_unit = "rad"
     else:
@@ -415,13 +419,12 @@ def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_
     title = f"{y_key} vs {x_key}"
     if oe_name != "":
         title += f" {oe_name}"
-    if "beamline_name" in kwargs and "chain_name" in kwargs:
-        beamline_name = kwargs.pop("beamline_name")
-        chain_name = kwargs.pop("chain_name")
-        if beamline_name is not None:
-            title += f" of {beamline_name}"
-        if chain_name is not None:
-            title += f" in config. {chain_name}"
+    beamline_name = kwargs.get("beamline_name")
+    chain_name = kwargs.get("chain_name")
+    if beamline_name is not None:
+        title += f" of {kwargs.pop('beamline_name')}"
+    if chain_name is not None:
+        title += f" in config. {kwargs.pop('chain_name')}"
     if "width" not in kwargs:
         kwargs["width"] = 800
     if "height" not in kwargs:

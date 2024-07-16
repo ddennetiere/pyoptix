@@ -23,8 +23,10 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
-from .ui_objects import show, plot_spd, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet, \
+from .ui_objects import show, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet, \
     plot_beamline, plot_aperture, general_FWHM
+from .ui_objects import plot_spd as plot_spd_bokeh
+from .ui_objects import plot_spd_plotly
 from numpy import pi, cos, sin, tan, arccos, arcsin, arctan
 from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import minimize
@@ -61,6 +63,28 @@ optix_dictionnary = {
     "trajectoryRadius": "trajectory_radius",
 
 }
+global plot_spd
+global backend
+
+
+def set_backend(bckend="bokeh"):
+    """
+    Toggles between a bokeh backend for the spot diagrams and a plotly one (preferred)
+    :param bckend: backend to be chosen can be 'bokeh' or 'plotly'
+    :type bckend: str
+    """
+    global plot_spd
+    global backend
+    backend = bckend
+    if backend == "bokeh":
+        plot_spd = plot_spd_bokeh
+    elif backend == "plotly":
+        plot_spd = plot_spd_plotly
+    else:
+        raise ValueError(f"Unknown backend {backend}, should be either bokeh or plotly")
+
+
+set_backend("plotly")
 
 
 class PostInitMeta(type):
@@ -1201,10 +1225,14 @@ class OpticalElement(metaclass=PostInitMeta):
                 print(f"Optimal focalisation along Y at {res.x[0]} m from this plane")
             except RuntimeError:
                 print("Unable to find the optimal focalisation along Y automatically")
-        handles = []
-        if show_spd:
+        if backend == "bokeh":
+            handles = []
+            if show_spd:
+                for fig in figs:
+                    handles.append(show(fig, notebook_handle=True))
+        elif backend == "plotly":
             for fig in figs:
-                handles.append(show(fig, notebook_handle=True))
+                fig.show()
         return datasources, figs
 
     def get_diagram(self, distance_from_oe=0, show_first_rays=False):
@@ -1305,9 +1333,13 @@ class OpticalElement(metaclass=PostInitMeta):
             figs.append(plot_spd(coldatasource, x_key=x_axis, y_key=y_axis,
                                  beamline_name=self.beamline.name, chain_name=self.beamline.active_chain_name,
                                  oe_name="on " + self._name, **kwargs))
-        handles = []
-        for fig in figs:
-            handles.append(show(fig, notebook_handle=True))
+        if backend == "bokeh":
+            handles = []
+            for fig in figs:
+                handles.append(show(fig, notebook_handle=True))
+        elif backend == "plotly":
+            for fig in figs:
+                fig.show()
         return coldatasource, figs
 
     def export_beam_mcpl(self, reference_frame):
@@ -3214,15 +3246,16 @@ def align_as_pseudo_petersen(grating: Grating, mirror: PlaneMirror, lambda_align
         mirror.distance_from_previous = 0
         # TODO: deal with pyoptix/optix axes ambiguity
         # mirror.d_z = -dz/(2*np.cos(theta)) + dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
-        mirror.d_y = -dz*(0.5-np.cos(theta)) +dz*np.sin(theta)*np.tan(theta)
+        mirror.d_y = -dz * (0.5 - np.cos(theta)) + dz * np.sin(theta) * np.tan(theta)
     else:
-        mirror.distance_from_previous = dz/np.sin(2*theta)
+        mirror.distance_from_previous = dz / np.sin(2 * theta)
         # mirror.d_z = dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))
-        mirror.d_y = dz*np.abs(-1+3*np.cos(theta)/2-np.sin(theta)/np.tan(2*theta))*np.sin(2*theta)/np.sin(theta)
-    mirror.theta = theta/2
+        mirror.d_y = dz * np.abs(-1 + 3 * np.cos(theta) / 2 - np.sin(theta) / np.tan(2 * theta)) * np.sin(
+            2 * theta) / np.sin(theta)
+    mirror.theta = theta / 2
     params["mirror_d_z"] = mirror.d_z
     if verbose:
-        print(f"\t mirror d_z = {mirror.d_z/milli} mm")
+        print(f"\t mirror d_z = {mirror.d_z / milli} mm")
     if return_parameters:
         return params
 
@@ -3230,7 +3263,7 @@ def align_as_pseudo_petersen(grating: Grating, mirror: PlaneMirror, lambda_align
 def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bool = True,
                   return_parameters: bool = False, condition: str = "cff",
                   condition_value=lambda l: 0.72 + 1e-9 * l, lambda_align: float = 1e-9, order: int = 1,
-                  line_density:float = 450e3):
+                  line_density: float = 450e3):
     """
     Method for aligning a grating using a relation between alpha and beta grazing angles such as their sum is known
     (known deviation), their difference is known (known omega), alpha is known (known incidence) or in the
@@ -3279,15 +3312,15 @@ def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bo
         if condition == "omega":  # cas omega constant
             omega = condition_function(lambda_align)
             # The next formula is benchmarked against CARPEM :
-            alpha = np.arcsin(order_align*line_density*lambda_align / (2 * np.sin(omega))) + omega
+            alpha = np.arcsin(order_align * line_density * lambda_align / (2 * np.sin(omega))) + omega
             beta = np.arccos(np.cos(alpha) + order_align * lambda_align * line_density)
             deviation = alpha + beta
         elif condition == "cff":
             if order_align > 0 and condition_function(lambda_align) > 1:
                 if isinstance(condition_value, float):
-                    condition_function = lambda l: 1/condition_value
+                    condition_function = lambda l: 1 / condition_value
                 else:
-                    condition_function = lambda l: 1/condition_value(l)
+                    condition_function = lambda l: 1 / condition_value(l)
             cff = condition_function(lambda_align)
             nu = order_align * lambda_align * line_density
             k = 1 - cff ** 2
@@ -3299,11 +3332,11 @@ def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bo
                 print(f"\t k={k}, nu={nu}, alpha={alpha}, beta={beta}")
         elif condition == "deviation":
             deviation = condition_function(lambda_align)
-            alpha = np.arcsin(lambda_align*order_align*line_density/(2*np.sin(deviation/2)))+deviation/2
+            alpha = np.arcsin(lambda_align * order_align * line_density / (2 * np.sin(deviation / 2))) + deviation / 2
             beta = deviation - alpha
         elif condition == "alpha":
             alpha = condition_function(lambda_align)
-            beta = np.arccos(np.cos(alpha)+order_align*lambda_align*line_density)
+            beta = np.arccos(np.cos(alpha) + order_align * lambda_align * line_density)
             deviation = alpha + beta
     else:
         if condition == "omega":
@@ -3311,7 +3344,7 @@ def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bo
             deviation = np.arcsin(1.0 * lambda_align * line_density / (2 * np.sin(omega * degree)))
         elif condition == "alpha":
             alpha = condition_value(lambda_align)
-            deviation = 2*alpha
+            deviation = 2 * alpha
         elif condition == "cff":
             raise AttributeError("Zero order angles cannot be computed from a cff condition")
         elif condition == "deviation":
@@ -3325,7 +3358,7 @@ def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bo
 
     # Sanity checks
     try:
-        assert np.cos(alpha) - np.cos(beta) + order_align*lambda_align*line_density < 1e-6
+        assert np.cos(alpha) - np.cos(beta) + order_align * lambda_align * line_density < 1e-6
     except AssertionError:
         raise AssertionError(f"Angles {alpha} ({alpha / degree}deg), {beta} ({beta / degree}deg) "
                              f"violate the gratings angle laws")
@@ -3338,14 +3371,14 @@ def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bo
 
     if verbose > 0:
         print(f"\t Lambda = {lambda_align} m,")
-        print(f"\t Groove density = {line_density/1000} mm-1,")
+        print(f"\t Groove density = {line_density / 1000} mm-1,")
         print(f"\t Alignment order = {order_align} ,")
         print(f"\t Alpha = {alpha / degree} deg,")
         print(f"\t Beta = {beta / degree} deg")
         print(f"\t Cff = {np.sin(beta) / np.sin(alpha)}")
-        print(f"\t Omega = {(alpha-beta)/2/degree} deg")
+        print(f"\t Omega = {(alpha - beta) / 2 / degree} deg")
         print(f"\t Deviation = {deviation / degree} deg")
-        print(f"\t Theta grating = {deviation/2 / degree} deg")
+        print(f"\t Theta grating = {deviation / 2 / degree} deg")
     if return_parameters:
         return dict(
             lamda=lambda_align,
@@ -3357,7 +3390,7 @@ def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bo
             beta=beta,
             deviation=deviation,
             theta=deviation / 2,
-            omega=(alpha-beta)/2,
-            omega_deg=(alpha-beta)/2/degree,
+            omega=(alpha - beta) / 2,
+            omega_deg=(alpha - beta) / 2 / degree,
             cff=np.sin(beta) / np.sin(alpha)
         )
