@@ -154,6 +154,19 @@ class FrameID(object):
     surface_frame = c_int32(3)
 
 
+class ErrMethod(object):
+    """
+    none : No correction applied
+    local_slope : Only the local slope at intercept position is used. No intercept correction applied
+    simple_shift : First order intercept and slope error refinement applied
+    surf_offset : The surface is shifted by dZ and intercept computed again (in case of large shape curvature)
+    """
+    none = c_int32(0)
+    local_slope = c_int32(1)
+    simple_shift = c_int32(2)
+    surf_offset = c_int32(3)
+
+
 class RecordingMode(object):
     recording_output = c_int32(2)
     recording_input = c_int32(1)
@@ -793,6 +806,8 @@ def get_surface_frame(element_id):
     return result, frame_vectors
 
 
+
+
 @catch_c_error
 def get_exit_frame(element_id):
     frame_vectors = np.empty((4, 3), dtype=float)
@@ -800,6 +815,138 @@ def get_exit_frame(element_id):
     # pointer, read_only_flag = frame_vectors.__array_interface__['data']
     result = optix.GetExitFrame(element_id, pointer)
     return result, frame_vectors
+
+@catch_c_error
+def set_error_generator(element_id):
+    """adds a surface error generator to the surface"""
+    result = optix.SetErrorGenerator(element_id)
+    return result
+
+
+@catch_c_error
+def unset_error_generator(element_id):
+    """  remove the surface error generator of this surface,
+    by deleting the corresponding interpolator and all related parameters.
+    """
+    result = optix.UnsetErrorGenerator(element_id)
+    return result
+
+
+@authorize_any_return
+def generate_surface_errors(element_id, total_sigma, legendre_sigmas):
+    """Generate a height error map attached to this surface, and initialize the
+    corresponding spline interpolator
+    the function will fail if a generator was not previously set for this surface by call to SetErrorGenerator, or
+    if the configuration of the 9 height error-defining parameters is incomplete or incorrect.
+    (more informations in the OptiXError)
+
+    :param element_id: the ID of the element to which an surface error generator should be added
+    :param dims: the size of the Legendre_sigma array in a double[2] array.
+        In input, the product dims[0]*dims[1] is the allocated number of elements of the array passed in the
+        Legendre_sigma parameter.
+        In output dims contains the size of the returned array. If this parameter is the NULL pointer,
+        the Legendre RMS information is not returned Note that this size is equal the size "low_Zernike"
+        array parameter, and is known in advance.
+    :return: true if the height error generation was successful, false if it failed. Failure information can be
+        recovered by calling GetOptiXError NoteRMS values of the Legendre polynomials are computed as the integral
+    """
+    total_sigma = ctypes.c_double(total_sigma)
+    dims = np.array(legendre_sigmas.shape)
+    assert dims.shape == (2,)
+    pointer_dims = dims.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    pointer_ls = legendre_sigmas.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+
+    result = optix.GenerateSurfaceErrors(element_id, ctypes.byref(total_sigma), pointer_dims, pointer_ls)
+    return result, total_sigma.value, legendre_sigmas, dims
+
+
+@authorize_any_return
+def set_surface_errors(element_id, x_min:float, x_max:float, y_min:float, y_max:float,
+                       height_errors:np.ndarray):
+    """
+    Install a fixed height error map interpolator into this surface.
+
+    If a generator is available for this surface, a call to GenerateSurfaceErrors will overwrite this error map
+    Parameters
+    elementID the ID of the element to which a height error map and interpolator should be added
+    xmin Low limit of the error map in the X direction
+    xmax High limit of the error map in the X direction
+    ymin Low limit of the error map in the Y direction
+    ymax High limit of the error map in the Y direction
+    xsize Number of points of the heighError array in the X direction
+    ysize Number of points of the heighError array in the Y direction
+    heightErrors a (xsize x ysize) array the height errors to be affected to the surface (fast varying dimension is along X)
+    Returns true if the function was successful; false otherwise and set OptiXLastError
+    """
+    x_size, y_size = height_errors.shape
+    pointer_height_errors = height_errors.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    result = optix.SetSurfaceErrors(element_id, x_min, x_max, y_min, y_max, x_size, y_size, pointer_height_errors)
+    return result, height_errors
+
+
+@catch_c_error
+def unset_surface_errors(element_id):
+    """
+    delete the height error map associated to the surface, which hence become perfect again
+    """
+    result = optix.UnsetSurfaceErrors(element_id)
+    return result
+
+
+@authorize_any_return
+def get_surface_errors(element_id, dims):
+    """
+    retrieves the height error map associated to the surface
+    Parameters
+     elementID The ID of the element from which the height error map should be get
+    [in,out] dims the size of the height_errors array in a double[2] array.
+    In input, the product dims[0]*dims[1] is the allocated number of elements of the array passed in the Legendre_sigma parameter.
+    In output dims contains the size of the returned array.
+    [out] height_errors An array of double whose size is dims[0]* dims[1], that will receive the height error map associated with the surface
+    Returns true if the function was successful; false otherwise and set OptiXLastError
+    """
+    dims = np.array(dims)
+    assert dims.shape == (2,)
+    pointer_dims = dims.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    height_errors = np.empty((dims[1], dims[0]), dtype=np.float64)
+    pointer_height_errors = height_errors.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    result = optix.GetSurfaceErrors(element_id, pointer_dims, pointer_height_errors)
+    # height_errors = np.ctypeslib.as_array(pointer_height_errors, shape=(dims[1] , dims[0]), dtype=np.float64)
+    return result, height_errors
+
+
+@catch_c_error
+def set_error_method(element_id, method):
+    """
+    Sets how the error influence the propagation of the rays, see class ErrMethod
+    """
+    result = optix.SetErrorMethod(element_id, method)
+    return result
+
+
+@authorize_any_return
+def get_error_method(element_id):
+    """returns the method used to take this surface errors into account in the ray tracing """
+    meth = ErrMethod.none
+    result = optix.GetErrorMethod (element_id, ctypes.byref(meth))
+    return result, meth
+
+
+@catch_c_error
+def surface_error_enable(activity:bool):
+    """Sets at global level whether the Surface height errors are considered or not in the ray tracing computation."""
+    result = optix.SurfaceErrorsEnable(activity)
+    return result
+
+
+@authorize_any_return
+def get_surface_error_state():
+    """  retrieve the global flag defining whether the Surface height errors are considered or
+    not in the ray tracing computation.
+    """
+    activityFlag = ctypes.c_bool(False)
+    result = optix.SurfaceErrorsGetState(ctypes.byref(activityFlag))
+    return result, activityFlag
 
 
 @catch_c_error

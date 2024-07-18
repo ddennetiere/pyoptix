@@ -19,7 +19,9 @@ from .exposed_functions import (get_parameter, set_parameter, align, generate, r
                                 replace_stop_by_polygon, insert_rectangular_stop, replace_stop_by_rectangle,
                                 get_ellipse_parameters, add_elliptical_stop, insert_elliptical_stop,
                                 replace_stop_by_ellipse, add_circular_stop, insert_circular_stop,
-                                replace_stop_by_circle, get_surface_frame, find_element_id, get_exit_frame)
+                                replace_stop_by_circle, get_surface_frame, find_element_id, get_exit_frame,
+                                set_error_generator, unset_error_generator, generate_surface_errors, set_surface_errors,
+                                get_surface_errors, set_error_method, ErrMethod, get_error_method)
 from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
@@ -785,6 +787,7 @@ class OpticalElement(metaclass=PostInitMeta):
         :type beamline: pyoptix.Beamline
         """
         super().__init__()
+        self._surface_error_dims = None
         self._recording_mode = RecordingMode.recording_none
         self._element_id = find_element_id(name)
         self._element_type = element_type
@@ -1781,6 +1784,48 @@ class OpticalElement(metaclass=PostInitMeta):
         fig = plot_aperture(stops, title=f"Composite aperture of {self.name}")
         fig.show()
 
+    def set_error_generator(self, is_set:bool):
+        if is_set:
+            set_error_generator(self.element_id)
+        else:
+            unset_error_generator(self.element_id)
+
+    def generate_surface_error(self, total_sigma, legendre_sigmas):
+        assert self.get_aperture_activity(), "For Errors maps to be calculated, the optical element must have an " \
+                                             "aperture"
+        dims = np.array(legendre_sigmas.shape)
+        total_sigma, legendre_sigma, height_dims = generate_surface_errors(self.element_id, total_sigma, legendre_sigmas)
+        self._surface_error_dims = np.copy(height_dims)
+        print(height_dims)
+        return total_sigma, legendre_sigma
+
+    def set_surface_errors(self, height_errors):
+        assert self.get_aperture_activity(), "For Errors maps to be calculated, the optical element must have an " \
+                                             "aperture"
+        vertices = None
+        for stop in self.enumerate_stops():
+            if stop["kind"] == "Polygon":
+                vertices = np.array(stop["vertex"])
+                break
+        if vertices is None:
+            raise AttributeError("Optical element must have at least one polygonal aperture")
+        x_min = vertices[:, 0].min()
+        x_max = vertices[:, 0].max()
+        y_min = vertices[:, 1].min()
+        y_max = vertices[:, 1].max()
+        self._surface_error_dims = height_errors.shape
+        set_surface_errors(self.element_id, x_min, x_max,
+                           y_min, y_max, height_errors)
+
+    def get_surface_errors(self, width:int, height:int):
+        flat_errors = get_surface_errors(self.element_id, np.array([width, height]))
+        return flat_errors#.reshape(self._surface_error_dims)
+
+    def set_error_method(self, method:ErrMethod):
+        set_error_method(self.element_id, method)
+
+    def get_error_method(self):
+        return get_error_method(self.element_id)
 
 class Source(OpticalElement):
     """
