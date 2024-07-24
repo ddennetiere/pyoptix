@@ -263,10 +263,7 @@ authorize_any_return = functools.partial(general_catch_c_error, authorized_retur
 def load_optix():
     global optix
     logger.info("initializing optix library")
-    # os.add_dll_directory(r'D:\Dennetiere\optix\release')
-    optix = ctypes.cdll.LoadLibrary(r'D:\Dennetiere\optix\release\OptiX.dll')
-    # optix = ctypes.CDLL(r'D:\Dennetiere\optix\release\OptiX.dll', winmode=0)
-    # optix = ctypes.windll.LoadLibrary(r'D:\Dennetiere\optix\release\OptiX.dll', winmode=0)
+    optix = ctypes.cdll.LoadLibrary(r'C:\msys64\mingw64\bin\OptiX.dll')
     optix.GetOptiXLastError.restype = BYTE
     optix.GetOptiXLastError.argtypes = [ctypes.c_char_p, INT]
     optix.GetOptiXError.restype = BYTE
