@@ -26,7 +26,7 @@ from scipy.constants import degree, milli
 from lxml import etree
 import pandas as pd
 from .ui_objects import show, figure, PolyAnnotation, ColumnDataSource, LabelSet, display_parameter_sheet, \
-    plot_beamline, plot_aperture, general_FWHM
+    plot_beamline, plot_aperture, general_FWHM, show_image_plotly
 from .ui_objects import plot_spd as plot_spd_bokeh
 from .ui_objects import plot_spd_plotly
 from numpy import pi, cos, sin, tan, arccos, arcsin, arctan
@@ -34,6 +34,7 @@ from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
 import pickle
+import xarray
 
 # dictionnary for optix to pyoptix attribute import
 optix_dictionnary = {
@@ -67,6 +68,11 @@ optix_dictionnary = {
 }
 global plot_spd
 global backend
+global show_image
+
+
+def raise_not_implemented():
+    raise NotImplementedError
 
 
 def set_backend(bckend="bokeh"):
@@ -77,11 +83,14 @@ def set_backend(bckend="bokeh"):
     """
     global plot_spd
     global backend
+    global show_image
     backend = bckend
     if backend == "bokeh":
         plot_spd = plot_spd_bokeh
+        show_image = raise_not_implemented  # TODO ?
     elif backend == "plotly":
         plot_spd = plot_spd_plotly
+        show_image = show_image_plotly
     else:
         raise ValueError(f"Unknown backend {backend}, should be either bokeh or plotly")
 
@@ -1237,6 +1246,72 @@ class OpticalElement(metaclass=PostInitMeta):
             for fig in figs:
                 fig.show()
         return datasources, figs
+
+    def show_through_focus(self, excursion_s=1, image_shape=(50, 50), display="all",
+                           show_zero_intensity=False, **kwargs):
+        """
+        Display through focus diagrams across a range of planes around the optical element.
+
+        This method generates and displays images of diagrams at different focus values within
+        a specified excursion range on axis S.
+
+        Parameters
+        ----------
+        excursion_s : float, optional
+            The total range of focus values to explore, centered around 0 in m. Default is 1.
+        image_shape : tuple of int, optional
+            The shape of the output images in the form (samples of S, samples across). Default is (50, 50).
+        display : str, optional
+            Specifies which images to display. If "all", displays both XS and YS images.
+            Default is "all".
+        show_zero_intensity : bool, optional
+            If False, excludes data points with zero intensity from the diagrams. Default is False.
+        **kwargs : dict
+            Additional keyword arguments passed to the `show_image` function.
+
+        Returns
+        -------
+        None
+            Displays the generated images.
+
+        Notes
+        -----
+        - The method retrieves diagrams at different focus values within the range specified by
+          `excursion_s`.
+        - The retrieved diagrams are filtered to exclude zero intensity values if `show_zero_intensity`
+          is set to False.
+        - The method calculates the minimum and maximum values for the X and Y coordinates across all
+          diagrams to set consistent histogram bin ranges.
+        - The histograms for X and Y coordinates are generated and stored in `xarray.DataArray` objects.
+        - The generated images are displayed using the `show_image` function taht depends on the backend.
+        """
+
+        if display == "all":
+            display = "xs, ys"
+        image_xs = np.zeros(image_shape)
+        image_ys = np.zeros(image_shape)
+        diags = []
+        x_min, x_max, y_min, y_max = (0,0,0,0)
+        for s in np.linspace(-excursion_s/2, excursion_s/2, image_shape[1]):
+            diag = self.get_diagram(s)
+            if not show_zero_intensity:
+                diag = diag.loc[diag['Intensity'] != 0]
+            diags.append(diag)
+            x_min = min(x_min, diag["X"].min())
+            y_min = min(y_min, diag["Y"].min())
+            x_max = max(x_max, diag["X"].max())
+            y_max = max(y_max, diag["Y"].max())
+        for i, diag in enumerate(diags):
+            image_xs[:,i], hedges = np.histogram(diag["X"], bins=image_shape[0], range=[x_min, x_max])
+            image_ys[:,i], vedges = np.histogram(diag["Y"], bins=image_shape[0], range=[y_min, y_max])
+
+        image_xs = xarray.DataArray(image_xs, coords=dict(x=np.linspace(x_min, x_max, image_shape[0]),
+                                                          s=np.linspace(-excursion_s/2, excursion_s/2, image_shape[1])))
+        image_ys = xarray.DataArray(image_ys, coords=dict(x=np.linspace(y_min, y_max, image_shape[0]),
+                                                          s=np.linspace(-excursion_s/2, excursion_s/2, image_shape[1])))
+        figs = show_image([image_xs, image_ys], **kwargs)
+        for fig in figs:
+            fig.show()
 
     def get_diagram(self, distance_from_oe=0, show_first_rays=False):
         """

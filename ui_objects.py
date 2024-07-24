@@ -371,6 +371,15 @@ def scatter_plot_2d(cds, xkey, ykey, title="", x_unit="", y_unit="", show_map=Fa
         return layout
 
 
+def show_image_plotly(images, **kwargs):
+    if not isinstance(images, list):
+        images = [images]
+    figs = []
+    for image in images:
+        figs.append(px.imshow(image, **kwargs))
+    return figs
+
+
 def plot_spd_plotly(df, x_key="x", y_key="y", oe_name="", show_map=False, light_plot=False, orthonorm=False,
                     save_in_file="", return_fwhm=False, **kwargs):
     """
