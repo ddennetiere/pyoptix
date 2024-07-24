@@ -384,8 +384,26 @@ def load_optix():
     optix.GetTransmissive.restypes = INT
     optix.SetTransmissive.argtypes = [HANDLE, BOOLEAN]
     optix.SetTransmissive.restypes = INT
-    logger.info(f"optix loaded, library version: {version()}")
-    return optix
+    optix.SetErrorGenerator.argtypes = [HANDLE]
+    optix.SetErrorGenerator.restype = BOOLEAN
+    optix.UnsetErrorGenerator.argtypes = [HANDLE]
+    optix.UnsetErrorGenerator.restype = BOOLEAN
+    optix.GenerateSurfaceErrors.argtypes = [HANDLE, POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+    optix.GenerateSurfaceErrors.restype = BOOLEAN
+    optix.SetSurfaceErrors.argtypes = [HANDLE, c_double, c_double, c_double, c_double, c_int32, c_int32, POINTER(c_double)]
+    optix.SetSurfaceErrors.restype = BOOLEAN
+    optix.UnsetSurfaceErrors.argtypes = [HANDLE]
+    optix.UnsetSurfaceErrors.restype = BOOLEAN
+    optix.GetSurfaceErrors.argtypes = [HANDLE, POINTER(c_double), POINTER(c_double)]
+    optix.GetSurfaceErrors.restype = BOOLEAN
+    optix.SetErrorMethod.argtypes = [HANDLE, c_int32]
+    optix.SetErrorMethod.restype = BOOLEAN
+    optix.GetErrorMethod.argtypes = [HANDLE, POINTER(c_int32)]
+    optix.GetErrorMethod.restype = BOOLEAN
+    optix.SurfaceErrorsEnable.argtypes = [BOOLEAN]
+    optix.SurfaceErrorsEnable.restype = BOOLEAN
+    optix.SurfaceErrorsGetState.argtypes = [POINTER(BOOLEAN)]
+    optix.SurfaceErrorsGetState.restype = BOOLEAN
 
 
 def release_optix():
