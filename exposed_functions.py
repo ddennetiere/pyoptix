@@ -852,7 +852,7 @@ def unset_error_generator(element_id):
     return result
 
 
-@authorize_any_return
+@catch_c_error
 def generate_surface_errors(element_id, total_sigma, legendre_sigmas):
     """Generate a height error map attached to this surface, and initialize the
     corresponding spline interpolator
@@ -913,7 +913,7 @@ def unset_surface_errors(element_id):
     return result
 
 
-@authorize_any_return
+@catch_c_error
 def get_surface_errors(element_id, dims):
     """
     retrieves the height error map associated to the surface
@@ -931,7 +931,6 @@ def get_surface_errors(element_id, dims):
     height_errors = np.empty((dims[1], dims[0]), dtype=np.float64)
     pointer_height_errors = height_errors.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
     result = optix.GetSurfaceErrors(element_id, pointer_dims, pointer_height_errors)
-    # height_errors = np.ctypeslib.as_array(pointer_height_errors, shape=(dims[1] , dims[0]), dtype=np.float64)
     return result, height_errors
 
 
