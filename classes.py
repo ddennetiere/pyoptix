@@ -1163,7 +1163,8 @@ class OpticalElement(metaclass=PostInitMeta):
                 "pitch": pitch, "yaw": yaw, "roll": roll}
 
     def show_diagram(self, distance_from_oe=0, map_xy=False, light_xy=False,
-                     light_xxp=False, light_yyp=False, show_first_rays=False, display="all", show_spd=True, **kwargs):
+                     light_xxp=False, light_yyp=False, show_first_rays=False, display="all", show_spd=True,
+                     show_zero_intensity=False, **kwargs):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y,
         X' vs X and Y' vs Y scatter plots at a distance `distance_from_oe` from the element.
@@ -1194,9 +1195,10 @@ class OpticalElement(metaclass=PostInitMeta):
             beamline_name = self.beamline.name
         print(beamline_name, chain_name)
         spots = self.get_diagram(distance_from_oe=distance_from_oe, show_first_rays=show_first_rays)
-        spots = spots.loc[spots['Intensity'] != 0]
-        if not spots.loc[spots['Intensity'] == 0].empty:
-            print("Warning : la colorisation présente des effets de bords avec les ouvertures")
+        if not show_zero_intensity:
+            spots = spots.loc[spots['Intensity'] != 0]
+            if not spots.loc[spots['Intensity'] == 0].empty:
+                print("Warning : la colorisation présente des effets de bords avec les ouvertures")
         if spots["X"].std() == 0:
             print("Warning empty diagram:\n", spots)
             return None, None
@@ -1371,7 +1373,7 @@ class OpticalElement(metaclass=PostInitMeta):
             print(spots.head())
         return spots
 
-    def show_impacts(self, reference_frame="local_absolute_frame", plots=None, **kwargs):
+    def show_impacts(self, reference_frame="local_absolute_frame", plots=None, show_zero_intensity=False, **kwargs):
         """
         If recording_mode is set to any other value than RecordingMode.recording_none, shows by default the (X,Y) and
         (X,Z) cross sections of the (X, Y, Z, dX, dY, dZ, Lambda, Intensity) pandas dataframe where each row is a
@@ -1400,9 +1402,10 @@ class OpticalElement(metaclass=PostInitMeta):
         if plots is None:
             plots = [('X', 'Y'), ('X', 'Z')]
         impacts = self.get_impacts(reference_frame=reference_frame, show_first_rays=False)
-        impacts = impacts.loc[impacts['Intensity'] != 0]
-        if not impacts.loc[impacts['Intensity'] == 0].empty:
-            print("Warning : plot colorization will show artefacts around borders if used with apertures")
+        if not show_zero_intensity:
+            impacts = impacts.loc[impacts['Intensity'] != 0]
+            if not impacts.loc[impacts['Intensity'] == 0].empty:
+                print("Warning : plot colorization will show artefacts around borders if used with apertures")
 
         figs = []
         coldatasource = ColumnDataSource(impacts)
