@@ -249,6 +249,8 @@ def general_catch_c_error(function, authorized_returns):
                     logger.warning(f"{function.__name__} Python return is {return_python}")
                 if "No error" not in buf.value.decode():
                     raise ChildProcessError(f"In {function.__name__} error {args[0]}:\n" + buf.value.decode())
+                else:
+                    logging.warning("C error buffer is 'No error'")
         return return_python
     return wrapper
 
