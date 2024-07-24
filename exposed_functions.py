@@ -388,7 +388,7 @@ def load_optix():
     optix.SetErrorGenerator.restype = BOOLEAN
     optix.UnsetErrorGenerator.argtypes = [HANDLE]
     optix.UnsetErrorGenerator.restype = BOOLEAN
-    optix.GenerateSurfaceErrors.argtypes = [HANDLE, POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+    optix.GenerateSurfaceErrors.argtypes = [HANDLE, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double)]
     optix.GenerateSurfaceErrors.restype = BOOLEAN
     optix.SetSurfaceErrors.argtypes = [HANDLE, c_double, c_double, c_double, c_double, c_int32, c_int32, POINTER(c_double)]
     optix.SetSurfaceErrors.restype = BOOLEAN
@@ -853,7 +853,7 @@ def unset_error_generator(element_id):
 
 
 @catch_c_error
-def generate_surface_errors(element_id, total_sigma, legendre_sigmas):
+def generate_surface_errors(element_id, legendre_dims):
     """Generate a height error map attached to this surface, and initialize the
     corresponding spline interpolator
     the function will fail if a generator was not previously set for this surface by call to SetErrorGenerator, or
@@ -870,14 +870,18 @@ def generate_surface_errors(element_id, total_sigma, legendre_sigmas):
     :return: true if the height error generation was successful, false if it failed. Failure information can be
         recovered by calling GetOptiXError NoteRMS values of the Legendre polynomials are computed as the integral
     """
-    total_sigma = ctypes.c_double(total_sigma)
-    dims = np.array(legendre_sigmas.shape)
-    assert dims.shape == (2,)
-    pointer_dims = dims.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    total_sigma = ctypes.c_double(0)
+    legendre_dims = np.array(legendre_dims)
+    legendre_sigmas = np.empty(legendre_dims)
+    map_dims = np.empty((2,), dtype=np.int32)
+    assert legendre_dims.shape == (2,)
+    pointer_mapdims = map_dims.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    pointer_dims = legendre_dims.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
     pointer_ls = legendre_sigmas.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-    result = optix.GenerateSurfaceErrors(element_id, ctypes.byref(total_sigma), pointer_dims, pointer_ls)
-    return result, total_sigma.value, legendre_sigmas, dims
+    result = optix.GenerateSurfaceErrors(element_id, pointer_mapdims, ctypes.byref(total_sigma),
+                                         pointer_dims, pointer_ls)
+    return result, total_sigma.value, legendre_sigmas, map_dims
 
 
 @authorize_any_return
