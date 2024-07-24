@@ -86,7 +86,10 @@ class Parameter(Structure):
         else:
             self._array = np_array.astype('float64')
         pa = ParamArray()
-        pa.dims[0] = self._array.shape[1]
+        if self.array.ndim == 2:
+            pa.dims[0] = self._array.shape[1]
+        else:
+            pa.dims[0] = 1
         pa.dims[1] = self._array.shape[0]
         pa.data = self._array.ctypes.data_as(POINTER(c_double))
         self.p_array = pointer(pa)
