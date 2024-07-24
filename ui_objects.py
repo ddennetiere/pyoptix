@@ -1,3 +1,4 @@
+import logging
 import re
 import pandas as pd
 import pyoptix.classes
@@ -675,21 +676,21 @@ def generate_widget_for_callable_argument(callable_func):
     argspec = inspect.getfullargspec(callable_func)
     arg_names = argspec.args
     defaults = argspec.defaults
-    print((arg_names, defaults))
+    logging.debug((str(arg_names)+ str(defaults)))
 
     # Create input widgets for each argument
     input_widgets = []
 
     for arg_name, default_value in zip(arg_names[2:], defaults):
         # Use text widgets for simplicity, but you can use other widgets as needed
-        print(arg_name, default_value)
+        logging.debug(str(arg_name)+ str(default_value))
         if callable(default_value):
-            print(default_value)
+            logging.debug(str(default_value))
             lambda_pattern = r'lambda\s+([\w\s]+):[\w\s\.\+\-\/\*]+'
             # Search for lambda functions in the code
             match = re.search(lambda_pattern, inspect.getsource(default_value))
             if match:
-                print(match[0])
+                logging.debug(str(match[0]))
                 default_value = match[0]
             else:
                 default_value = inspect.getsource(default_value)
