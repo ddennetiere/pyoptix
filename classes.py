@@ -109,7 +109,9 @@ class PostInitMeta(type):
         return instance
 
 
-array_parameter_list = ['coefficients', "surfaceLimits"]
+array_parameter_list = ['coefficients', "surfaceLimits", "low_Zernike", "detrending", "fractal_frequency_x",
+                        "fractal_exponent_x", "fractal_frequency_y", "fractal_exponent_y", "sampling",
+                        "error_limits"]
 
 
 class ChainList(list):
@@ -824,6 +826,16 @@ class OpticalElement(metaclass=PostInitMeta):
         self.previous = previous
         self.distance_from_previous = distance_from_previous
         self.beamline = beamline
+        self.set_error_generator(True)
+        self.error_limits = [[-1, 1], [-1, 1]]
+        self.sampling = [0.1, 0.1]
+        self.low_Zernike = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+        self.fractal_exponent_x = [-1, -1]
+        self.fractal_exponent_y = [-1, -1]
+        self.fractal_frequency_x = [500, ]
+        self.fractal_frequency_y = [500, ]
+        self.residual_sigma = 0
+        self.detrending = [[1, 1, 1], [1, 1, 0], [1, 0, 0]]
 
     def __setattr__(self, name, value):  # enable the frozen decorator for child classes
         if not self._frozen or hasattr(self, name):
@@ -874,9 +886,9 @@ class OpticalElement(metaclass=PostInitMeta):
         else:
             pyoptix_param_name = param_name
         param = self._get_c_parameter(param_name)
-        if isinstance(value, np.ndarray):
-            if value.ndim == 1 and value.shape[0] == 1:
-                value = value[0]
+        # if isinstance(value, np.ndarray):  # TODO : maybe remove this section if not needed anymore
+        #     if value.ndim == 1 and value.shape[0] == 1:
+        #         value = value[0]
         if isinstance(value, dict):  # value is a dictionnary
             for key in value:
                 assert key in ("value", "bounds", "multiplier", "type", "group", "flags")
@@ -896,13 +908,11 @@ class OpticalElement(metaclass=PostInitMeta):
                     bounds.max = DOUBLE(value[key][1])
                     param.bounds = bounds
             set_parameter(self._element_id, param_name, param)
-        elif isinstance(value, np.ndarray):  # value is an array
-            print(value, value.ndim)
+        elif isinstance(value, (np.ndarray, list)):  # value is an array
+            value = np.array(value)
             assert param_name in array_parameter_list, (f"{param_name} is not an array attribute of {self.name}, "
                                                         f"array attributes are {array_parameter_list}")
-            # print(f"setting {param_name} with array {value}")
             param.array = value
-            # dump_arg_parameter(param)
         elif isinstance(value, (float, int)):  # value is a float
             try:
                 value = float(value)
@@ -911,7 +921,8 @@ class OpticalElement(metaclass=PostInitMeta):
                 raise AttributeError(
                     "value of parameter must be castable in a float, an numpy.ndarray or a dictionnary")
         else:
-            raise AttributeError("Unknown value type")
+            raise AttributeError(f"value of parameter must be castable in a float, an numpy.ndarray or a dictionnary"
+                                 f" type found {type(value)}")
         if param_name in array_parameter_list:
             # print(f"Setting in _set_parameter {param_name} with {param} ")
             pass
@@ -1067,6 +1078,90 @@ class OpticalElement(metaclass=PostInitMeta):
                          RecordingMode.recording_none]
         set_recording(self.element_id, value)
         self._recording_mode = value
+
+    @property
+    def error_limits(self):
+        self._error_limits = self._get_parameter("error_limits")
+        return self._error_limits
+
+    @error_limits.setter
+    def error_limits(self, value):
+        assert np.array(value).shape == (2, 2)
+        self._error_limits = self._set_parameter("error_limits", np.array(value))
+
+    @property
+    def sampling(self):
+        self._sampling = self._get_parameter("sampling")
+        return self._sampling
+
+    @sampling.setter
+    def sampling(self, value):
+        assert np.array(value).shape == (2,)
+        self._sampling = self._set_parameter("sampling", np.array(value))
+
+    @property
+    def fractal_exponent_x(self):
+        self._fractal_exponent_x = self._get_parameter("fractal_exponent_x")
+        return self._fractal_exponent_x
+
+    @fractal_exponent_x.setter
+    def fractal_exponent_x(self, value):
+        self._fractal_exponent_x = self._set_parameter("fractal_exponent_x", np.array(value))
+
+    @property
+    def fractal_exponent_y(self):
+        self._fractal_exponent_y = self._get_parameter("fractal_exponent_y")
+        return self._fractal_exponent_y
+
+    @fractal_exponent_y.setter
+    def fractal_exponent_y(self, value):
+        self._fractal_exponent_y = self._set_parameter("fractal_exponent_y", np.array(value))
+
+    @property
+    def fractal_frequency_x(self):
+        self._fractal_frequency_x = self._get_parameter("fractal_frequency_x")
+        return self._fractal_frequency_x
+
+    @fractal_frequency_x.setter
+    def fractal_frequency_x(self, value):
+        self._fractal_frequency_x = self._set_parameter("fractal_frequency_x", np.array(value))
+
+    @property
+    def fractal_frequency_y(self):
+        self._fractal_frequency_y = self._get_parameter("fractal_frequency_y")
+        return self._fractal_frequency_y
+
+    @fractal_frequency_y.setter
+    def fractal_frequency_y(self, value):
+        self._fractal_frequency_y = self._set_parameter("fractal_frequency_y", np.array(value))
+
+    @property
+    def detrending(self):
+        self._detrending = self._get_parameter("detrending")
+        return self._detrending
+
+    @detrending.setter
+    def detrending(self, value):
+        self._detrending = self._set_parameter("detrending", np.array(value))
+
+    @property
+    def low_Zernike(self):
+        self._low_Zernike = self._get_parameter("low_Zernike")
+        return self._low_Zernike
+
+    @low_Zernike.setter
+    def low_Zernike(self, value):
+        self._low_Zernike = self._set_parameter("low_Zernike", np.array(value))
+
+    @property
+    def residual_sigma(self):
+        self._residual_sigma = self._get_parameter("residual_sigma")
+        return self._residual_sigma
+
+    @residual_sigma.setter
+    def residual_sigma(self, value):
+        self._residual_sigma = self._set_parameter("residual_sigma", value)
+
 
     def __repr__(self):
         description = f"Element {self._name} of class {self.__class__}"
@@ -1862,22 +1957,50 @@ class OpticalElement(metaclass=PostInitMeta):
         fig = plot_aperture(stops, title=f"Composite aperture of {self.name}")
         fig.show()
 
-    def set_error_generator(self, is_set:bool):
+    def set_error_generator(self, is_set: bool):
+        """
+        Turns of or off the error generator on a given optical element
+        :param is_set: if True, errors can be generated
+        :type is_set: bool
+        :return: None
+        :rtype: NoneType
+        """
         if is_set:
             set_error_generator(self.element_id)
         else:
             unset_error_generator(self.element_id)
 
-    def generate_surface_error(self, total_sigma, legendre_sigmas):
-        assert self.get_aperture_activity(), "For Errors maps to be calculated, the optical element must have an " \
-                                             "aperture"
-        dims = np.array(legendre_sigmas.shape)
-        total_sigma, legendre_sigma, height_dims = generate_surface_errors(self.element_id, total_sigma, legendre_sigmas)
-        self._surface_error_dims = np.copy(height_dims)
-        print(height_dims)
+    def generate_surface_error(self):
+        """
+        Generates a semi-statistical error for the optical element surface
+        In order to work, please gives a value to the following parameter of the optical element :
+        -error_limits = [[xmin, xmax],[ymin, ymax]] array of the limits of the error map, rays falling outside will
+            have a zero intensity. xmin and xmax are tangential coordinates, ymin and ymax are sagittal
+        -sampling = [pixel_size along x, pixel size along y]
+        -residual_sigma = maximal (if possible) RMS figure error
+        -fractal_exponent_x = list of PSD exponent of e^(- spatial_frequency) for each frequency domain, must be of
+            len(fractal_frequency_x)+1
+        -fractal_frequency_x = list of spatial frequency cut-offs at which the PSD exponent changes
+        -detrending = detrending mask of the low frequency Legendre polynomials, shape must match low_Zernike one
+        -low_Zernike = n by m array on the amplitude of the low frequency L_{n,m} legendre polynomials
+
+        :return: (total RMS of the figure error, array of contributions of each legendre polynomial)
+        :rtype: tuple
+        """
+        dims = np.array(self._low_Zernike.shape)
+        total_sigma, legendre_sigma, map_dims = generate_surface_errors(self.element_id, dims)
+        self._surface_error_dims = np.array(map_dims, dtype=int)
         return total_sigma, legendre_sigma
 
     def set_surface_errors(self, height_errors):
+        """
+        sets an error map on the surface. Pixel coordinates are assumed from sampling and error_limits parameters
+
+        :param height_errors: map of figure errors in m
+        :type height_errors: np.ndarray
+        :return: None
+        :rtype: NoneType
+        """
         assert self.get_aperture_activity(), "For Errors maps to be calculated, the optical element must have an " \
                                              "aperture"
         vertices = None
@@ -1895,15 +2018,43 @@ class OpticalElement(metaclass=PostInitMeta):
         set_surface_errors(self.element_id, x_min, x_max,
                            y_min, y_max, height_errors)
 
-    def get_surface_errors(self, width:int, height:int):
-        flat_errors = get_surface_errors(self.element_id, np.array([width, height]))
-        return flat_errors#.reshape(self._surface_error_dims)
+    def get_surface_errors(self):
+        """
+        Returns a map of the surface figure errors in m with its coordinates in a xarray.DataArray.
+        Slope errors can be easily computed using xarray.DataArray.differentiate method
 
-    def set_error_method(self, method:ErrMethod):
+        :return: map of the surface errors
+        :rtype: xarray.DataArray
+        """
+        lims_x, lims_y = self.error_limits
+        xmin, xmax = lims_x
+        ymin, ymax = lims_y
+        sample_x, sample_y = self.sampling
+        flat_errors = get_surface_errors(self.element_id, np.array([self._surface_error_dims[0],
+                                                                    self._surface_error_dims[1]]))
+        return xarray.DataArray(flat_errors, coords=dict(y=np.arange(self._surface_error_dims[1])*sample_y+ymin,
+                                                         x=np.arange(self._surface_error_dims[0])*sample_x+xmin))
+
+    def set_error_method(self, method: ErrMethod):
+        """
+        Sets how the ray intercept must be computed. See ErrMethod.
+
+        :param method: one of the four intercept method from ErrMethod
+        :type method: ErrMethod
+        :return:None
+        :rtype:NoneType
+        """
         set_error_method(self.element_id, method)
 
     def get_error_method(self):
+        """
+        Returns how the ray intercept is to be computed. See ErrMethod.
+
+        :return: one of the four intercept method from ErrMethod
+        :rtype: ErrMethod
+        """
         return get_error_method(self.element_id)
+
 
 class Source(OpticalElement):
     """
