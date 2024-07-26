@@ -4,15 +4,31 @@ import pandas as pd
 import numpy as np
 from ipywidgets import interact, Layout
 import ipywidgets as widgets
+from IPython.display import display as ipy_display
 from bokeh.models.widgets import Slider, TextInput
 from bokeh.application import Application
 from bokeh.application.handlers import FunctionHandler
 from bokeh.layouts import row, column
+import plotly.graph_objs as go
 from bokeh.io import show
 from bokeh.io import push_notebook
 
 
-def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable_step=0.1, screen=None,
+class AttrDict(dict):
+    """
+    Magic class that let's the user access a dictionnary keys as attribute
+    """
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
+
+fig_keys = AttrDict(dict(xy=AttrDict({"x": "X", "y": "Y", "xunit": "m", "yunit": "m"}),
+                         xxp=AttrDict({"x": "X", "y": "dX", "xunit": "m", "yunit": "rad"}),
+                         yyp=AttrDict({"x": "Y", "y": "dY", "xunit": "m", "yunit": "rad"})))
+
+
+def slider_optimizer_bokeh(variable_oe=None, variable="", variable_bounds=(), variable_step=0.1, screen=None,
                      wavelength=6e-9, nrays=None, display="yyp", light_spd=False):
     """
     Prints out the spot diagram kind asked in display on the surface of 'screen' and a slider object which when moved
@@ -48,8 +64,9 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
         nrays = int(screen.beamline.active_chain[0].nrays)
     else:
         screen.beamline.active_chain[0].nrays = int(nrays)
+    print(screen.beamline.active_chain[0].nrays)
     screen.beamline.clear_impacts(clear_source=True)
-    screen.beamline.align(wavelength)
+    screen.beamline.align(wavelength, wavelength)
     screen.beamline.generate(wavelength)
     screen.beamline.radiate()
     datasource, handles = screen.show_diagram(display=display, light_yyp=light_spd, light_xy=light_spd,
@@ -62,7 +79,7 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
         variable_oe.__setattr__(variable, value_slider.value)
         screen.beamline.align(wavelength)
         screen.beamline.radiate()
-        spd = screen.get_diagram(nrays)
+        spd = screen.get_diagram()
         datasource[display].data.update(spd)
         # push_notebook(handle=handles[0])
 
@@ -83,6 +100,178 @@ def slider_optimizer(variable_oe=None, variable="", variable_bounds=(), variable
     app = Application(handler)
     return app
     # show(app)
+
+
+def slider_optimizer_plotly(variable_oe=None, variable="", variable_bounds=(), variable_step=0.1, screen=None,
+                            wavelength=6e-9, nrays=1000, display="yyp", inverse_value=False, run_func=None):
+    v0 = variable_oe.__getattribute__(variable)
+    if inverse_value:
+        v0 = 1/v0
+    layout = widgets.Layout(width='auto', height='40px')
+    slider = widgets.FloatSlider(
+        value=v0,
+        min=variable_bounds[0],
+        max=variable_bounds[1],
+        step=variable_step,
+        description=f"{variable_oe.name} {variable}:",
+        disabled=False,
+        continuous_update=True,
+        orientation='horizontal',
+        readout=True,
+        readout_format='.1f',
+        layout=layout
+    )
+    output = widgets.Output()
+
+    screen.beamline.active_chain[0].nrays = nrays
+    if run_func:
+        run_func()
+    else:
+        screen.beamline.clear_impacts(clear_source=False)
+        screen.beamline.align(wavelength)
+        screen.beamline.radiate()
+    df = screen.get_diagram(0)
+    fig = go.FigureWidget(go.Scatter(x=df[fig_keys[display].x], y=df[fig_keys[display].y], mode="markers"))
+    fig.layout.xaxis.title = f"{fig_keys[display].x} ({fig_keys[display].xunit})"
+    fig.layout.yaxis.title = f"{fig_keys[display].y} ({fig_keys[display].yunit})"
+    points = fig.data[0]
+    points = fig.data[0]
+
+    def on_slider_moved(_):
+        if inverse_value:
+            value = 1/slider.value
+        else:
+            value = slider.value
+        variable_oe.__setattr__(variable, value)
+        if run_func:
+            run_func()
+        else:
+            screen.beamline.clear_impacts(clear_source=False)
+            screen.beamline.align(wavelength)
+            screen.beamline.radiate()
+        with output:
+            points.x, points.y = (screen.get_diagram(0)[fig_keys[display].x],
+                                  screen.get_diagram(0)[fig_keys[display].y])
+
+    slider.observe(on_slider_moved, names="value")
+    ipy_display(fig, slider, output)
+
+
+def multi_slider_optimizer_plotly(variable_oes=None, variables=None, variable_bounds=None, variable_steps=None,
+                                  screen=None,
+                                  wavelength=6e-9, nrays=1000, display="yyp", inverse_values=None, run_func=None):
+    """
+    Create interactive Plotly sliders for optimizing multiple beamline variables.
+
+    This function sets up Jupyter widget sliders to adjust specified variables in multiple optical
+    elements (OEs) and dynamically updates Plotly scatter plots based on the changes. It is used for
+    optimizing multiple beamline parameters interactively.
+
+    Parameters
+    ----------
+    variable_oes : list of objects, optional
+        The optical elements (OEs) containing the variables to be optimized. Default is None.
+    variables : list of str, optional
+        The names of the variables in `variable_oes` to be optimized. Default is None.
+    variable_bounds : list of tuples, optional
+        The bounds (min, max) for the sliders corresponding to `variables`. Default is None.
+    variable_steps : list of floats, optional
+        The step sizes for the sliders. Default is None.
+    screen : object, optional
+        The screen object used for beamline simulations and plotting. Default is None.
+    wavelength : float, optional
+        The wavelength used for beamline alignment and radiation, in meters. Default is 6e-9.
+    nrays : int, optional
+        The number of rays used in the beamline simulation. Default is 1000.
+    display : str, optional
+        The keys for the x and y data to be displayed in the Plotly scatter plot. Default is "yyp".
+    inverse_values : list of bool, optional
+        If True for a variable, the slider value is used as the inverse of the variable. Default is None.
+    run_func : function, optional
+        A custom function to run for each slider update instead of the default beamline simulation
+        process. Default is None.
+
+    Returns
+    -------
+    None
+        Displays interactive sliders and dynamically updating Plotly scatter plots in a Jupyter
+        notebook.
+
+    Notes
+    -----
+    - The sliders update the specified `variables` in `variable_oes` within the provided bounds.
+    - If `inverse_values` is True for a variable, the slider value is taken as the inverse of the variable.
+    - The function either uses a custom `run_func` or performs default beamline simulation steps
+      (clear impacts, align, radiate) to update the plots.
+    - The scatter plots update dynamically based on the changes in `variables`, displaying the
+      results of the beamline simulation or custom function output.
+    """
+    if variable_oes is None or variables is None or variable_bounds is None or variable_steps is None:
+        raise ValueError("variable_oes, variables, variable_bounds, and variable_steps must be provided")
+
+    if inverse_values is None:
+        inverse_values = [False] * len(variables)
+
+    sliders = []
+
+    for i, (variable_oe, variable, bounds, step, inverse_value) in enumerate(
+            zip(variable_oes, variables, variable_bounds, variable_steps, inverse_values)):
+        v0 = variable_oe.__getattribute__(variable)
+        if inverse_value:
+            v0 = 1 / v0
+        layout = widgets.Layout(width='auto', height='40px')
+        slider = widgets.FloatSlider(
+            value=v0,
+            min=bounds[0],
+            max=bounds[1],
+            step=step,
+            description=f"{variable_oe.name} {variable}:",
+            disabled=False,
+            continuous_update=True,
+            orientation='horizontal',
+            readout=True,
+            readout_format='.1f',
+            layout=layout
+        )
+        sliders.append(slider)
+
+    screen.beamline.active_chain[0].nrays = nrays
+    if run_func:
+        run_func()
+    else:
+        screen.beamline.clear_impacts(clear_source=False)
+        screen.beamline.align(wavelength)
+        screen.beamline.radiate()
+
+    df = screen.get_diagram(0)
+    fig = go.FigureWidget(go.Scatter(x=df[fig_keys[display].x], y=df[fig_keys[display].y], mode="markers"))
+    fig.layout.xaxis.title = f"{fig_keys[display].x} ({fig_keys[display].xunit})"
+    fig.layout.yaxis.title = f"{fig_keys[display].y} ({fig_keys[display].yunit})"
+    points = fig.data[0]
+
+    def on_slider_moved(change):
+        for slider, variable_oe, variable, inverse_value in zip(sliders, variable_oes, variables, inverse_values):
+            if inverse_value:
+                value = 1 / slider.value
+            else:
+                value = slider.value
+            variable_oe.__setattr__(variable, value)
+
+        if run_func:
+            run_func()
+        else:
+            screen.beamline.clear_impacts(clear_source=False)
+            screen.beamline.align(wavelength)
+            screen.beamline.radiate()
+
+        points.x, points.y = (screen.get_diagram(0)[fig_keys[display].x],
+                              screen.get_diagram(0)[fig_keys[display].y])
+
+    for slider in sliders:
+        slider.observe(on_slider_moved, names="value")
+
+    widgets_list = [fig] + sliders
+    ipy_display(*widgets_list)
 
 
 def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nrays=None, method="Nelder-Mead",
