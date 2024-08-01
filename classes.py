@@ -1413,7 +1413,7 @@ class OpticalElement(metaclass=PostInitMeta):
 
         image_xs = xarray.DataArray(image_xs, coords=dict(x=np.linspace(x_min, x_max, image_shape[0]),
                                                           s=np.linspace(-excursion_s/2, excursion_s/2, image_shape[1])))
-        image_ys = xarray.DataArray(image_ys, coords=dict(x=np.linspace(y_min, y_max, image_shape[0]),
+        image_ys = xarray.DataArray(image_ys, coords=dict(y=np.linspace(y_min, y_max, image_shape[0]),
                                                           s=np.linspace(-excursion_s/2, excursion_s/2, image_shape[1])))
         figs = show_image([image_xs, image_ys], **kwargs)
         for fig in figs:
