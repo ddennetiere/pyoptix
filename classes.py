@@ -834,7 +834,7 @@ class OpticalElement(metaclass=PostInitMeta):
         self.previous = previous
         self.distance_from_previous = distance_from_previous
         self.beamline = beamline
-        self.set_error_generator(True)
+        self.set_error_generator(True)  # needed temporarily to create the attributes
         self.error_limits = [[-1, 1], [-1, 1]]
         self.sampling = [0.1, 0.1]
         self.low_Zernike = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
@@ -844,6 +844,7 @@ class OpticalElement(metaclass=PostInitMeta):
         self.fractal_frequency_y = [500, ]
         self.residual_sigma = 0
         self.detrending = [[1, 1, 1], [1, 1, 0], [1, 0, 0]]
+        self.set_error_generator(False)
 
     def __setattr__(self, name, value):  # enable the frozen decorator for child classes
         if not self._frozen or hasattr(self, name):
