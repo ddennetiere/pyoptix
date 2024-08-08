@@ -227,7 +227,7 @@ def general_catch_c_error(function, authorized_returns):
 
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
-        ret = function(*args)
+        ret = function(*args, **kwargs)
         if isinstance(ret, tuple):
             return_c = ret[0]
             if len(ret) > 2:
