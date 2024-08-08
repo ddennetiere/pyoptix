@@ -388,9 +388,11 @@ def load_optix():
     optix.SetErrorGenerator.restype = BOOLEAN
     optix.UnsetErrorGenerator.argtypes = [HANDLE]
     optix.UnsetErrorGenerator.restype = BOOLEAN
-    optix.GenerateSurfaceErrors.argtypes = [HANDLE, POINTER(c_double), POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+    optix.GenerateSurfaceErrors.argtypes = [HANDLE, BOOLEAN, POINTER(c_double), POINTER(c_double), POINTER(c_double),
+                                            POINTER(c_double)]
     optix.GenerateSurfaceErrors.restype = BOOLEAN
-    optix.SetSurfaceErrors.argtypes = [HANDLE, c_double, c_double, c_double, c_double, c_int32, c_int32, POINTER(c_double)]
+    optix.SetSurfaceErrors.argtypes = [HANDLE, c_double, c_double, c_double, c_double, c_int32, c_int32,
+                                       POINTER(c_double)]
     optix.SetSurfaceErrors.restype = BOOLEAN
     optix.UnsetSurfaceErrors.argtypes = [HANDLE]
     optix.UnsetSurfaceErrors.restype = BOOLEAN
@@ -853,7 +855,7 @@ def unset_error_generator(element_id):
 
 
 @catch_c_error
-def generate_surface_errors(element_id, legendre_dims):
+def generate_surface_errors(element_id, legendre_dims, random_zernike=True):
     """Generate a height error map attached to this surface, and initialize the
     corresponding spline interpolator
     the function will fail if a generator was not previously set for this surface by call to SetErrorGenerator, or
@@ -861,12 +863,8 @@ def generate_surface_errors(element_id, legendre_dims):
     (more informations in the OptiXError)
 
     :param element_id: the ID of the element to which an surface error generator should be added
-    :param dims: the size of the Legendre_sigma array in a double[2] array.
-        In input, the product dims[0]*dims[1] is the allocated number of elements of the array passed in the
-        Legendre_sigma parameter.
-        In output dims contains the size of the returned array. If this parameter is the NULL pointer,
-        the Legendre RMS information is not returned Note that this size is equal the size "low_Zernike"
-        array parameter, and is known in advance.
+    :param random_zernike: if True, each Zernike coefficient is random within +- the specified value, if False, the
+        specified values are used for generating the error map
     :return: true if the height error generation was successful, false if it failed. Failure information can be
         recovered by calling GetOptiXError NoteRMS values of the Legendre polynomials are computed as the integral
     """
@@ -879,7 +877,7 @@ def generate_surface_errors(element_id, legendre_dims):
     pointer_dims = legendre_dims.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
     pointer_ls = legendre_sigmas.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-    result = optix.GenerateSurfaceErrors(element_id, pointer_mapdims, ctypes.byref(total_sigma),
+    result = optix.GenerateSurfaceErrors(element_id, random_zernike, pointer_mapdims, ctypes.byref(total_sigma),
                                          pointer_dims, pointer_ls)
     return result, total_sigma.value, legendre_sigmas, map_dims
 

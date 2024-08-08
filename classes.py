@@ -1979,7 +1979,7 @@ class OpticalElement(metaclass=PostInitMeta):
         else:
             unset_error_generator(self.element_id)
 
-    def generate_surface_error(self):
+    def generate_surface_error(self, random_zernike=True):
         """
         Generates a semi-statistical error for the optical element surface
         In order to work, please gives a value to the following parameter of the optical element :
@@ -1993,11 +1993,14 @@ class OpticalElement(metaclass=PostInitMeta):
         -detrending = detrending mask of the low frequency Legendre polynomials, shape must match low_Zernike one
         -low_Zernike = n by m array on the amplitude of the low frequency L_{n,m} legendre polynomials
 
+        :param random_zernike: if True, each Zernike coefficient is random within +- the specified value, if False, the
+            specified values are used for generating the error map
         :return: (total RMS of the figure error, array of contributions of each legendre polynomial)
         :rtype: tuple
         """
         dims = np.array(self._low_Zernike.shape)
-        total_sigma, legendre_sigma, map_dims = generate_surface_errors(self.element_id, dims)
+        total_sigma, legendre_sigma, map_dims = generate_surface_errors(self.element_id, dims,
+                                                                        random_zernike=random_zernike)
         self._surface_error_dims = np.array(map_dims, dtype=int)
         return total_sigma, legendre_sigma
 
