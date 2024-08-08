@@ -605,7 +605,7 @@ class Beamline(object):
         slit_next_OE = mono_slit.next
         mono_slit.next = None
         self.active_chain[0].nrays = nrays
-        self.align(wavelength, wavelength, **kwargs)
+        self.align(wavelength, wavelength, verbose=verbose, **kwargs)
         self.generate(wavelength)
         self.generate(wavelength + wavelength * dlambda_over_lambda)
         self.radiate()
