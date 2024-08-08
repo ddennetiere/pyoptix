@@ -1,8 +1,6 @@
 from scipy.stats import pearsonr
 from scipy.optimize import minimize
-import pandas as pd
 import numpy as np
-from ipywidgets import interact, Layout
 import ipywidgets as widgets
 from IPython.display import display as ipy_display
 from bokeh.models.widgets import Slider, TextInput
@@ -10,8 +8,9 @@ from bokeh.application import Application
 from bokeh.application.handlers import FunctionHandler
 from bokeh.layouts import row, column
 import plotly.graph_objs as go
-from bokeh.io import show
-from bokeh.io import push_notebook
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AttrDict(dict):
@@ -64,7 +63,6 @@ def slider_optimizer_bokeh(variable_oe=None, variable="", variable_bounds=(), va
         nrays = int(screen.beamline.active_chain[0].nrays)
     else:
         screen.beamline.active_chain[0].nrays = int(nrays)
-    print(screen.beamline.active_chain[0].nrays)
     screen.beamline.clear_impacts(clear_source=True)
     screen.beamline.align(wavelength, wavelength)
     screen.beamline.generate(wavelength)
@@ -278,7 +276,7 @@ def multi_slider_optimizer_plotly(variable_oes=None, variables=None, variable_bo
 
 
 def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nrays=None, method="Nelder-Mead",
-          show_progress=False, tol=1e-3, options=None, verbose=1):
+          show_progress=False, tol=1e-3, options=None, verbose=1, **kwargs):
     """
     Function to be called for minimizing a focused spot diagram placed at "screen" by varying the parameter "variable"
     of the optical element "variable_oe" of the "beamline" beamline. Each iteration is realigned at wavelength
@@ -312,6 +310,8 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
     :type options: dict
     :param verbose: Verbose level control. 0 is silent
     :type verbose: int
+    :param kwargs: parameters to be passed to align call
+    :type kwargs: dict
     :return: optimal value of the variable to achieve focusing
     :rtype: float
     :raises RuntimeError: if variable has no effect or minimum cannot be reached with asked tolerance
@@ -332,9 +332,11 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
     beamline.generate(wavelength)
 
     def correlation(value):
+        if isinstance(value, np.ndarray) and value.ndim == 1:
+            value = value[0]
         variable_oe.__setattr__(variable, value)
         beamline.clear_impacts()
-        beamline.align(wavelength)
+        beamline.align(wavelength, verbose=verbose, **kwargs)
         beamline.radiate()
         spots = screen.get_diagram(nrays, show_first_rays=False)
         try:
@@ -355,11 +357,11 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
             ret = spots["X"].std()
         elif dimension.lower() == "y":
             # ret = abs(pearsonr(spots["Y"], spots["dY"])[0])
-            ret = spots["X"].std()
+            ret = spots["Y"].std()
         else:
             raise AttributeError("Unknown dimension, should be 'x', 'y' or 'xy'")
         if show_progress:
-            print(variable_oe.__getattribute__(variable), ret)
+            logger.info(f"value : {variable_oe.__getattribute__(variable)}, FOM:{ret}")
         return ret
 
     if "fatol" not in options and method == "Nedler-Mead":
@@ -369,7 +371,8 @@ def focus(beamline, variable_oe, variable, wavelength, screen, dimension="y", nr
     solution = minimize(correlation, variable_oe.__getattribute__(variable), method=method, tol=tol, bounds=bounds,
                         options=options)
     if verbose:
-        print(f"Minimization success: {solution.success}, converged to {variable_oe.name}.{variable} = {solution.x}")
+        logger.info(f"Minimization success: {solution.success}, "
+                    f"converged to {variable_oe.name}.{variable} = {solution.x}")
     beamline.active_chain[0].nrays = int(old_nrays)
     screen.next = old_link
     if solution.success:
@@ -434,7 +437,7 @@ def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="
     def correlation(value):
         ret = correlation_on_screen(screen, nrays, dimension=dimension, distance_to_screen=value)
         if show_progress:
-            print(value, ret)
+            logger.info(f"vaiable value : {value}, FOM value : {ret}")
         return ret
 
     if "fatol" not in options and method == "Nedler-Mead":
@@ -444,7 +447,7 @@ def find_focus(beamline, screen, wavelength, dimension="y", nrays=None, method="
     solution = minimize(correlation, 0, method=method, tol=tol, bounds=bounds,
                         options=options)
     if verbose:
-        print(f"Minimization success: {solution.success}, converged to a distance of {solution.x}")
+        logger.info(f"Minimization success: {solution.success}, converged to a distance of {solution.x}")
     beamline.active_chain[0].nrays = int(old_nrays)
     if solution.success:
         if adjust_distance:
@@ -552,8 +555,8 @@ def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="
         ret = np.linalg.norm(contributions, norm)
         if show_progress:
             for oe, attrib in zip(oes, attributes):
-                print(f"{oe.name}.{attrib} = {oe.__getattribute__(attrib)}")
-            print(f"-> FOM = {ret}")
+                logger.info(f"{oe.name}.{attrib} = {oe.__getattribute__(attrib)}")
+            logger.info(f"-> FOM = {ret}")
         return ret
 
     attributes_values_0 = []
@@ -562,10 +565,10 @@ def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="
     solution = minimize(FOM, np.array(attributes_values_0), method=method, tol=tol,
                         options=options)
     if verbose:
-        print(f"Minimization success: {solution.success}, converged to :")
+        logger.info(f"Minimization success: {solution.success}, converged to :")
         for oe, attrib in zip(oes, attributes):
-            print(f"{oe.name}.{attrib} = {oe.__getattribute__(attrib)}")
-        print(f"-> FOM = {solution.x}")
+            logger.info(f"{oe.name}.{attrib} = {oe.__getattribute__(attrib)}")
+        logger.info(f"-> FOM = {solution.x}")
     beamline.active_chain[0].nrays = int(old_nrays)
     screen.next = old_link
     if solution.success:
