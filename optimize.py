@@ -465,8 +465,8 @@ def correlation_on_screen(screen, nrays, dimension="y", distance_to_screen=0):
 
 
 def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="y", nrays=None, method="Nelder-Mead",
-                     show_progress=False, tol=1e-3, options=None, move_screen=False, norm=2, special_align=lambda:None,
-                     verbose=1):
+                     show_progress=False, tol=1e-3, options=None, move_screen=False, norm=2,
+                     verbose=1, **kwargs):
     """
     Optimize the optical system based on the figure of merit (FOM) using the specified optimization method.
 
@@ -498,10 +498,10 @@ def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="
         If True, move the screen to the focal position during optimization (default is False)
     norm : int, optional
         Order of the norm used to calculate the FOM (default is 2)
-    special_align : callable, optional
-        function to be called before running simulation, can be used for alignment
     verbose : int, optional
         If 1, print the optimized values of the attributes (default is 1)
+    kwargs: dict
+        parameters to pass the align method of the beamline except verbose and wavelength which are passed along
 
     Returns
     -------
@@ -539,15 +539,13 @@ def custom_optimizer(beamline, screen, wavelengths, oes, attributes, dimension="
         contributions = []
         for wavelength in wavelengths:
             beamline.clear_impacts(clear_source=True)
-            beamline.align(wavelength)
-            special_align()
+            beamline.align(wavelength, verbose=verbose, **kwargs)
             beamline.generate(wavelength)
             beamline.radiate()
             if move_screen:
                 find_focus(beamline, screen, wavelength, dimension=dimension, nrays=nrays, method="Nelder-Mead",
                            show_progress=False, tol=1e-3)
             contributions.append(screen.get_diagram()[dimension].std())
-            # contributions.append(correlation_on_screen(screen, nrays, dimension=dimension))
         ret = np.linalg.norm(contributions, norm)
         if show_progress:
             for oe, attrib in zip(oes, attributes):
