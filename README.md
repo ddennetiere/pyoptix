@@ -35,7 +35,7 @@ Installing
 3. Download optix using git :
 
    ```bash
-   git clone ssh://https://gitlab.synchrotron-soleil.fr/OPTIQUE/optical-simulation/optix
+   git clone https://github.com/ddennetiere/optix
    ```
 
    Compile its release version using msys2 cf. https://www.msys2.org/ and codeblocks.
