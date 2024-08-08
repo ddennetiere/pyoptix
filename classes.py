@@ -958,7 +958,7 @@ class OpticalElement(metaclass=PostInitMeta):
     @property
     def name(self):
         element_name = create_string_buffer(32)
-        get_element_name(self._element_id, element_name, confirm=False)
+        get_element_name(self._element_id, element_name)
         self._name = element_name.value.decode()
         return self._name
 
@@ -1559,7 +1559,7 @@ class OpticalElement(metaclass=PostInitMeta):
         print("initializing ", self.name)
         param = Parameter()
         param_name = create_string_buffer(48)
-        enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
+        enumerate_parameters(element_id, hparam, param_name, param)
         while hparam:
             if print_all:
                 print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
@@ -1568,7 +1568,7 @@ class OpticalElement(metaclass=PostInitMeta):
                 self.__dict__["_" + optix_dictionnary[param_name.value.decode()]] = param.value
             else:
                 self.__dict__["_" + param_name.value.decode()] = param.value
-            enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
+            enumerate_parameters(element_id, hparam, param_name, param)
         if print_all:
             print("\t", f"{param_name.value.decode()}: {param.value} [{param.bounds.min}, {param.bounds.max}],"
                         f"x{param.multiplier}, type {param.type}, groupe {param.group}, flags {param.flags}")
@@ -1576,18 +1576,18 @@ class OpticalElement(metaclass=PostInitMeta):
             self.__dict__["_" + optix_dictionnary[param_name.value.decode()]] = param.value
         else:
             self.__dict__["_" + param_name.value.decode()] = param.value
-        enumerate_parameters(element_id, hparam, param_name, param, confirm=False)
-        next_id = get_next_element(element_id, confirm=False)
+        enumerate_parameters(element_id, hparam, param_name, param)
+        next_id = get_next_element(element_id)
         if next_id is not None:
             next_name = create_string_buffer(32)
-            get_element_name(next_id, next_name, confirm=False)
+            get_element_name(next_id, next_name)
             self._next = next_name.value.decode()
         else:
             self._next = None
-        previous_id = get_previous_element(element_id, confirm=False)
+        previous_id = get_previous_element(element_id)
         if previous_id is not None:
             previous_name = create_string_buffer(32)
-            get_element_name(previous_id, previous_name, confirm=False)
+            get_element_name(previous_id, previous_name)
             self._previous = previous_name.value.decode()
         else:
             self._previous = None
@@ -1635,7 +1635,7 @@ class OpticalElement(metaclass=PostInitMeta):
         hparam = HANDLE(0)
         param_name = create_string_buffer(48)
         param = Parameter()
-        enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
+        enumerate_parameters(self.element_id, hparam, param_name, param)
         if verbose:
             print(f"Dump of all optix parameter for {self.name}")
         param_dict = {"oe_name": self.name, "oe_params": {}, "oe_class": self.__class__}
@@ -1661,7 +1661,7 @@ class OpticalElement(metaclass=PostInitMeta):
                                                                   "multiplier": param.multiplier,
                                                                   "type": param.type, "group": param.group,
                                                                   "flags": param.flags}
-            enumerate_parameters(self.element_id, hparam, param_name, param, confirm=False)
+            enumerate_parameters(self.element_id, hparam, param_name, param)
 
         if param_name.value.decode() not in array_parameter_list:
             value = param.value
