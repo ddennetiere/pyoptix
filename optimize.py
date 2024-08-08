@@ -159,7 +159,8 @@ def slider_optimizer_plotly(variable_oe=None, variable="", variable_bounds=(), v
 
 def multi_slider_optimizer_plotly(variable_oes=None, variables=None, variable_bounds=None, variable_steps=None,
                                   screen=None,
-                                  wavelength=6e-9, nrays=1000, display="yyp", inverse_values=None, run_func=None):
+                                  wavelength=6e-9, nrays=1000, display="yyp", inverse_values=None, run_func=None,
+                                  readout_format=".2f"):
     """
     Create interactive Plotly sliders for optimizing multiple beamline variables.
 
@@ -190,6 +191,8 @@ def multi_slider_optimizer_plotly(variable_oes=None, variables=None, variable_bo
     run_func : function, optional
         A custom function to run for each slider update instead of the default beamline simulation
         process. Default is None.
+    readout_format : str
+        How the values should b displayed in widget
 
     Returns
     -------
@@ -230,7 +233,7 @@ def multi_slider_optimizer_plotly(variable_oes=None, variables=None, variable_bo
             continuous_update=True,
             orientation='horizontal',
             readout=True,
-            readout_format='.1f',
+            readout_format=readout_format,
             layout=layout
         )
         sliders.append(slider)
