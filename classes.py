@@ -720,13 +720,20 @@ class Beamline(object):
         diags = []
         for config, lamda in zip(configurations, wavelength):
             if radiate:
-                self.active_chain = config
-                for oe in self.active_chain:
-                    oe.recording_mode = RecordingMode.recording_output
-                self.clear_impacts(clear_source=True)
-                self.align(lamda, lamda, **kwargs)
-                self.generate(lamda)
-                self.radiate()
+                try:
+                    self.active_chain = config
+                    for oe in self.active_chain:
+                        oe.recording_mode = RecordingMode.recording_output
+                    self.clear_impacts(clear_source=True)
+                    self.align(lamda, lamda, **kwargs)
+                    self.generate(lamda)
+                    self.radiate()
+                except ChildProcessError as e:
+                    if safe_draw:
+                        print(e.__str__())
+                        pass
+                    else:
+                        raise e
             for oe in self.active_chain:
                 if oe.recording_mode != RecordingMode.recording_none:
                     impacts = oe.get_impacts(reference_frame="general_frame")
