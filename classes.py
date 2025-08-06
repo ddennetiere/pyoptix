@@ -926,9 +926,20 @@ class OpticalElement(metaclass=PostInitMeta):
             set_parameter(self._element_id, param_name, param)
         elif isinstance(value, (np.ndarray, list)):  # value is an array
             value = np.array(value)
-            assert param_name in array_parameter_list, (f"{param_name} is not an array attribute of {self.name}, "
-                                                        f"array attributes are {array_parameter_list}")
-            param.array = value
+            try:
+                assert param_name in array_parameter_list, (f"{param_name} is not an array attribute of {self.name}, "
+                                                            f"array attributes are {array_parameter_list}")
+                param.array = value
+            except AssertionError as e:  # needed for optimizers : minimize sets the value of param with array of 1 value
+                try: 
+                    if value.ndim == 1 and value.shape[0] == 1:
+                        value = value[0]
+                        param.value = DOUBLE(value)
+                    else:
+                        raise e
+                except Exception:
+                    raise e
+
         elif isinstance(value, (float, int)):  # value is a float
             try:
                 value = float(value)
