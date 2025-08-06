@@ -22,6 +22,7 @@ import plotly.graph_objs as go
 from scipy.constants import h, c, eV, degree
 import inspect
 from numpy.polynomial import Polynomial
+from itertools import cycle
 
 
 # Definition des fonctions d'affichage
@@ -540,7 +541,7 @@ def plot_polynomial_surface(coeffs, xy_limits, legendre=False, mesh=100, probe_s
     return fig
 
 
-def plot_beamline(spots, plot_3D=False, beamline_walls=None, orthonorm=False):
+def plot_beamline(spots, plot_3D=False, beamline_walls=None, orthonorm=False, draw_beam=True):
     spots = spots.loc[spots['Intensity'] != 0]
     if "size" not in spots.columns:
         spots.assign(size=0.1)
@@ -557,18 +558,44 @@ def plot_beamline(spots, plot_3D=False, beamline_walls=None, orthonorm=False):
         fig.update_layout(scene={'aspectmode': 'data'})
         fig.show()
     else:
+        if draw_beam:
+            if color_by:
+                configs = [conf[1] for conf in spots.groupby(color_by)]
+            else:
+                configs = spots
+            # oes = spots.name.unique()
+            beams_top = []
+            beams_side = []
+            color_wheel = cycle(['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'])
+            for config in configs:
+                beam = {"X": [], "Y": [], "Z": []}
+                for oe in config.name.unique():
+                    mean = config[config["name"] == oe].mean(numeric_only=True)
+                    beam["X"].append(mean["X"])
+                    beam["Y"].append(mean["Y"])
+                    beam["Z"].append(mean["Z"])
+                beam = pd.DataFrame(beam)
+                color = next(color_wheel)
+                beams_side.append(px.line(beam, x="Z", y="Y"))
+                beams_top.append(px.line(beam, x="Z", y="X"))
+                beams_side[-1]['data'][0]['line']['color']=color
+                beams_top[-1]['data'][0]['line']['color']=color
         fig = px.scatter(spots, x="Z", y="X", color=color_by,
                          labels={
                              "Z": "S",
                              "X": "X",
                              "Y": "Z"},
-                         hover_data=['name', "configuration", "center_s", "center_x"], title="Top view")
+                         hover_data=['name', "configuration", "center_s", "center_x"], title="Top view",
+                         color_discrete_sequence=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'])
         if beamline_walls is not None:
             beamline_walls_fig = px.line({"Z": beamline_walls[:, 1],
                                           "X": beamline_walls[:, 0]}, x="Z", y="X")
             fig.add_trace(beamline_walls_fig.data[0])
         fig.update_layout(scene=dict(xaxis_title='X',
                                      yaxis_title='Z', ), title="Top view")
+        if draw_beam:
+            for f_beam_top in beams_top:
+                fig.add_trace(f_beam_top.data[0])
         if orthonorm:
             fig.update_layout(xaxis=dict(scaleanchor='y', scaleratio=1),
                               yaxis=dict(scaleanchor='x', scaleratio=1))
@@ -578,9 +605,13 @@ def plot_beamline(spots, plot_3D=False, beamline_walls=None, orthonorm=False):
                              "Z": "S",
                              "X": "X",
                              "Y": "Z"},
-                         hover_data=['name', "configuration", "center_s", "center_z"], title="Side view")
+                         hover_data=['name', "configuration", "center_s", "center_z"], title="Side view",
+                         color_discrete_sequence=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'])
         fig.update_layout(scene=dict(xaxis_title='S',
                                      yaxis_title='Z', ))
+        if draw_beam:
+            for f_beam_side in beams_side:
+                fig.add_trace(f_beam_side.data[0])
         if orthonorm:
             fig.update_layout(xaxis=dict(scaleanchor='y', scaleratio=1),
                               yaxis=dict(scaleanchor='x', scaleratio=1))
