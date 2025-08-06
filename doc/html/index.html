@@ -318,7 +318,7 @@ classes</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.AstigmaticGaussianSource.set_error_generator" title="pyoptix.classes.AstigmaticGaussianSource.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.AstigmaticGaussianSource.set_error_method" title="pyoptix.classes.AstigmaticGaussianSource.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -561,9 +561,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -921,11 +924,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.AstigmaticGaussianSource.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.AstigmaticGaussianSource.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1196,7 +1206,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.BMSource.set_error_generator" title="pyoptix.classes.BMSource.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.BMSource.set_error_method" title="pyoptix.classes.BMSource.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -1442,9 +1452,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -1802,11 +1815,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.BMSource.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.BMSource.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -2661,7 +2681,7 @@ except it is invariant along the X axe (width).</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.ConicCylindricalMirror.set_error_generator" title="pyoptix.classes.ConicCylindricalMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.ConicCylindricalMirror.set_error_method" title="pyoptix.classes.ConicCylindricalMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -2895,9 +2915,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -3255,11 +3278,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.ConicCylindricalMirror.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.ConicCylindricalMirror.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -3539,7 +3569,7 @@ ie 1/curvature + apex_distance*sin(directix_angle) = 0</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.ConicalMirror.set_error_generator" title="pyoptix.classes.ConicalMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.ConicalMirror.set_error_method" title="pyoptix.classes.ConicalMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -3783,9 +3813,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -4143,11 +4176,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.ConicalMirror.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.ConicalMirror.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -4418,7 +4458,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalFilm.set_error_generator" title="pyoptix.classes.CylindricalFilm.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalFilm.set_error_method" title="pyoptix.classes.CylindricalFilm.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -4656,9 +4696,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -5016,11 +5059,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.CylindricalFilm.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.CylindricalFilm.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -5240,7 +5290,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalHoloGrating.get_angles" title="pyoptix.classes.CylindricalHoloGrating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalHoloGrating.get_aperture_activity" title="pyoptix.classes.CylindricalHoloGrating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -5315,7 +5365,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalHoloGrating.set_error_generator" title="pyoptix.classes.CylindricalHoloGrating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalHoloGrating.set_error_method" title="pyoptix.classes.CylindricalHoloGrating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -5605,9 +5655,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -5618,11 +5671,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.CylindricalHoloGrating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.CylindricalHoloGrating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -6059,11 +6119,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.CylindricalHoloGrating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.CylindricalHoloGrating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -6374,7 +6441,7 @@ the mirror.</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalMirror.set_error_generator" title="pyoptix.classes.CylindricalMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalMirror.set_error_method" title="pyoptix.classes.CylindricalMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -6617,9 +6684,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -6977,11 +7047,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.CylindricalMirror.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.CylindricalMirror.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -7198,7 +7275,7 @@ polynomial way. The center of the grating is assumed to be at the 0 value of the
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalPoly1DGrating.get_angles" title="pyoptix.classes.CylindricalPoly1DGrating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalPoly1DGrating.get_aperture_activity" title="pyoptix.classes.CylindricalPoly1DGrating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -7258,7 +7335,7 @@ polynomial way. The center of the grating is assumed to be at the 0 value of the
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalPoly1DGrating.set_error_generator" title="pyoptix.classes.CylindricalPoly1DGrating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.CylindricalPoly1DGrating.set_error_method" title="pyoptix.classes.CylindricalPoly1DGrating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -7492,9 +7569,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -7505,11 +7585,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.CylindricalPoly1DGrating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.CylindricalPoly1DGrating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -7862,11 +7949,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.CylindricalPoly1DGrating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.CylindricalPoly1DGrating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -8138,7 +8232,7 @@ classes</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.GaussianSource.set_error_generator" title="pyoptix.classes.GaussianSource.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.GaussianSource.set_error_method" title="pyoptix.classes.GaussianSource.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -8384,9 +8478,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -8744,11 +8841,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.GaussianSource.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.GaussianSource.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -8962,7 +9066,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.Grating.get_angles" title="pyoptix.classes.Grating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.Grating.get_aperture_activity" title="pyoptix.classes.Grating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -9022,7 +9126,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.Grating.set_error_generator" title="pyoptix.classes.Grating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.Grating.set_error_method" title="pyoptix.classes.Grating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -9291,9 +9395,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -9304,11 +9411,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.Grating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.Grating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -9661,11 +9775,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.Grating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.Grating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -9926,43 +10047,46 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.insert_rectangular_stop" title="pyoptix.classes.LegendrePolynomialMirror.insert_rectangular_stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert_rectangular_stop</span></code></a>(index, x_width, y_width)</p></td>
 <td><p>Insert a rectangular stop at the specified index in the aperture.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_circle" title="pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_circle</span></code></a>(index, radius[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.plot_surface" title="pyoptix.classes.LegendrePolynomialMirror.plot_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_surface</span></code></a>([nb_points_x, nb_points_y])</p></td>
+<td><p>Generate a 2D surface grid from polynomial coefficients.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_circle" title="pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_circle</span></code></a>(index, radius[, ...])</p></td>
 <td><p>Replace a stop in the aperture with a circular stop.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_ellipse" title="pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_ellipse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_ellipse</span></code></a>(index, x_axis, y_axis)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_ellipse" title="pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_ellipse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_ellipse</span></code></a>(index, x_axis, y_axis)</p></td>
 <td><p>Replace a stop in the aperture with an elliptical stop.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_polygon" title="pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_polygon</span></code></a>(index, num_sides, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_polygon" title="pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_polygon</span></code></a>(index, num_sides, ...)</p></td>
 <td><p>Replace a stop in the aperture with a polygonal stop.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_rectangle" title="pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_rectangle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_rectangle</span></code></a>(index, x_width, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_rectangle" title="pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_rectangle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_rectangle</span></code></a>(index, x_width, ...)</p></td>
 <td><p>Replace a stop in the aperture with a rectangular stop.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_aperture_activity" title="pyoptix.classes.LegendrePolynomialMirror.set_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_aperture_activity</span></code></a>([active])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_aperture_activity" title="pyoptix.classes.LegendrePolynomialMirror.set_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_aperture_activity</span></code></a>([active])</p></td>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_error_generator" title="pyoptix.classes.LegendrePolynomialMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_error_generator" title="pyoptix.classes.LegendrePolynomialMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_error_method" title="pyoptix.classes.LegendrePolynomialMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_error_method" title="pyoptix.classes.LegendrePolynomialMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_recording" title="pyoptix.classes.LegendrePolynomialMirror.set_recording"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_recording</span></code></a>([recording_mode])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_recording" title="pyoptix.classes.LegendrePolynomialMirror.set_recording"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_recording</span></code></a>([recording_mode])</p></td>
 <td><p>Sets the recording mode for the spot diagram associated with the element.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_surface_errors" title="pyoptix.classes.LegendrePolynomialMirror.set_surface_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_surface_errors</span></code></a>(height_errors)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_surface_errors" title="pyoptix.classes.LegendrePolynomialMirror.set_surface_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_surface_errors</span></code></a>(height_errors)</p></td>
 <td><p>sets an error map on the surface.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_transmissive" title="pyoptix.classes.LegendrePolynomialMirror.set_transmissive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_transmissive</span></code></a>(is_transmissive)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.set_transmissive" title="pyoptix.classes.LegendrePolynomialMirror.set_transmissive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_transmissive</span></code></a>(is_transmissive)</p></td>
 <td><p>Sets an optical element as transmissive or reflective depending on the value of is_transmissive.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.show_diagram" title="pyoptix.classes.LegendrePolynomialMirror.show_diagram"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_diagram</span></code></a>([distance_from_oe, map_xy, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.show_diagram" title="pyoptix.classes.LegendrePolynomialMirror.show_diagram"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_diagram</span></code></a>([distance_from_oe, map_xy, ...])</p></td>
 <td><p>If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y, X' vs X and Y' vs Y scatter plots at a distance <cite>distance_from_oe</cite> from the element.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.show_impacts" title="pyoptix.classes.LegendrePolynomialMirror.show_impacts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_impacts</span></code></a>([reference_frame, plots, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.show_impacts" title="pyoptix.classes.LegendrePolynomialMirror.show_impacts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_impacts</span></code></a>([reference_frame, plots, ...])</p></td>
 <td><p>If recording_mode is set to any other value than RecordingMode.recording_none, shows by default the (X,Y) and (X,Z) cross sections of the (X, Y, Z, dX, dY, dZ, Lambda, Intensity) pandas dataframe where each row is a computed ray in the frame of reference given in parameter reference_frame either :</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.show_through_focus" title="pyoptix.classes.LegendrePolynomialMirror.show_through_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_through_focus</span></code></a>([excursion_s, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.LegendrePolynomialMirror.show_through_focus" title="pyoptix.classes.LegendrePolynomialMirror.show_through_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_through_focus</span></code></a>([excursion_s, ...])</p></td>
 <td><p>Display through focus diagrams across a range of planes around the optical element.</p></td>
 </tr>
 </tbody>
@@ -10207,9 +10331,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -10479,6 +10606,47 @@ absorbant outside of it.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyoptix.classes.LegendrePolynomialMirror.plot_surface">
+<span class="sig-name descname"><span class="pre">plot_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_points_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_points_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.LegendrePolynomialMirror.plot_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a 2D surface grid from polynomial coefficients.</p>
+<p>Creates a 2D grid of z-values by evaluating the polynomial defined by
+self.coeffs over a rectangular domain specified by self.limits. The
+surface is sampled at regular intervals along both x and y axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_points_x</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of sampling points along the x-axis. Default is 100.</p></li>
+<li><p><strong>nb_points_y</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of sampling points along the y-axis. Default is 100.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array of shape (nb_points_y, nb_points_x) containing the
+z-values of the polynomial surface. Each element zz[i, j] represents
+the polynomial value at coordinates (x[j], y[i]).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method requires the following instance attributes:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>self.limits<span class="classifier">array-like of length 4</span></dt><dd><p>Domain boundaries in the format [x_min, x_max, y_min, y_max]</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>self.coeffs<span class="classifier">array-like</span></dt><dd><p>Polynomial coefficients compatible with numpy.polynomial.polynomial.polygrid2d</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The polynomial is evaluated using numpy’s polynomial module, which expects
+coefficients in a specific format for 2D polynomial evaluation.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_circle">
 <span class="sig-name descname"><span class="pre">replace_stop_by_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.LegendrePolynomialMirror.replace_stop_by_circle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace a stop in the aperture with a circular stop.</p>
@@ -10567,11 +10735,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.LegendrePolynomialMirror.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.LegendrePolynomialMirror.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -10832,43 +11007,46 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.insert_rectangular_stop" title="pyoptix.classes.NaturalPolynomialMirror.insert_rectangular_stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert_rectangular_stop</span></code></a>(index, x_width, y_width)</p></td>
 <td><p>Insert a rectangular stop at the specified index in the aperture.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_circle" title="pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_circle</span></code></a>(index, radius[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.plot_surface" title="pyoptix.classes.NaturalPolynomialMirror.plot_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_surface</span></code></a>([nb_points_x, nb_points_y])</p></td>
+<td><p>Generate a 2D surface grid from polynomial coefficients.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_circle" title="pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_circle</span></code></a>(index, radius[, ...])</p></td>
 <td><p>Replace a stop in the aperture with a circular stop.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_ellipse" title="pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_ellipse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_ellipse</span></code></a>(index, x_axis, y_axis)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_ellipse" title="pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_ellipse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_ellipse</span></code></a>(index, x_axis, y_axis)</p></td>
 <td><p>Replace a stop in the aperture with an elliptical stop.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_polygon" title="pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_polygon</span></code></a>(index, num_sides, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_polygon" title="pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_polygon</span></code></a>(index, num_sides, ...)</p></td>
 <td><p>Replace a stop in the aperture with a polygonal stop.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_rectangle" title="pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_rectangle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_rectangle</span></code></a>(index, x_width, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_rectangle" title="pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_rectangle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_rectangle</span></code></a>(index, x_width, ...)</p></td>
 <td><p>Replace a stop in the aperture with a rectangular stop.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_aperture_activity" title="pyoptix.classes.NaturalPolynomialMirror.set_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_aperture_activity</span></code></a>([active])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_aperture_activity" title="pyoptix.classes.NaturalPolynomialMirror.set_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_aperture_activity</span></code></a>([active])</p></td>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_error_generator" title="pyoptix.classes.NaturalPolynomialMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_error_generator" title="pyoptix.classes.NaturalPolynomialMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_error_method" title="pyoptix.classes.NaturalPolynomialMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_error_method" title="pyoptix.classes.NaturalPolynomialMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_recording" title="pyoptix.classes.NaturalPolynomialMirror.set_recording"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_recording</span></code></a>([recording_mode])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_recording" title="pyoptix.classes.NaturalPolynomialMirror.set_recording"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_recording</span></code></a>([recording_mode])</p></td>
 <td><p>Sets the recording mode for the spot diagram associated with the element.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_surface_errors" title="pyoptix.classes.NaturalPolynomialMirror.set_surface_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_surface_errors</span></code></a>(height_errors)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_surface_errors" title="pyoptix.classes.NaturalPolynomialMirror.set_surface_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_surface_errors</span></code></a>(height_errors)</p></td>
 <td><p>sets an error map on the surface.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_transmissive" title="pyoptix.classes.NaturalPolynomialMirror.set_transmissive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_transmissive</span></code></a>(is_transmissive)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.set_transmissive" title="pyoptix.classes.NaturalPolynomialMirror.set_transmissive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_transmissive</span></code></a>(is_transmissive)</p></td>
 <td><p>Sets an optical element as transmissive or reflective depending on the value of is_transmissive.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.show_diagram" title="pyoptix.classes.NaturalPolynomialMirror.show_diagram"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_diagram</span></code></a>([distance_from_oe, map_xy, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.show_diagram" title="pyoptix.classes.NaturalPolynomialMirror.show_diagram"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_diagram</span></code></a>([distance_from_oe, map_xy, ...])</p></td>
 <td><p>If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y, X' vs X and Y' vs Y scatter plots at a distance <cite>distance_from_oe</cite> from the element.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.show_impacts" title="pyoptix.classes.NaturalPolynomialMirror.show_impacts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_impacts</span></code></a>([reference_frame, plots, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.show_impacts" title="pyoptix.classes.NaturalPolynomialMirror.show_impacts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_impacts</span></code></a>([reference_frame, plots, ...])</p></td>
 <td><p>If recording_mode is set to any other value than RecordingMode.recording_none, shows by default the (X,Y) and (X,Z) cross sections of the (X, Y, Z, dX, dY, dZ, Lambda, Intensity) pandas dataframe where each row is a computed ray in the frame of reference given in parameter reference_frame either :</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.show_through_focus" title="pyoptix.classes.NaturalPolynomialMirror.show_through_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_through_focus</span></code></a>([excursion_s, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.NaturalPolynomialMirror.show_through_focus" title="pyoptix.classes.NaturalPolynomialMirror.show_through_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_through_focus</span></code></a>([excursion_s, ...])</p></td>
 <td><p>Display through focus diagrams across a range of planes around the optical element.</p></td>
 </tr>
 </tbody>
@@ -11113,9 +11291,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -11385,6 +11566,47 @@ absorbant outside of it.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyoptix.classes.NaturalPolynomialMirror.plot_surface">
+<span class="sig-name descname"><span class="pre">plot_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_points_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_points_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.NaturalPolynomialMirror.plot_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a 2D surface grid from polynomial coefficients.</p>
+<p>Creates a 2D grid of z-values by evaluating the polynomial defined by
+self.coeffs over a rectangular domain specified by self.limits. The
+surface is sampled at regular intervals along both x and y axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_points_x</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of sampling points along the x-axis. Default is 100.</p></li>
+<li><p><strong>nb_points_y</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of sampling points along the y-axis. Default is 100.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array of shape (nb_points_y, nb_points_x) containing the
+z-values of the polynomial surface. Each element zz[i, j] represents
+the polynomial value at coordinates (x[j], y[i]).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method requires the following instance attributes:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>self.limits<span class="classifier">array-like of length 4</span></dt><dd><p>Domain boundaries in the format [x_min, x_max, y_min, y_max]</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>self.coeffs<span class="classifier">array-like</span></dt><dd><p>Polynomial coefficients compatible with numpy.polynomial.polynomial.polygrid2d</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The polynomial is evaluated using numpy’s polynomial module, which expects
+coefficients in a specific format for 2D polynomial evaluation.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_circle">
 <span class="sig-name descname"><span class="pre">replace_stop_by_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.NaturalPolynomialMirror.replace_stop_by_circle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace a stop in the aperture with a circular stop.</p>
@@ -11473,11 +11695,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.NaturalPolynomialMirror.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.NaturalPolynomialMirror.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -11748,7 +11977,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.OpticalElement.set_error_generator" title="pyoptix.classes.OpticalElement.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.OpticalElement.set_error_method" title="pyoptix.classes.OpticalElement.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -12017,9 +12246,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -12377,11 +12609,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.OpticalElement.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.OpticalElement.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -12652,7 +12891,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneFilm.set_error_generator" title="pyoptix.classes.PlaneFilm.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneFilm.set_error_method" title="pyoptix.classes.PlaneFilm.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -12886,9 +13125,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -13246,11 +13488,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PlaneFilm.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PlaneFilm.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -13471,7 +13720,7 @@ line density</p>
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneGrating.get_angles" title="pyoptix.classes.PlaneGrating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneGrating.get_aperture_activity" title="pyoptix.classes.PlaneGrating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -13546,7 +13795,7 @@ line density</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneGrating.set_error_generator" title="pyoptix.classes.PlaneGrating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneGrating.set_error_method" title="pyoptix.classes.PlaneGrating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -13836,9 +14085,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -13849,11 +14101,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PlaneGrating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PlaneGrating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -14290,11 +14549,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PlaneGrating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PlaneGrating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -14560,7 +14826,7 @@ point N is computed from line density of the grating and the other M and N coord
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneHoloGrating.get_angles" title="pyoptix.classes.PlaneHoloGrating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneHoloGrating.get_aperture_activity" title="pyoptix.classes.PlaneHoloGrating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -14635,7 +14901,7 @@ point N is computed from line density of the grating and the other M and N coord
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneHoloGrating.set_error_generator" title="pyoptix.classes.PlaneHoloGrating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneHoloGrating.set_error_method" title="pyoptix.classes.PlaneHoloGrating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -14936,9 +15202,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -14949,11 +15218,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PlaneHoloGrating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PlaneHoloGrating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -15390,11 +15666,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PlaneHoloGrating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PlaneHoloGrating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -15702,7 +15985,7 @@ after any change applied to the hologram related attribute of the object.</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneMirror.set_error_generator" title="pyoptix.classes.PlaneMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PlaneMirror.set_error_method" title="pyoptix.classes.PlaneMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -15936,9 +16219,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -16296,11 +16582,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PlaneMirror.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PlaneMirror.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -16518,7 +16811,7 @@ ToroidalPoly1DGrating.</p>
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PlanePoly1DGrating.get_angles" title="pyoptix.classes.PlanePoly1DGrating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PlanePoly1DGrating.get_aperture_activity" title="pyoptix.classes.PlanePoly1DGrating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -16578,7 +16871,7 @@ ToroidalPoly1DGrating.</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PlanePoly1DGrating.set_error_generator" title="pyoptix.classes.PlanePoly1DGrating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PlanePoly1DGrating.set_error_method" title="pyoptix.classes.PlanePoly1DGrating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -16823,9 +17116,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -16836,11 +17132,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PlanePoly1DGrating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PlanePoly1DGrating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -17193,11 +17496,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PlanePoly1DGrating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PlanePoly1DGrating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -17457,43 +17767,46 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.insert_rectangular_stop" title="pyoptix.classes.PolynomialOpticalElement.insert_rectangular_stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert_rectangular_stop</span></code></a>(index, x_width, y_width)</p></td>
 <td><p>Insert a rectangular stop at the specified index in the aperture.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.replace_stop_by_circle" title="pyoptix.classes.PolynomialOpticalElement.replace_stop_by_circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_circle</span></code></a>(index, radius[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.plot_surface" title="pyoptix.classes.PolynomialOpticalElement.plot_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_surface</span></code></a>([nb_points_x, nb_points_y])</p></td>
+<td><p>Generate a 2D surface grid from polynomial coefficients.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.replace_stop_by_circle" title="pyoptix.classes.PolynomialOpticalElement.replace_stop_by_circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_circle</span></code></a>(index, radius[, ...])</p></td>
 <td><p>Replace a stop in the aperture with a circular stop.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.replace_stop_by_ellipse" title="pyoptix.classes.PolynomialOpticalElement.replace_stop_by_ellipse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_ellipse</span></code></a>(index, x_axis, y_axis)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.replace_stop_by_ellipse" title="pyoptix.classes.PolynomialOpticalElement.replace_stop_by_ellipse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_ellipse</span></code></a>(index, x_axis, y_axis)</p></td>
 <td><p>Replace a stop in the aperture with an elliptical stop.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.replace_stop_by_polygon" title="pyoptix.classes.PolynomialOpticalElement.replace_stop_by_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_polygon</span></code></a>(index, num_sides, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.replace_stop_by_polygon" title="pyoptix.classes.PolynomialOpticalElement.replace_stop_by_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_polygon</span></code></a>(index, num_sides, ...)</p></td>
 <td><p>Replace a stop in the aperture with a polygonal stop.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.replace_stop_by_rectangle" title="pyoptix.classes.PolynomialOpticalElement.replace_stop_by_rectangle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_rectangle</span></code></a>(index, x_width, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.replace_stop_by_rectangle" title="pyoptix.classes.PolynomialOpticalElement.replace_stop_by_rectangle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_stop_by_rectangle</span></code></a>(index, x_width, ...)</p></td>
 <td><p>Replace a stop in the aperture with a rectangular stop.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_aperture_activity" title="pyoptix.classes.PolynomialOpticalElement.set_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_aperture_activity</span></code></a>([active])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_aperture_activity" title="pyoptix.classes.PolynomialOpticalElement.set_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_aperture_activity</span></code></a>([active])</p></td>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_error_generator" title="pyoptix.classes.PolynomialOpticalElement.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_error_generator" title="pyoptix.classes.PolynomialOpticalElement.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_error_method" title="pyoptix.classes.PolynomialOpticalElement.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_error_method" title="pyoptix.classes.PolynomialOpticalElement.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_recording" title="pyoptix.classes.PolynomialOpticalElement.set_recording"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_recording</span></code></a>([recording_mode])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_recording" title="pyoptix.classes.PolynomialOpticalElement.set_recording"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_recording</span></code></a>([recording_mode])</p></td>
 <td><p>Sets the recording mode for the spot diagram associated with the element.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_surface_errors" title="pyoptix.classes.PolynomialOpticalElement.set_surface_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_surface_errors</span></code></a>(height_errors)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_surface_errors" title="pyoptix.classes.PolynomialOpticalElement.set_surface_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_surface_errors</span></code></a>(height_errors)</p></td>
 <td><p>sets an error map on the surface.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_transmissive" title="pyoptix.classes.PolynomialOpticalElement.set_transmissive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_transmissive</span></code></a>(is_transmissive)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.set_transmissive" title="pyoptix.classes.PolynomialOpticalElement.set_transmissive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_transmissive</span></code></a>(is_transmissive)</p></td>
 <td><p>Sets an optical element as transmissive or reflective depending on the value of is_transmissive.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.show_diagram" title="pyoptix.classes.PolynomialOpticalElement.show_diagram"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_diagram</span></code></a>([distance_from_oe, map_xy, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.show_diagram" title="pyoptix.classes.PolynomialOpticalElement.show_diagram"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_diagram</span></code></a>([distance_from_oe, map_xy, ...])</p></td>
 <td><p>If recording_mode is set to any other value than RecordingMode.recording_none, displays X vs Y, X' vs X and Y' vs Y scatter plots at a distance <cite>distance_from_oe</cite> from the element.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.show_impacts" title="pyoptix.classes.PolynomialOpticalElement.show_impacts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_impacts</span></code></a>([reference_frame, plots, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.show_impacts" title="pyoptix.classes.PolynomialOpticalElement.show_impacts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_impacts</span></code></a>([reference_frame, plots, ...])</p></td>
 <td><p>If recording_mode is set to any other value than RecordingMode.recording_none, shows by default the (X,Y) and (X,Z) cross sections of the (X, Y, Z, dX, dY, dZ, Lambda, Intensity) pandas dataframe where each row is a computed ray in the frame of reference given in parameter reference_frame either :</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.show_through_focus" title="pyoptix.classes.PolynomialOpticalElement.show_through_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_through_focus</span></code></a>([excursion_s, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.PolynomialOpticalElement.show_through_focus" title="pyoptix.classes.PolynomialOpticalElement.show_through_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_through_focus</span></code></a>([excursion_s, ...])</p></td>
 <td><p>Display through focus diagrams across a range of planes around the optical element.</p></td>
 </tr>
 </tbody>
@@ -17738,9 +18051,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -18010,6 +18326,47 @@ absorbant outside of it.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyoptix.classes.PolynomialOpticalElement.plot_surface">
+<span class="sig-name descname"><span class="pre">plot_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_points_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_points_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PolynomialOpticalElement.plot_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a 2D surface grid from polynomial coefficients.</p>
+<p>Creates a 2D grid of z-values by evaluating the polynomial defined by
+self.coeffs over a rectangular domain specified by self.limits. The
+surface is sampled at regular intervals along both x and y axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_points_x</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of sampling points along the x-axis. Default is 100.</p></li>
+<li><p><strong>nb_points_y</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of sampling points along the y-axis. Default is 100.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array of shape (nb_points_y, nb_points_x) containing the
+z-values of the polynomial surface. Each element zz[i, j] represents
+the polynomial value at coordinates (x[j], y[i]).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method requires the following instance attributes:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>self.limits<span class="classifier">array-like of length 4</span></dt><dd><p>Domain boundaries in the format [x_min, x_max, y_min, y_max]</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>self.coeffs<span class="classifier">array-like</span></dt><dd><p>Polynomial coefficients compatible with numpy.polynomial.polynomial.polygrid2d</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The polynomial is evaluated using numpy’s polynomial module, which expects
+coefficients in a specific format for 2D polynomial evaluation.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PolynomialOpticalElement.replace_stop_by_circle">
 <span class="sig-name descname"><span class="pre">replace_stop_by_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PolynomialOpticalElement.replace_stop_by_circle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace a stop in the aperture with a circular stop.</p>
@@ -18098,11 +18455,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.PolynomialOpticalElement.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.PolynomialOpticalElement.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -18412,7 +18776,7 @@ Due to this convention, the cylinder base (directrix) is</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.RevolutionQuadricMirror.set_error_generator" title="pyoptix.classes.RevolutionQuadricMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.RevolutionQuadricMirror.set_error_method" title="pyoptix.classes.RevolutionQuadricMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -18658,9 +19022,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -19018,11 +19385,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.RevolutionQuadricMirror.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.RevolutionQuadricMirror.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -19294,7 +19668,7 @@ classes</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.Source.set_error_generator" title="pyoptix.classes.Source.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.Source.set_error_method" title="pyoptix.classes.Source.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -19534,9 +19908,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -19894,11 +20271,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.Source.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.Source.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -20169,7 +20553,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalFilm.set_error_generator" title="pyoptix.classes.SphericalFilm.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalFilm.set_error_method" title="pyoptix.classes.SphericalFilm.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -20407,9 +20791,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -20767,11 +21154,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.SphericalFilm.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.SphericalFilm.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -20991,7 +21385,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalHoloGrating.get_angles" title="pyoptix.classes.SphericalHoloGrating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalHoloGrating.get_aperture_activity" title="pyoptix.classes.SphericalHoloGrating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -21066,7 +21460,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalHoloGrating.set_error_generator" title="pyoptix.classes.SphericalHoloGrating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalHoloGrating.set_error_method" title="pyoptix.classes.SphericalHoloGrating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -21356,9 +21750,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -21369,11 +21766,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.SphericalHoloGrating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.SphericalHoloGrating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -21810,11 +22214,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.SphericalHoloGrating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.SphericalHoloGrating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -22124,7 +22535,7 @@ after any change applied to the hologram related attribute of the object.</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalMirror.set_error_generator" title="pyoptix.classes.SphericalMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalMirror.set_error_method" title="pyoptix.classes.SphericalMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -22365,9 +22776,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -22725,11 +23139,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.SphericalMirror.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.SphericalMirror.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -22946,7 +23367,7 @@ polynomial way. The center of the grating is assumed to be at the 0 value of the
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalPoly1DGrating.get_angles" title="pyoptix.classes.SphericalPoly1DGrating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalPoly1DGrating.get_aperture_activity" title="pyoptix.classes.SphericalPoly1DGrating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -23006,7 +23427,7 @@ polynomial way. The center of the grating is assumed to be at the 0 value of the
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalPoly1DGrating.set_error_generator" title="pyoptix.classes.SphericalPoly1DGrating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.SphericalPoly1DGrating.set_error_method" title="pyoptix.classes.SphericalPoly1DGrating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -23244,9 +23665,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -23257,11 +23681,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.SphericalPoly1DGrating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.SphericalPoly1DGrating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -23614,11 +24045,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.SphericalPoly1DGrating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.SphericalPoly1DGrating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -23889,7 +24327,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalFilm.set_error_generator" title="pyoptix.classes.ToroidalFilm.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalFilm.set_error_method" title="pyoptix.classes.ToroidalFilm.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -24123,9 +24561,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -24483,11 +24924,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.ToroidalFilm.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.ToroidalFilm.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -24707,7 +25155,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalHoloGrating.get_angles" title="pyoptix.classes.ToroidalHoloGrating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalHoloGrating.get_aperture_activity" title="pyoptix.classes.ToroidalHoloGrating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -24782,7 +25230,7 @@ diagrams to set consistent histogram bin ranges.</p></li>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalHoloGrating.set_error_generator" title="pyoptix.classes.ToroidalHoloGrating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalHoloGrating.set_error_method" title="pyoptix.classes.ToroidalHoloGrating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -25072,9 +25520,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -25085,11 +25536,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.ToroidalHoloGrating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.ToroidalHoloGrating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -25526,11 +25984,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.ToroidalHoloGrating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.ToroidalHoloGrating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -25841,7 +26306,7 @@ along its width.</p>
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalMirror.set_error_generator" title="pyoptix.classes.ToroidalMirror.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalMirror.set_error_method" title="pyoptix.classes.ToroidalMirror.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -26083,9 +26548,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -26443,11 +26911,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.ToroidalMirror.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.ToroidalMirror.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -26664,7 +27139,7 @@ polynomial way. The center of the grating is assumed to be at the 0 value of the
 <td><p>Generates a semi-statistical error for the optical element surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalPoly1DGrating.get_angles" title="pyoptix.classes.ToroidalPoly1DGrating.get_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_angles</span></code></a>([degree])</p></td>
-<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating :param degree: if True angles are returned in degrees :type degree: bool :return: dictionnary containing alpha, beta and theta :rtype: dict</p></td>
+<td><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalPoly1DGrating.get_aperture_activity" title="pyoptix.classes.ToroidalPoly1DGrating.get_aperture_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aperture_activity</span></code></a>()</p></td>
 <td><p>Get the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
@@ -26724,7 +27199,7 @@ polynomial way. The center of the grating is assumed to be at the 0 value of the
 <td><p>Set the activity state of the aperture, i.e. whether the aperture is used for propagation or not.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalPoly1DGrating.set_error_generator" title="pyoptix.classes.ToroidalPoly1DGrating.set_error_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_generator</span></code></a>(is_set)</p></td>
-<td><p>Turns of or off the error generator on a given optical element :param is_set: if True, errors can be generated :type is_set: bool :return: None :rtype: NoneType</p></td>
+<td><p>Turns of or off the error generator on a given optical element</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyoptix.classes.ToroidalPoly1DGrating.set_error_method" title="pyoptix.classes.ToroidalPoly1DGrating.set_error_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error_method</span></code></a>(method)</p></td>
 <td><p>Sets how the ray intercept must be computed.</p></td>
@@ -26962,9 +27437,12 @@ If False, the specified values are used for generating the error map.
 Default is True.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- total RMS of the figure error (float)
-- array of contributions of each legendre polynomial (numpy.ndarray)</p>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>total RMS of the figure error (float)</p></li>
+<li><p>array of contributions of each legendre polynomial (numpy.ndarray)</p></li>
+</ul>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
@@ -26975,11 +27453,18 @@ Default is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.ToroidalPoly1DGrating.get_angles">
 <span class="sig-name descname"><span class="pre">get_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.ToroidalPoly1DGrating.get_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
-:param degree: if True angles are returned in degrees
-:type degree: bool
-:return: dictionnary containing alpha, beta and theta
-:rtype: dict</p>
+<dd><p>Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degree</strong> (<em>bool</em>) – if True angles are returned in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionnary containing alpha, beta and theta</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -27332,11 +27817,18 @@ absorbant outside of it.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyoptix.classes.ToroidalPoly1DGrating.set_error_generator">
 <span class="sig-name descname"><span class="pre">set_error_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyoptix.classes.ToroidalPoly1DGrating.set_error_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turns of or off the error generator on a given optical element
-:param is_set: if True, errors can be generated
-:type is_set: bool
-:return: None
-:rtype: NoneType</p>
+<dd><p>Turns of or off the error generator on a given optical element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>is_set</strong> (<em>bool</em>) – if True, errors can be generated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

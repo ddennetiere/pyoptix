@@ -1196,7 +1196,7 @@ class OpticalElement(metaclass=PostInitMeta):
         if self._next is not None:
             description += f"\n\t pointing to {self._next.name}"
         else:
-            description += f"\n\t pointing to None"
+            description += "\n\t pointing to None"
         description += f"\n\t oriented in pitch at {self._theta / degree} deg " \
                        f"(deviation {180 - 2 * self._theta / degree} deg)"
         description += f"\n\t oriented in roll at {self._phi / degree} deg"
@@ -1555,7 +1555,7 @@ class OpticalElement(metaclass=PostInitMeta):
         """
         mcpl_file_out = PyOptixMCPLWriter("my_mcpl_file.mcpl")
         mcpl_file_out.add_comment(f"File generated with beamline {self.beamline.name}")
-        mcpl_file_out.add_comment(f"Test MCPL file from MCPL_interfacing.ipynb")
+        mcpl_file_out.add_comment("Test MCPL file from MCPL_interfacing.ipynb")
         mcpl_file_out.dump_diagram(self.get_impacts(reference_frame=reference_frame))
         mcpl_file_out.write_to_file()
 
@@ -1984,6 +1984,7 @@ class OpticalElement(metaclass=PostInitMeta):
     def set_error_generator(self, is_set: bool):
         """
         Turns of or off the error generator on a given optical element
+        
         :param is_set: if True, errors can be generated
         :type is_set: bool
         :return: None
@@ -2023,6 +2024,7 @@ class OpticalElement(metaclass=PostInitMeta):
         -------
         tuple
             A tuple containing:
+            
             - total RMS of the figure error (float)
             - array of contributions of each legendre polynomial (numpy.ndarray)
         """
@@ -2414,9 +2416,42 @@ class PolynomialOpticalElement(OpticalElement):
         return sigma_x, sigma_y
 
     def plot_surface(self, nb_points_x=100, nb_points_y=100):
+        """Generate a 2D surface grid from polynomial coefficients.
+    
+        Creates a 2D grid of z-values by evaluating the polynomial defined by 
+        self.coeffs over a rectangular domain specified by self.limits. The 
+        surface is sampled at regular intervals along both x and y axes.
+        
+        Parameters
+        ----------
+        nb_points_x : int, optional
+            Number of sampling points along the x-axis. Default is 100.
+        nb_points_y : int, optional  
+            Number of sampling points along the y-axis. Default is 100.
+            
+        Returns
+        -------
+        numpy.ndarray
+            A 2D array of shape (nb_points_y, nb_points_x) containing the 
+            z-values of the polynomial surface. Each element zz[i, j] represents
+            the polynomial value at coordinates (x[j], y[i]).
+            
+        Notes
+        -----
+        This method requires the following instance attributes:
+        
+        * self.limits : array-like of length 4
+            Domain boundaries in the format [x_min, x_max, y_min, y_max]
+        * self.coeffs : array-like  
+            Polynomial coefficients compatible with numpy.polynomial.polynomial.polygrid2d
+            
+        The polynomial is evaluated using numpy's polynomial module, which expects
+        coefficients in a specific format for 2D polynomial evaluation.
+        """
         x = np.linspace(self.limits[0], self.limits[1], nb_points_x)
         y = np.linspace(self.limits[2], self.limits[3], nb_points_y)
         zz = np.polynomial.polynomial.polygrid2d(x, y, self.coeffs)
+        return zz
 
 
 class NaturalPolynomialMirror(PolynomialOpticalElement):
@@ -2854,6 +2889,7 @@ class Grating(OpticalElement):
     def get_angles(self, degree=True):
         """
         Returns the incidence angle (alpha), exit angle (beta) and half deviation angle (theta) of an aligned grating
+
         :param degree: if True angles are returned in degrees
         :type degree: bool
         :return: dictionnary containing alpha, beta and theta
@@ -3512,7 +3548,7 @@ def save_beamline(beamline, active_chain_name, filename):
 
 
 def align_as_pseudo_petersen(grating: Grating, mirror: PlaneMirror, lambda_align: float,
-                             condition: str = "cff", condition_value=lambda l: 0.72 + 1e-9 * l, verbose: int = 0,
+                             condition: str = "cff", condition_value=lambda wl: 0.72 + 1e-9 * wl, verbose: int = 0,
                              dz: float = 15e-3, offset_mirror_center: bool = False, return_parameters: bool = False):
     """
     The mirror associated to the grating turns around a point located at (0,-dz/2) from the grating center
@@ -3576,7 +3612,7 @@ def align_as_pseudo_petersen(grating: Grating, mirror: PlaneMirror, lambda_align
 
 def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bool = True,
                   return_parameters: bool = False, condition: str = "cff",
-                  condition_value=lambda l: 0.72 + 1e-9 * l, lambda_align: float = 1e-9, order: int = 1,
+                  condition_value=lambda wl: 0.72 + 1e-9 * wl, lambda_align: float = 1e-9, order: int = 1,
                   line_density: float = 450e3):
     """
     Method for aligning a grating using a relation between alpha and beta grazing angles such as their sum is known
@@ -3608,7 +3644,8 @@ def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bo
     if verbose:
         print("Grating alignment")
     if not isinstance(condition_value, Callable):
-        condition_function = lambda l: condition_value
+        def condition_function(wl):
+            return condition_value
     else:
         condition_function = condition_value
     deviation = np.nan
@@ -3632,9 +3669,11 @@ def align_grating(grating: Grating = None, verbose: int = 0, apply_alignment: bo
         elif condition == "cff":
             if order_align > 0 and condition_function(lambda_align) > 1:
                 if isinstance(condition_value, float):
-                    condition_function = lambda l: 1 / condition_value
+                    def condition_function(wl):
+                        return 1 / condition_value
                 else:
-                    condition_function = lambda l: 1 / condition_value(l)
+                    def condition_function(wl):
+                        return 1 / condition_value(wl)
             cff = condition_function(lambda_align)
             nu = order_align * lambda_align * line_density
             k = 1 - cff ** 2
