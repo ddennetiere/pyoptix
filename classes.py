@@ -1996,22 +1996,35 @@ class OpticalElement(metaclass=PostInitMeta):
 
     def generate_surface_error(self, random_zernike=True):
         """
-        Generates a semi-statistical error for the optical element surface
-        In order to work, please gives a value to the following parameter of the optical element :
-        -error_limits = [[xmin, xmax],[ymin, ymax]] array of the limits of the error map, rays falling outside will
-            have a zero intensity. xmin and xmax are tangential coordinates, ymin and ymax are sagittal
-        -sampling = [pixel_size along x, pixel size along y]
-        -residual_sigma = maximal (if possible) RMS figure error
-        -fractal_exponent_x = list of PSD exponent of e^(- spatial_frequency) for each frequency domain, must be of
-            len(fractal_frequency_x)+1
-        -fractal_frequency_x = list of spatial frequency cut-offs at which the PSD exponent changes
-        -detrending = detrending mask of the low frequency Legendre polynomials, shape must match low_Zernike one
-        -low_Zernike = n by m array on the amplitude of the low frequency L_{n,m} legendre polynomials
+        Generates a semi-statistical error for the optical element surface.
+        
+        In order to work, please give values to the following parameters of the optical element:
+        
+        - error_limits: array of the limits of the error map [[xmin, xmax], [ymin, ymax]], 
+          rays falling outside will have zero intensity. xmin and xmax are tangential 
+          coordinates, ymin and ymax are sagittal
+        - sampling: [pixel_size along x, pixel size along y]
+        - residual_sigma: maximal (if possible) RMS figure error
+        - fractal_exponent_x: list of PSD exponent of e^(-spatial_frequency) for each 
+          frequency domain, must be of len(fractal_frequency_x)+1
+        - fractal_frequency_x: list of spatial frequency cut-offs at which the PSD exponent changes
+        - detrending: detrending mask of the low frequency Legendre polynomials, shape must 
+          match low_Zernike one
+        - low_Zernike: n by m array on the amplitude of the low frequency L_{n,m} legendre polynomials
+        
+        Parameters
+        ----------
+        random_zernike : bool, optional
+            If True, each Zernike coefficient is random within +- the specified value.
+            If False, the specified values are used for generating the error map.
+            Default is True.
 
-        :param random_zernike: if True, each Zernike coefficient is random within +- the specified value, if False, the
-            specified values are used for generating the error map
-        :return: (total RMS of the figure error, array of contributions of each legendre polynomial)
-        :rtype: tuple
+        Returns
+        -------
+        tuple
+            A tuple containing:
+            - total RMS of the figure error (float)
+            - array of contributions of each legendre polynomial (numpy.ndarray)
         """
         dims = np.array(self._low_Zernike.shape)
         total_sigma, legendre_sigma, map_dims = generate_surface_errors(self.element_id, dims,
@@ -2068,8 +2081,8 @@ class OpticalElement(metaclass=PostInitMeta):
 
         :param method: one of the four intercept method from ErrMethod
         :type method: ErrMethod
-        :return:None
-        :rtype:NoneType
+        :return: None
+        :rtype: NoneType
         """
         set_error_method(self.element_id, method)
 
