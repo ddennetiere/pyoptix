@@ -3388,7 +3388,7 @@ class PlanePoly1DGrating(Grating):
     @line_density_coeffs.setter
     def line_density_coeffs(self, value):
         self._line_density_coeffs = []
-        assert isinstance(value, list)
+        assert isinstance(value, list), f"Value should be a list, got {value}"
         for i in range(1, self.degree + 1):
             self._line_density_coeffs.append(self._set_parameter(f"lineDensityCoeff_{i}", value[i - 1]))
 
