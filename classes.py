@@ -902,9 +902,6 @@ class OpticalElement(metaclass=PostInitMeta):
         else:
             pyoptix_param_name = param_name
         param = self._get_c_parameter(param_name)
-        # if isinstance(value, np.ndarray):  # TODO : maybe remove this section if not needed anymore
-        #     if value.ndim == 1 and value.shape[0] == 1:
-        #         value = value[0]
         if isinstance(value, dict):  # value is a dictionnary
             for key in value:
                 assert key in ("value", "bounds", "multiplier", "type", "group", "flags")
