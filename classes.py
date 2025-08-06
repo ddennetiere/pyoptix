@@ -340,10 +340,10 @@ class Beamline(object):
             ret = align(self.active_chain[0].element_id, lambda_align)
         if export is not None:
             align_dict = dict()
-            for oe in self.active_chain:
+            for oe in self.active_chain: # TODO : le GAM propose d'organiser la donnée en 1 ligne / oe : name, S, X, Z, Ns, Nx, Nz
                 loc_fr = oe.get_local_frame()
-                align_dict[oe.name, "center"] = loc_fr["Center_soleil"]
-                align_dict[oe.name, "normal_vector"] = loc_fr["Z_soleil"]
+                align_dict[oe.name, "center"] = loc_fr["Center_soleil"]*[1,-1,1] # see dostring of OpticalElement.get_local_frame
+                align_dict[oe.name, "normal_vector"] = loc_fr["Z_soleil"]*[1,-1,1]
             align_df = pd.DataFrame(align_dict.values(), index=align_dict.keys(), columns=["S", "X", "Z"])
             align_df.to_csv(export)
         return ret
